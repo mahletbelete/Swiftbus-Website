@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Database-Only Tickets - SwiftBus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-section h3 {
+            color: #1a73e8;
+            margin-bottom: 15px;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0d47a1;
+        }
+        .ticket-card {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #1a73e8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-database"></i> Database-Only Tickets Test</h1>
+        <p>This page tests the new database-only approach for ticket management, ensuring localStorage is no longer used.</p>
+
+        <!-- Authentication Test -->
+        <div class="test-section">
+            <h3><i class="fas fa-user-check"></i> Authentication Test</h3>
+            <button onclick="testAuthentication()">Check Authentication</button>
+            <div id="authResult"></div>
+        </div>
+
+        <!-- Database Connection Test -->
+        <div class="test-section">
+            <h3><i class="fas fa-database"></i> Database Connection Test</h3>
+            <button onclick="testDatabaseConnection()">Test Database Connection</button>
+            <div id="dbResult"></div>
+        </div>
+
+        <!-- Create Booking Test -->
+        <div class="test-section">
+            <h3><i class="fas fa-plus-circle"></i> Create Booking Test</h3>
+            <button onclick="testCreateBooking()">Create Test Booking</button>
+            <div id="createResult"></div>
+        </div>
+
+        <!-- Load Tickets Test -->
+        <div class="test-section">
+            <h3><i class="fas fa-ticket-alt"></i> Load Tickets from Database</h3>
+            <button onclick="testLoadTickets()">Load User Tickets</button>
+            <div id="loadResult"></div>
+        </div>
+
+        <!-- LocalStorage Check -->
+        <div class="test-section">
+            <h3><i class="fas fa-exclamation-triangle"></i> LocalStorage Dependency Check</h3>
+            <button onclick="checkLocalStorageDependency()">Check LocalStorage Usage</button>
+            <div id="localStorageResult"></div>
+        </div>
+
+        <!-- Cancel Booking Test -->
+        <div class="test-section">
+            <h3><i class="fas fa-times-circle"></i> Cancel Booking Test</h3>
+            <input type="text" id="cancelBookingId" placeholder="Enter Booking ID to cancel" style="padding: 8px; margin-right: 10px; width: 200px;">
+            <button onclick="testCancelBooking()">Cancel Booking</button>
+            <div id="cancelResult"></div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let testBookingId = null;
+
+        // Test authentication
+        async function testAuthentication() {
+            const resultDiv = document.getElementById('authResult');
+            resultDiv.innerHTML = '<div class="info">Testing authentication...</div>';
+            
+            try {
+                const response = await swiftBusAPI.checkSession();
+                
+                if (response && response.success && response.data) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ Authentication successful!<br>
+                            User: ${response.data.name || response.data.full_name}<br>
+                            Email: ${response.data.email}<br>
+                            Role: ${response.data.role}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            ❌ Authentication failed: ${response?.message || 'Not logged in'}<br>
+                            Please <a href="login.html">login</a> to continue testing.
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Authentication error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Test database connection
+        async function testDatabaseConnection() {
+            const resultDiv = document.getElementById('dbResult');
+            resultDiv.innerHTML = '<div class="info">Testing database connection...</div>';
+            
+            try {
+                const response = await swiftBusAPI.request('booking_clean.php?action=test');
+                
+                if (response && response.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ Database connection successful!<br>
+                            Message: ${response.message}<br>
+                            Timestamp: ${response.data.timestamp}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            ❌ Database connection failed: ${response?.message || 'Unknown error'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Database connection error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Test creating a booking
+        async function testCreateBooking() {
+            const resultDiv = document.getElementById('createResult');
+            resultDiv.innerHTML = '<div class="info">Creating test booking...</div>';
+            
+            try {
+                const testBookingData = {
+                    from_city: 'addis-ababa',
+                    to_city: 'kombolcha',
+                    departure_date: '2025-01-15',
+                    departure_time: '08:00',
+                    bus_company: 'selam-bus',
+                    bus_type: 'premium-ac',
+                    passenger_count: 1,
+                    selected_seats: ['A1'],
+                    passenger_details: {
+                        fullName: 'Test User',
+                        email: 'test@example.com',
+                        phone: '+251911234567',
+                        idNumber: 'TEST123456'
+                    },
+                    total_amount: 520,
+                    payment_method: 'telebirr',
+                    special_requirements: 'Test booking for database verification'
+                };
+
+                const response = await swiftBusAPI.createBooking(testBookingData);
+                
+                if (response && response.success) {
+                    testBookingId = response.data.booking_id;
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ Test booking created successfully!<br>
+                            Booking ID: ${response.data.booking_id}<br>
+                            Status: ${response.data.status}<br>
+                            Payment Status: ${response.data.payment_status}
+                        </div>
+                    `;
+                    
+                    // Auto-populate cancel booking field
+                    document.getElementById('cancelBookingId').value = testBookingId;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            ❌ Failed to create booking: ${response?.message || 'Unknown error'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Booking creation error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Test loading tickets from database
+        async function testLoadTickets() {
+            const resultDiv = document.getElementById('loadResult');
+            resultDiv.innerHTML = '<div class="info">Loading tickets from database...</div>';
+            
+            try {
+                const response = await swiftBusAPI.getUserBookings();
+                
+                if (response && response.success) {
+                    const bookings = response.data.bookings || [];
+                    
+                    if (bookings.length > 0) {
+                        let ticketsHtml = `
+                            <div class="success">
+                                ✅ Successfully loaded ${bookings.length} tickets from database!
+                            </div>
+                        `;
+                        
+                        bookings.slice(0, 3).forEach((booking, index) => {
+                            ticketsHtml += `
+                                <div class="ticket-card">
+                                    <strong>Booking ${index + 1}:</strong> ${booking.booking_id}<br>
+                                    <strong>Route:</strong> ${booking.from_city_display || booking.from_city} → ${booking.to_city_display || booking.to_city}<br>
+                                    <strong>Date:</strong> ${booking.departure_date || booking.travel_date}<br>
+                                    <strong>Status:</strong> ${booking.booking_status}<br>
+                                    <strong>Payment:</strong> ${booking.payment_status}<br>
+                                    <strong>Amount:</strong> ETB ${booking.total_amount}
+                                </div>
+                            `;
+                        });
+                        
+                        if (bookings.length > 3) {
+                            ticketsHtml += `<div class="info">... and ${bookings.length - 3} more tickets</div>`;
+                        }
+                        
+                        resultDiv.innerHTML = ticketsHtml;
+                    } else {
+                        resultDiv.innerHTML = `
+                            <div class="info">
+                                ℹ️ No tickets found in database.<br>
+                                Create a test booking first to see tickets here.
+                            </div>
+                        `;
+                    }
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            ❌ Failed to load tickets: ${response?.message || 'Unknown error'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Ticket loading error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Check localStorage dependency
+        function checkLocalStorageDependency() {
+            const resultDiv = document.getElementById('localStorageResult');
+            
+            // Check for old localStorage keys
+            const oldKeys = [
+                'swiftbus_tickets',
+                'swiftbus_confirmation',
+                'swiftbus_payment_data'
+            ];
+            
+            let foundKeys = [];
+            let totalItems = 0;
+            
+            oldKeys.forEach(key => {
+                const value = localStorage.getItem(key);
+                if (value) {
+                    foundKeys.push(key);
+                    try {
+                        const parsed = JSON.parse(value);
+                        if (Array.isArray(parsed)) {
+                            totalItems += parsed.length;
+                        } else {
+                            totalItems += 1;
+                        }
+                    } catch (e) {
+                        totalItems += 1;
+                    }
+                }
+            });
+            
+            if (foundKeys.length > 0) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ⚠️ Found ${foundKeys.length} localStorage keys with ${totalItems} items:<br>
+                        ${foundKeys.join(', ')}<br><br>
+                        <strong>Recommendation:</strong> Clear these keys to fully test database-only approach.<br>
+                        <button onclick="clearOldLocalStorage()">Clear Old LocalStorage</button>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        ✅ No old localStorage keys found!<br>
+                        The application is now using database-only approach.
+                    </div>
+                `;
+            }
+        }
+
+        // Clear old localStorage
+        function clearOldLocalStorage() {
+            const oldKeys = [
+                'swiftbus_tickets',
+                'swiftbus_confirmation',
+                'swiftbus_payment_data',
+                'payment_total',
+                'payment_method'
+            ];
+            
+            let clearedCount = 0;
+            oldKeys.forEach(key => {
+                if (localStorage.getItem(key)) {
+                    localStorage.removeItem(key);
+                    clearedCount++;
+                }
+            });
+            
+            // Also clear individual booking keys
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('swiftbus_booking_')) {
+                    localStorage.removeItem(key);
+                    clearedCount++;
+                    i--; // Adjust index since we removed an item
+                }
+            }
+            
+            document.getElementById('localStorageResult').innerHTML = `
+                <div class="success">
+                    ✅ Cleared ${clearedCount} localStorage items!<br>
+                    Now using database-only approach.
+                </div>
+            `;
+        }
+
+        // Test canceling a booking
+        async function testCancelBooking() {
+            const bookingId = document.getElementById('cancelBookingId').value.trim();
+            const resultDiv = document.getElementById('cancelResult');
+            
+            if (!bookingId) {
+                resultDiv.innerHTML = '<div class="error">❌ Please enter a booking ID to cancel</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<div class="info">Cancelling booking...</div>';
+            
+            try {
+                const response = await swiftBusAPI.cancelBooking(bookingId, 'Test cancellation');
+                
+                if (response && response.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ Booking cancelled successfully!<br>
+                            Booking ID: ${response.data.booking_id}<br>
+                            Status: ${response.data.status}<br>
+                            Refund Amount: ETB ${response.data.refund_amount || 0}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            ❌ Failed to cancel booking: ${response?.message || 'Unknown error'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Booking cancellation error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-run authentication test on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            testAuthentication();
+        });
+    </script>
+</body>
+</html>

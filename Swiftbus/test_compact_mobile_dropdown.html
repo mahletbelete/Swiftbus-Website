@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compact Mobile Dropdown Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --secondary: #ff6d00;
+            --dark: #222;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --accent: #00c6ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            transition: all 0.4s ease;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            overflow: visible;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            position: relative;
+            overflow: visible;
+        }
+
+        .logo h1 {
+            color: var(--primary);
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .logo span {
+            color: var(--secondary);
+        }
+
+        .user-nav {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            position: relative;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+        }
+
+        .user-greeting {
+            font-weight: 500;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-profile-btn {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-profile-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Dropdown Menu - DESKTOP */
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            min-width: 250px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+            border-radius: 12px;
+            z-index: 1001;
+            margin-top: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.1);
+            transform-origin: top right;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-info-header {
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary), #0d47a1);
+            color: white;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar-small {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .user-role {
+            font-size: 13px;
+            opacity: 0.9;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+        }
+
+        .dropdown-links {
+            padding: 10px 0;
+        }
+
+        .dropdown-links a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: var(--dark);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .dropdown-links a:hover {
+            background: var(--light);
+            border-left-color: var(--primary);
+            padding-left: 25px;
+        }
+
+        .dropdown-links a.active {
+            background: var(--light);
+            border-left-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .dropdown-links a i {
+            width: 20px;
+            text-align: center;
+            color: var(--primary);
+        }
+
+        .dropdown-links a.logout {
+            color: var(--danger);
+            border-top: 1px solid #eee;
+            margin-top: 10px;
+        }
+
+        .dropdown-links a.logout i {
+            color: var(--danger);
+        }
+
+        .test-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+
+        .test-section h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .before, .after {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .before {
+            background: #ffebee;
+            border: 2px solid #f44336;
+        }
+
+        .after {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+        }
+
+        /* MOBILE RESPONSIVE STYLES */
+        @media (max-width: 768px) {
+            .header-top {
+                padding: 12px 15px;
+            }
+
+            .user-greeting {
+                display: none;
+            }
+
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* COMPACT MOBILE DROPDOWN - FIXED WIDTH */
+        @media (max-width: 480px) {
+            .dropdown-menu {
+                position: fixed;
+                top: 70px;
+                right: 10px; /* Right-aligned */
+                left: auto;  /* Not full width */
+                bottom: auto;
+                width: 280px; /* Fixed compact width */
+                max-width: calc(100vw - 20px);
+                margin: 0;
+                border-radius: 15px;
+                max-height: calc(100vh - 90px);
+                overflow-y: auto;
+                z-index: 1002;
+                transform-origin: top right;
+            }
+        }
+
+        /* TABLET DROPDOWN - SLIGHTLY SMALLER */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .dropdown-menu {
+                position: fixed;
+                top: 70px;
+                right: 10px;
+                left: auto;
+                bottom: auto;
+                width: 260px; /* Compact tablet width */
+                max-width: calc(100vw - 20px);
+                margin: 0;
+                border-radius: 15px;
+                max-height: calc(100vh - 90px);
+                overflow-y: auto;
+                z-index: 1001;
+                transform-origin: top right;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-top">
+            <div class="logo">
+                <h1>Swift<span>Bus</span></h1>
+            </div>
+            
+            <div class="user-nav">
+                <div class="user-menu">
+                    <div class="user-greeting">
+                        <i class="fas fa-user"></i>
+                        <span>Welcome back, John!</span>
+                    </div>
+                    <div style="position: relative;">
+                        <button class="user-profile-btn" id="profileDropdown">
+                            <i class="fas fa-user-circle"></i>
+                            <span>John Doe</span>
+                            <i class="fas fa-caret-down" style="margin-left: 5px;"></i>
+                        </button>
+                        <div class="dropdown-menu" id="userDropdownMenu">
+                            <div class="user-info-header">
+                                <div class="user-avatar-small">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="user-details">
+                                    <div class="user-name">
+                                        <span>John Doe</span>
+                                    </div>
+                                    <div class="user-role user">
+                                        <i class="fas fa-user"></i>
+                                        Regular User
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dropdown-links">
+                                <a href="#">
+                                    <i class="fas fa-home"></i>
+                                    <span>Home</span>
+                                </a>
+                                <a href="#">
+                                    <i class="fas fa-search"></i>
+                                    <span>Book Ticket</span>
+                                </a>
+                                <a href="#" class="active">
+                                    <i class="fas fa-user-circle"></i>
+                                    <span>My Profile</span>
+                                </a>
+                                <a href="#">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <span>Dashboard</span>
+                                </a>
+                                <a href="#">
+                                    <i class="fas fa-ticket-alt"></i>
+                                    <span>My Tickets</span>
+                                </a>
+                                <a href="#" class="logout">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Logout</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="test-container">
+        <div class="test-section">
+            <h3>✅ Compact Mobile Dropdown - FIXED</h3>
+            <div class="status success">
+                <strong>FIXED:</strong> Mobile dropdown now has a compact 280px width instead of covering the entire screen width
+            </div>
+            
+            <p><strong>Test Instructions:</strong></p>
+            <ol>
+                <li>Resize your browser to mobile width (≤480px) or test on mobile device</li>
+                <li>Click the profile button in the header</li>
+                <li>The dropdown should appear as a compact menu on the right side, not full width</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h3>📱 Width Comparison</h3>
+            <div class="comparison">
+                <div class="before">
+                    <h4>❌ BEFORE</h4>
+                    <p><strong>Mobile:</strong> Full width dropdown</p>
+                    <p><code>left: 10px; right: 10px;</code></p>
+                    <p><code>width: auto;</code></p>
+                    <p>Covered entire screen width</p>
+                </div>
+                <div class="after">
+                    <h4>✅ AFTER</h4>
+                    <p><strong>Mobile:</strong> Compact dropdown</p>
+                    <p><code>right: 10px; width: 280px;</code></p>
+                    <p><code>left: auto;</code></p>
+                    <p>Compact, right-aligned menu</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📐 Responsive Width Sizes</h3>
+            <div class="status info">
+                <strong>Screen Size Widths:</strong><br><br>
+                • <strong>Desktop (>768px):</strong> min-width: 250px (positioned relative to button)<br>
+                • <strong>Tablet (481px-768px):</strong> width: 260px (compact tablet size)<br>
+                • <strong>Mobile (≤480px):</strong> width: 280px (compact mobile size)
+            </div>
+            
+            <div class="status info">
+                <strong>Current Screen:</strong> <span id="screenInfo"></span><br>
+                <strong>Dropdown Width:</strong> <span id="dropdownWidth"></span>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Technical Changes</h3>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 14px;">
+                <strong>Mobile CSS Changes:</strong><br><br>
+                <span style="color: #dc3545;">/* OLD - Full width */</span><br>
+                <span style="color: #dc3545;">left: 10px;</span><br>
+                <span style="color: #dc3545;">right: 10px;</span><br>
+                <span style="color: #dc3545;">width: auto;</span><br><br>
+                
+                <span style="color: #28a745;">/* NEW - Compact width */</span><br>
+                <span style="color: #28a745;">right: 10px;</span><br>
+                <span style="color: #28a745;">left: auto;</span><br>
+                <span style="color: #28a745;">width: 280px;</span><br>
+                <span style="color: #28a745;">max-width: calc(100vw - 20px);</span><br>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dropdown functionality
+        const profileDropdown = document.getElementById('profileDropdown');
+        const dropdownMenu = document.getElementById('userDropdownMenu');
+
+        profileDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('show');
+            console.log('Dropdown toggled:', dropdownMenu.classList.contains('show'));
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.user-menu')) {
+                dropdownMenu.classList.remove('show');
+            }
+        });
+
+        // Update screen info
+        function updateScreenInfo() {
+            const width = window.innerWidth;
+            const screenInfo = document.getElementById('screenInfo');
+            const dropdownWidth = document.getElementById('dropdownWidth');
+            
+            let mode = '';
+            let dropdownSize = '';
+            
+            if (width <= 480) {
+                mode = `Mobile (${width}px)`;
+                dropdownSize = '280px (compact)';
+            } else if (width <= 768) {
+                mode = `Tablet (${width}px)`;
+                dropdownSize = '260px (compact)';
+            } else {
+                mode = `Desktop (${width}px)`;
+                dropdownSize = 'min-width: 250px (relative)';
+            }
+            
+            if (screenInfo) screenInfo.textContent = mode;
+            if (dropdownWidth) dropdownWidth.textContent = dropdownSize;
+        }
+
+        window.addEventListener('resize', updateScreenInfo);
+        updateScreenInfo();
+    </script>
+</body>
+</html>

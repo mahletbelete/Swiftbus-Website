@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Dashboard Alerts & Activities Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 { color: #1a73e8; }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #1a73e8;
+            padding-bottom: 10px;
+        }
+        button {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover { background: #0d47a1; }
+        pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .status.success { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .status.info { background: #cce5ff; color: #004085; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Dashboard Alerts & Activities Test</h1>
+    
+    <div class="test-section">
+        <h2>🔐 Authentication Check</h2>
+        <button onclick="checkAuth()">Check Auth Status</button>
+        <pre id="authResult">Click to check authentication...</pre>
+    </div>
+    
+    <div class="test-section">
+        <h2>🔔 System Alerts</h2>
+        <button onclick="getSystemAlerts()">Get System Alerts</button>
+        <pre id="alertsResult">Click to get system alerts...</pre>
+    </div>
+    
+    <div class="test-section">
+        <h2>📋 Recent Activities</h2>
+        <button onclick="getRecentActivities()">Get Recent Activities</button>
+        <pre id="activitiesResult">Click to get recent activities...</pre>
+    </div>
+    
+    <div class="test-section">
+        <h2>📊 Admin Stats</h2>
+        <button onclick="getAdminStats()">Get Admin Stats</button>
+        <pre id="statsResult">Click to get admin stats...</pre>
+    </div>
+    
+    <div class="test-section">
+        <h2>🧪 Test All</h2>
+        <button onclick="testAll()">Run All Tests</button>
+        <pre id="allResult">Click to run all tests...</pre>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost/bus/api';
+        
+        async function makeRequest(endpoint) {
+            try {
+                const response = await fetch(`${API_URL}/${endpoint}`, {
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                return await response.json();
+            } catch (error) {
+                return { success: false, message: error.message };
+            }
+        }
+        
+        async function checkAuth() {
+            const result = document.getElementById('authResult');
+            result.textContent = '⏳ Checking authentication...';
+            
+            const response = await makeRequest('auth.php?action=check_session');
+            result.textContent = JSON.stringify(response, null, 2);
+        }
+        
+        async function getSystemAlerts() {
+            const result = document.getElementById('alertsResult');
+            result.textContent = '⏳ Getting system alerts...';
+            
+            const response = await makeRequest('dashboard.php?action=get_system_alerts');
+            result.textContent = JSON.stringify(response, null, 2);
+        }
+        
+        async function getRecentActivities() {
+            const result = document.getElementById('activitiesResult');
+            result.textContent = '⏳ Getting recent activities...';
+            
+            const response = await makeRequest('dashboard.php?action=get_recent_activities');
+            result.textContent = JSON.stringify(response, null, 2);
+        }
+        
+        async function getAdminStats() {
+            const result = document.getElementById('statsResult');
+            result.textContent = '⏳ Getting admin stats...';
+            
+            const response = await makeRequest('dashboard.php?action=get_admin_stats');
+            result.textContent = JSON.stringify(response, null, 2);
+        }
+        
+        async function testAll() {
+            const result = document.getElementById('allResult');
+            result.textContent = '⏳ Running all tests...\n\n';
+            
+            // Auth check
+            result.textContent += '🔐 AUTH CHECK:\n';
+            const authResponse = await makeRequest('auth.php?action=check_session');
+            result.textContent += JSON.stringify(authResponse, null, 2) + '\n\n';
+            
+            if (!authResponse.success) {
+                result.textContent += '❌ Not authenticated. Please login first.\n';
+                return;
+            }
+            
+            if (authResponse.data.role !== 'admin') {
+                result.textContent += '❌ Not an admin. Please login as admin.\n';
+                return;
+            }
+            
+            // System alerts
+            result.textContent += '🔔 SYSTEM ALERTS:\n';
+            const alertsResponse = await makeRequest('dashboard.php?action=get_system_alerts');
+            result.textContent += JSON.stringify(alertsResponse, null, 2) + '\n\n';
+            
+            // Recent activities
+            result.textContent += '📋 RECENT ACTIVITIES:\n';
+            const activitiesResponse = await makeRequest('dashboard.php?action=get_recent_activities');
+            result.textContent += JSON.stringify(activitiesResponse, null, 2) + '\n\n';
+            
+            // Admin stats
+            result.textContent += '📊 ADMIN STATS:\n';
+            const statsResponse = await makeRequest('dashboard.php?action=get_admin_stats');
+            result.textContent += JSON.stringify(statsResponse, null, 2) + '\n\n';
+            
+            result.textContent += '✅ All tests completed!';
+        }
+        
+        console.log('✅ Dashboard Alerts & Activities Test initialized');
+        console.log('API URL:', API_URL);
+    </script>
+</body>
+</html>

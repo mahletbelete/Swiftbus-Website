@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug totalAmount Error - SwiftBus</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .error { color: red; }
+        .success { color: green; }
+        .info { color: blue; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        input, select { padding: 8px; margin: 5px; }
+        .form-group { margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Debug totalAmount Error</h1>
+    
+    <div class="debug-section">
+        <h2>Test Form Elements</h2>
+        <div class="form-group">
+            <label>Bus Type:</label>
+            <select id="busType">
+                <option value="">Select Bus Type</option>
+                <option value="premium-ac">Premium AC Bus</option>
+                <option value="standard-ac">Standard AC Bus</option>
+                <option value="luxury">Luxury Bus</option>
+                <option value="standard">Standard Bus</option>
+                <option value="economy">Economy Bus</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>From City:</label>
+            <select id="fromCity">
+                <option value="">Select From City</option>
+                <option value="addis-ababa">Addis Ababa</option>
+                <option value="kombolcha">Kombolcha</option>
+                <option value="bahirdar">Bahirdar</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>To City:</label>
+            <select id="toCity">
+                <option value="">Select To City</option>
+                <option value="addis-ababa">Addis Ababa</option>
+                <option value="kombolcha">Kombolcha</option>
+                <option value="bahirdar">Bahirdar</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Departure Date:</label>
+            <input type="date" id="departureDate">
+        </div>
+        
+        <div class="form-group">
+            <label>Departure Time:</label>
+            <select id="departureTime">
+                <option value="">Select Time</option>
+                <option value="06:00">06:00 AM</option>
+                <option value="08:00">08:00 AM</option>
+                <option value="10:00">10:00 AM</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Bus Company:</label>
+            <select id="busCompany">
+                <option value="">Select Company</option>
+                <option value="selam-bus">Selam Bus</option>
+                <option value="abay-bus">Abay Bus</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Passenger Count:</label>
+            <input type="number" id="passengerCount" value="1" min="1" max="4">
+        </div>
+        
+        <button onclick="testCalculateTotal()">Test Calculate Total</button>
+        <button onclick="testCreateBooking()">Test Create Booking</button>
+        <button onclick="fillSampleData()">Fill Sample Data</button>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Debug Output</h2>
+        <div id="debugOutput"></div>
+    </div>
+    
+    <script>
+        // Copy the variables and functions from book-ticket.html
+        let selectedSeats = ['A1']; // Sample selected seat
+        
+        const seatPrices = {
+            'premium-ac': 450,
+            'standard-ac': 350,
+            'luxury': 400,
+            'standard': 300,
+            'economy': 250
+        };
+        const serviceFee = 25;
+        const taxRate = 0.1; // 10%
+        
+        function calculateTotal() {
+            try {
+                console.log('🧮 Starting calculateTotal...');
+                
+                const busType = document.getElementById('busType').value;
+                console.log('🚌 Bus type:', busType);
+                
+                const pricePerSeat = seatPrices[busType] || 350;
+                console.log('💰 Price per seat:', pricePerSeat);
+                
+                // Ensure selectedSeats is always an array
+                if (!selectedSeats || !Array.isArray(selectedSeats)) {
+                    selectedSeats = [];
+                }
+                console.log('🪑 Selected seats:', selectedSeats);
+                
+                const seatCount = selectedSeats.length || 1;
+                console.log('🔢 Seat count:', seatCount);
+                
+                const baseFare = seatCount * pricePerSeat;
+                console.log('💵 Base fare:', baseFare);
+                
+                const tax = baseFare * taxRate;
+                console.log('🏛️ Tax:', tax);
+                
+                const total = Math.round(baseFare + serviceFee + tax);
+                console.log('💳 Total amount:', total);
+                
+                return total;
+            } catch (error) {
+                console.error('❌ Error in calculateTotal:', error);
+                throw error;
+            }
+        }
+        
+        function testCalculateTotal() {
+            const output = document.getElementById('debugOutput');
+            try {
+                const total = calculateTotal();
+                output.innerHTML += `<p class="success">✅ calculateTotal() returned: ${total}</p>`;
+            } catch (error) {
+                output.innerHTML += `<p class="error">❌ calculateTotal() failed: ${error.message}</p>`;
+                console.error('Error details:', error);
+            }
+        }
+        
+        function testCreateBooking() {
+            const output = document.getElementById('debugOutput');
+            try {
+                // Test the same logic as in createBookingInDatabase
+                const totalAmount = calculateTotal();
+                
+                // Extract form data
+                const fromCity = document.getElementById('fromCity').value.trim();
+                const toCity = document.getElementById('toCity').value.trim();
+                const departureDate = document.getElementById('departureDate').value.trim();
+                const departureTime = document.getElementById('departureTime').value.trim();
+                const busCompany = document.getElementById('busCompany').value.trim();
+                const busType = document.getElementById('busType').value.trim();
+                const passengerCount = parseInt(document.getElementById('passengerCount').value);
+                
+                const paymentData = {
+                    booking_id: 'TEST-' + Date.now(),
+                    total_amount: totalAmount,
+                    from_city: fromCity,
+                    to_city: toCity,
+                    departure_date: departureDate,
+                    departure_time: departureTime,
+                    bus_company: busCompany,
+                    bus_type: busType,
+                    passenger_count: passengerCount,
+                    selected_seats: selectedSeats
+                };
+                
+                output.innerHTML += `<p class="success">✅ Payment data created successfully:</p>`;
+                output.innerHTML += `<pre>${JSON.stringify(paymentData, null, 2)}</pre>`;
+                
+            } catch (error) {
+                output.innerHTML += `<p class="error">❌ Create booking failed: ${error.message}</p>`;
+                console.error('Error details:', error);
+            }
+        }
+        
+        function fillSampleData() {
+            document.getElementById('busType').value = 'standard-ac';
+            document.getElementById('fromCity').value = 'addis-ababa';
+            document.getElementById('toCity').value = 'kombolcha';
+            document.getElementById('departureDate').value = '2025-01-15';
+            document.getElementById('departureTime').value = '08:00';
+            document.getElementById('busCompany').value = 'selam-bus';
+            document.getElementById('passengerCount').value = '1';
+            
+            document.getElementById('debugOutput').innerHTML += `<p class="info">📝 Sample data filled</p>`;
+        }
+        
+        // Test on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('debugOutput').innerHTML += `<p class="info">🚀 Debug page loaded</p>`;
+        });
+    </script>
+</body>
+</html>

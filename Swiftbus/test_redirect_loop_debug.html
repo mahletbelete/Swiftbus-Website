@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirect Loop Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .step { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Redirect Loop Debug Test</h1>
+    
+    <div class="step">
+        <h3>Step 1: Clear All Data</h3>
+        <button onclick="clearAllData()">Clear Browser Data</button>
+        <div id="clearResult"></div>
+    </div>
+    
+    <div class="step">
+        <h3>Step 2: Test Login API</h3>
+        <button onclick="testLogin()">Test Login API</button>
+        <div id="loginResult"></div>
+    </div>
+    
+    <div class="step">
+        <h3>Step 3: Test Session Check</h3>
+        <button onclick="testSession()">Test Session Check</button>
+        <div id="sessionResult"></div>
+    </div>
+    
+    <div class="step">
+        <h3>Step 4: Test Admin Page Access</h3>
+        <button onclick="testAdminAccess()">Test Admin Dashboard</button>
+        <div id="adminResult"></div>
+    </div>
+    
+    <div class="step">
+        <h3>Step 5: Manual Navigation Test</h3>
+        <p>After successful login, try these links:</p>
+        <a href="admin-dashboard.html" target="_blank">Admin Dashboard</a> |
+        <a href="admin-profile.html" target="_blank">Admin Profile</a> |
+        <a href="admin-settings.html" target="_blank">Admin Settings</a>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        function clearAllData() {
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Clear cookies
+            document.cookie.split(";").forEach(function(c) { 
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+            });
+            
+            document.getElementById('clearResult').innerHTML = '<div class="success">✅ All browser data cleared</div>';
+        }
+        
+        async function testLogin() {
+            const container = document.getElementById('loginResult');
+            container.innerHTML = '<div class="warning">🔄 Testing login...</div>';
+            
+            try {
+                const response = await swiftBusAPI.login({
+                    email: 'mubarekali974@gmail.com',
+                    password: 'Admin@123'
+                });
+                
+                if (response.success) {
+                    container.innerHTML = `
+                        <div class="success">
+                            ✅ Login SUCCESS<br>
+                            User: ${response.data.name}<br>
+                            Role: ${response.data.role}
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `<div class="error">❌ Login FAILED: ${response.message}</div>`;
+                }
+            } catch (error) {
+                container.innerHTML = `<div class="error">❌ Login ERROR: ${error.message}</div>`;
+            }
+        }
+        
+        async function testSession() {
+            const container = document.getElementById('sessionResult');
+            container.innerHTML = '<div class="warning">🔄 Testing session...</div>';
+            
+            try {
+                const response = await swiftBusAPI.checkSession();
+                
+                if (response.success) {
+                    container.innerHTML = `
+                        <div class="success">
+                            ✅ Session VALID<br>
+                            User: ${response.data.name}<br>
+                            Role: ${response.data.role}<br>
+                            Admin Access: ${response.data.role === 'admin' ? 'GRANTED' : 'DENIED'}
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `<div class="error">❌ Session INVALID: ${response.message}</div>`;
+                }
+            } catch (error) {
+                container.innerHTML = `<div class="error">❌ Session ERROR: ${error.message}</div>`;
+            }
+        }
+        
+        async function testAdminAccess() {
+            const container = document.getElementById('adminResult');
+            container.innerHTML = '<div class="warning">🔄 Testing admin access...</div>';
+            
+            try {
+                // Test the exact same function used by admin pages
+                const user = await authManager.requireAdmin();
+                
+                if (user) {
+                    container.innerHTML = `
+                        <div class="success">
+                            ✅ Admin Access GRANTED<br>
+                            User: ${user.name}<br>
+                            Role: ${user.role}<br>
+                            <strong>Admin pages should work now!</strong>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `<div class="error">❌ Admin Access DENIED - Should redirect to login</div>`;
+                }
+            } catch (error) {
+                container.innerHTML = `<div class="error">❌ Admin Access ERROR: ${error.message}</div>`;
+            }
+        }
+        
+        // Auto-run session test on page load
+        setTimeout(() => {
+            testSession();
+        }, 1000);
+    </script>
+</body>
+</html>

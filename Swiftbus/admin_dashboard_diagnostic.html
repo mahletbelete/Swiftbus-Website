@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard Diagnostic - SwiftBus</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .test-card { background: white; margin: 20px 0; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .success { border-left: 5px solid #28a745; background: #d4edda; }
+        .error { border-left: 5px solid #dc3545; background: #f8d7da; }
+        .warning { border-left: 5px solid #ffc107; background: #fff3cd; }
+        .info { border-left: 5px solid #17a2b8; background: #d1ecf1; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 12px; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; border: none; border-radius: 5px; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        .btn-danger { background: #dc3545; color: white; }
+        .status-indicator { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
+        .status-success { background: #28a745; }
+        .status-error { background: #dc3545; }
+        .status-warning { background: #ffc107; }
+        .status-pending { background: #6c757d; }
+        h1 { color: #333; text-align: center; }
+        h2 { color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; }
+        .test-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Admin Dashboard Diagnostic Tool</h1>
+        <p style="text-align: center; color: #6c757d;">This tool helps diagnose issues with the admin dashboard</p>
+        
+        <div class="test-card info">
+            <h2>🔍 System Information</h2>
+            <div id="systemInfo">Loading system information...</div>
+        </div>
+        
+        <div class="test-grid">
+            <div class="test-card">
+                <h2>📡 API Connectivity</h2>
+                <div id="apiStatus">
+                    <span class="status-indicator status-pending"></span>
+                    <span>Testing API connectivity...</span>
+                </div>
+                <button class="btn-primary" onclick="testAPIConnectivity()">Test API</button>
+                <div id="apiResults"></div>
+            </div>
+            
+            <div class="test-card">
+                <h2>🔐 Authentication</h2>
+                <div id="authStatus">
+                    <span class="status-indicator status-pending"></span>
+                    <span>Testing authentication...</span>
+                </div>
+                <button class="btn-primary" onclick="testAuthentication()">Test Auth</button>
+                <div id="authResults"></div>
+            </div>
+            
+            <div class="test-card">
+                <h2>📊 Dashboard Data</h2>
+                <div id="dataStatus">
+                    <span class="status-indicator status-pending"></span>
+                    <span>Testing dashboard data...</span>
+                </div>
+                <button class="btn-primary" onclick="testDashboardData()">Test Data</button>
+                <div id="dataResults"></div>
+            </div>
+            
+            <div class="test-card">
+                <h2>🔔 Alerts & Activities</h2>
+                <div id="alertsStatus">
+                    <span class="status-indicator status-pending"></span>
+                    <span>Testing alerts and activities...</span>
+                </div>
+                <button class="btn-primary" onclick="testAlertsAndActivities()">Test Alerts</button>
+                <div id="alertsResults"></div>
+            </div>
+        </div>
+        
+        <div class="test-card">
+            <h2>🚀 Quick Actions</h2>
+            <button class="btn-success" onclick="runAllTests()">Run All Tests</button>
+            <button class="btn-warning" onclick="testWithSampleData()">Test with Sample Data</button>
+            <button class="btn-danger" onclick="clearResults()">Clear Results</button>
+            <button class="btn-primary" onclick="openAdminDashboard()">Open Admin Dashboard</button>
+        </div>
+        
+        <div class="test-card">
+            <h2>📋 Test Results Summary</h2>
+            <div id="testSummary">
+                <p>Click "Run All Tests" to see a comprehensive summary of all tests.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let swiftBusAPI;
+        let testResults = {};
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSystemInfo();
+            initializeAPI();
+        });
+        
+        function loadSystemInfo() {
+            const systemInfo = document.getElementById('systemInfo');
+            systemInfo.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                    <div>
+                        <strong>Current URL:</strong><br>
+                        <code>${window.location.href}</code>
+                    </div>
+                    <div>
+                        <strong>User Agent:</strong><br>
+                        <code>${navigator.userAgent.substring(0, 50)}...</code>
+                    </div>
+                    <div>
+                        <strong>Timestamp:</strong><br>
+                        <code>${new Date().toISOString()}</code>
+                    </div>
+                    <div>
+                        <strong>Session Storage:</strong><br>
+                        <code>${Object.keys(sessionStorage).length} items</code>
+                    </div>
+                    <div>
+                        <strong>Local Storage:</strong><br>
+                        <code>${Object.keys(localStorage).length} items</code>
+                    </div>
+                    <div>
+                        <strong>Cookies:</strong><br>
+                        <code>${document.cookie ? 'Present' : 'None'}</code>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function initializeAPI() {
+            if (typeof SwiftBusAPI !== 'undefined') {
+                swiftBusAPI = new SwiftBusAPI();
+                updateStatus('apiStatus', 'success', 'SwiftBusAPI loaded successfully');
+                console.log('✅ SwiftBusAPI initialized for diagnostic');
+            } else {
+                updateStatus('apiStatus', 'error', 'SwiftBusAPI failed to load');
+                console.error('❌ SwiftBusAPI not available for diagnostic');
+            }
+        }
+        
+        function updateStatus(elementId, status, message) {
+            const element = document.getElementById(elementId);
+            const indicator = element.querySelector('.status-indicator');
+            const text = element.querySelector('span:last-child');
+            
+            indicator.className = `status-indicator status-${status}`;
+            text.textContent = message;
+        }
+        
+        async function testAPIConnectivity() {
+            const resultsDiv = document.getElementById('apiResults');
+            resultsDiv.innerHTML = '<p>Testing API connectivity...</p>';
+            
+            try {
+                if (!swiftBusAPI) {
+                    throw new Error('SwiftBusAPI not initialized');
+                }
+                
+                // Test both simple and complex APIs
+                const tests = [
+                    { name: 'Simple API', endpoint: 'admin_dashboard_simple.php?action=get_admin_stats' },
+                    { name: 'Complex API', endpoint: 'admin_dashboard_fixed.php?action=get_admin_stats' }
+                ];
+                
+                let results = '<h4>API Connectivity Results:</h4>';
+                
+                for (const test of tests) {
+                    try {
+                        const url = `${swiftBusAPI.apiURL}/${test.endpoint}`;
+                        console.log(`Testing ${test.name} at:`, url);
+                        
+                        const response = await fetch(url, {
+                            method: 'GET',
+                            credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                        
+                        const data = await response.json();
+                        
+                        results += `
+                            <div class="success" style="margin: 10px 0; padding: 10px;">
+                                <strong>✅ ${test.name}</strong><br>
+                                Status: ${response.status}<br>
+                                Success: ${data.success ? 'Yes' : 'No'}<br>
+                                Message: ${data.message || 'No message'}
+                            </div>
+                        `;
+                        
+                        testResults[test.name] = { success: true, status: response.status, data: data };
+                        
+                    } catch (error) {
+                        results += `
+                            <div class="error" style="margin: 10px 0; padding: 10px;">
+                                <strong>❌ ${test.name}</strong><br>
+                                Error: ${error.message}
+                            </div>
+                        `;
+                        
+                        testResults[test.name] = { success: false, error: error.message };
+                    }
+                }
+                
+                resultsDiv.innerHTML = results;
+                updateStatus('apiStatus', 'success', 'API connectivity test completed');
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error"><strong>Error:</strong> ${error.message}</div>`;
+                updateStatus('apiStatus', 'error', 'API connectivity test failed');
+                testResults['API Connectivity'] = { success: false, error: error.message };
+            }
+        }
+        
+        async function testAuthentication() {
+            const resultsDiv = document.getElementById('authResults');
+            resultsDiv.innerHTML = '<p>Testing authentication...</p>';
+            
+            try {
+                const response = await swiftBusAPI.checkSession();
+                
+                let resultClass = response.success ? 'success' : 'warning';
+                let statusIcon = response.success ? '✅' : '⚠️';
+                
+                resultsDiv.innerHTML = `
+                    <div class="${resultClass}">
+                        <h4>${statusIcon} Authentication Test Result</h4>
+                        <pre>${JSON.stringify(response, null, 2)}</pre>
+                    </div>
+                `;
+                
+                updateStatus('authStatus', response.success ? 'success' : 'warning', 
+                    response.success ? 'Authentication successful' : 'Authentication required');
+                
+                testResults['Authentication'] = response;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error"><strong>Error:</strong> ${error.message}</div>`;
+                updateStatus('authStatus', 'error', 'Authentication test failed');
+                testResults['Authentication'] = { success: false, error: error.message };
+            }
+        }
+        
+        async function testDashboardData() {
+            const resultsDiv = document.getElementById('dataResults');
+            resultsDiv.innerHTML = '<p>Testing dashboard data...</p>';
+            
+            try {
+                // Try simple API first
+                let response;
+                try {
+                    response = await swiftBusAPI.request('admin_dashboard_simple.php?action=get_admin_stats');
+                } catch (simpleError) {
+                    console.log('Simple API failed, trying complex API...');
+                    response = await swiftBusAPI.request('admin_dashboard_fixed.php?action=get_admin_stats');
+                }
+                
+                let resultClass = response.success ? 'success' : 'error';
+                let statusIcon = response.success ? '✅' : '❌';
+                
+                resultsDiv.innerHTML = `
+                    <div class="${resultClass}">
+                        <h4>${statusIcon} Dashboard Data Test Result</h4>
+                        <p><strong>Success:</strong> ${response.success}</p>
+                        <p><strong>Message:</strong> ${response.message}</p>
+                        ${response.data ? `<p><strong>Data Keys:</strong> ${Object.keys(response.data).join(', ')}</p>` : ''}
+                        <details>
+                            <summary>Full Response</summary>
+                            <pre>${JSON.stringify(response, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+                
+                updateStatus('dataStatus', response.success ? 'success' : 'error', 
+                    response.success ? 'Dashboard data loaded successfully' : 'Dashboard data failed to load');
+                
+                testResults['Dashboard Data'] = response;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error"><strong>Error:</strong> ${error.message}</div>`;
+                updateStatus('dataStatus', 'error', 'Dashboard data test failed');
+                testResults['Dashboard Data'] = { success: false, error: error.message };
+            }
+        }
+        
+        async function testAlertsAndActivities() {
+            const resultsDiv = document.getElementById('alertsResults');
+            resultsDiv.innerHTML = '<p>Testing alerts and activities...</p>';
+            
+            try {
+                // Test alerts
+                let alertsResponse;
+                try {
+                    alertsResponse = await swiftBusAPI.request('admin_dashboard_simple.php?action=get_system_alerts');
+                } catch (simpleError) {
+                    alertsResponse = await swiftBusAPI.request('admin_dashboard_fixed.php?action=get_system_alerts');
+                }
+                
+                // Test activities
+                let activitiesResponse;
+                try {
+                    activitiesResponse = await swiftBusAPI.request('admin_dashboard_simple.php?action=get_recent_activities');
+                } catch (simpleError) {
+                    activitiesResponse = await swiftBusAPI.request('admin_dashboard_fixed.php?action=get_recent_activities');
+                }
+                
+                resultsDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Alerts & Activities Test Results</h4>
+                        <p><strong>Alerts:</strong> ${alertsResponse.success ? 'Success' : 'Failed'} 
+                           (${alertsResponse.data ? alertsResponse.data.length : 0} alerts)</p>
+                        <p><strong>Activities:</strong> ${activitiesResponse.success ? 'Success' : 'Failed'} 
+                           (${activitiesResponse.data ? activitiesResponse.data.length : 0} activities)</p>
+                    </div>
+                `;
+                
+                updateStatus('alertsStatus', 'success', 'Alerts and activities loaded successfully');
+                
+                testResults['Alerts'] = alertsResponse;
+                testResults['Activities'] = activitiesResponse;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error"><strong>Error:</strong> ${error.message}</div>`;
+                updateStatus('alertsStatus', 'error', 'Alerts and activities test failed');
+                testResults['Alerts & Activities'] = { success: false, error: error.message };
+            }
+        }
+        
+        async function runAllTests() {
+            console.log('🔄 Running all diagnostic tests...');
+            
+            await testAPIConnectivity();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testAuthentication();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testDashboardData();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testAlertsAndActivities();
+            
+            // Generate summary
+            generateTestSummary();
+        }
+        
+        function generateTestSummary() {
+            const summaryDiv = document.getElementById('testSummary');
+            
+            let summary = '<h3>📊 Test Results Summary</h3>';
+            let totalTests = 0;
+            let passedTests = 0;
+            
+            for (const [testName, result] of Object.entries(testResults)) {
+                totalTests++;
+                const passed = result.success !== false;
+                if (passed) passedTests++;
+                
+                const icon = passed ? '✅' : '❌';
+                const status = passed ? 'Passed' : 'Failed';
+                
+                summary += `
+                    <div style="margin: 10px 0; padding: 10px; border-left: 3px solid ${passed ? '#28a745' : '#dc3545'};">
+                        <strong>${icon} ${testName}:</strong> ${status}
+                        ${result.error ? `<br><small>Error: ${result.error}</small>` : ''}
+                    </div>
+                `;
+            }
+            
+            const overallStatus = passedTests === totalTests ? 'success' : 
+                                 passedTests > 0 ? 'warning' : 'error';
+            
+            summary = `
+                <div class="${overallStatus}" style="margin-bottom: 20px; padding: 15px;">
+                    <h3>Overall Status: ${passedTests}/${totalTests} tests passed</h3>
+                    <p>Timestamp: ${new Date().toLocaleString()}</p>
+                </div>
+            ` + summary;
+            
+            summaryDiv.innerHTML = summary;
+        }
+        
+        function testWithSampleData() {
+            alert('This would test the dashboard with sample data. Feature coming soon!');
+        }
+        
+        function clearResults() {
+            document.getElementById('apiResults').innerHTML = '';
+            document.getElementById('authResults').innerHTML = '';
+            document.getElementById('dataResults').innerHTML = '';
+            document.getElementById('alertsResults').innerHTML = '';
+            document.getElementById('testSummary').innerHTML = '<p>Click "Run All Tests" to see a comprehensive summary of all tests.</p>';
+            
+            // Reset status indicators
+            updateStatus('apiStatus', 'pending', 'Ready to test API connectivity');
+            updateStatus('authStatus', 'pending', 'Ready to test authentication');
+            updateStatus('dataStatus', 'pending', 'Ready to test dashboard data');
+            updateStatus('alertsStatus', 'pending', 'Ready to test alerts and activities');
+            
+            testResults = {};
+        }
+        
+        function openAdminDashboard() {
+            window.open('admin-dashboard.html', '_blank');
+        }
+    </script>
+</body>
+</html>

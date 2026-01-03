@@ -1,0 +1,2902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - SwiftBus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --secondary: #ff6d00;
+            --dark: #222;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: #f5f5f5;
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            transition: all 0.4s ease;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            overflow: visible;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            position: relative;
+            overflow: visible;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo h1 {
+            color: var(--primary);
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .logo span {
+            color: var(--secondary);
+        }
+
+        .user-nav {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            position: relative;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+        }
+
+        .user-greeting {
+            font-weight: 500;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-profile-btn {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-profile-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            background: #f8f9fa;
+            padding: 0 40px;
+            border-top: 1px solid #eee;
+        }
+
+        .nav-links li {
+            margin-right: 25px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            padding: 15px 0;
+            display: block;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-links a.active {
+            color: var(--primary);
+        }
+
+        .nav-links a.active::after {
+            width: 100%;
+        }
+
+        /* Profile Container */
+        .profile-container {
+            margin-top: 80px;
+            padding: 0 40px 40px;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+        }
+
+        /* Profile Sidebar */
+        .profile-sidebar {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            height: fit-content;
+            text-align: center;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .profile-avatar {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 60px;
+        }
+
+        .avatar-upload {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .avatar-upload input {
+            display: none;
+        }
+
+        .profile-info {
+            margin: 20px 0;
+        }
+
+        .profile-info h2 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .profile-info p {
+            color: var(--gray);
+            margin-bottom: 10px;
+        }
+
+        .profile-role {
+            display: inline-block;
+            background: #e8f0fe;
+            color: var(--primary);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        /* Profile Content */
+        .profile-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .profile-tabs {
+            display: flex;
+            border-bottom: 2px solid #f0f0f0;
+            margin-bottom: 30px;
+        }
+
+        .tab-btn {
+            padding: 12px 25px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--gray);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--primary);
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .readonly-input {
+            background: #f8f9fa;
+            cursor: not-allowed;
+            border-color: #e9ecef;
+        }
+
+        .editable-input {
+            background: white;
+            cursor: text;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.1);
+        }
+
+        .editable-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+        }
+
+        /* Activity Log */
+        .activity-log {
+            list-style: none;
+        }
+
+        .activity-item {
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        .activity-content h4 {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .activity-content p {
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        .activity-time {
+            margin-left: auto;
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        /* Button Styles */
+        .btn {
+            padding: 12px 25px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0d47a1;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(26, 115, 232, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #bd2130;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        /* Toggle Switch Styles */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 30px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+        }
+
+        /* Enhanced Form Styles */
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: white;
+            font-family: inherit;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .form-control:hover {
+            border-color: var(--primary);
+        }
+
+        .form-control.error {
+            border-color: var(--danger);
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+        }
+
+        .form-control.success {
+            border-color: var(--success);
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+        }
+
+        .form-feedback {
+            font-size: 12px;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .form-feedback.error {
+            color: var(--danger);
+        }
+
+        .form-feedback.success {
+            color: var(--success);
+        }
+
+        .readonly-input {
+            background: #f8f9fa !important;
+            cursor: not-allowed;
+            border-color: #e9ecef;
+            color: var(--gray);
+        }
+
+        /* Enhanced Button Styles */
+        .btn {
+            padding: 14px 28px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 15px;
+            text-decoration: none;
+            min-height: 48px; /* Better touch target */
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #0d47a1);
+            color: white;
+            box-shadow: 0 4px 15px rgba(26, 115, 232, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(26, 115, 232, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #545b62);
+            color: white;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.2);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(108, 117, 125, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #218838);
+            color: white;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), #bd2130);
+            color: white;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Enhanced Profile Tabs */
+        .profile-tabs {
+            display: flex;
+            border-bottom: 3px solid #f0f0f0;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .profile-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            padding: 15px 25px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--gray);
+            position: relative;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            min-width: 120px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .tab-btn:hover {
+            color: var(--primary);
+            background: rgba(26, 115, 232, 0.05);
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            background: rgba(26, 115, 232, 0.1);
+            font-weight: 600;
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 2px 2px 0 0;
+        }
+
+        /* Enhanced Activity Log */
+        .activity-log {
+            list-style: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            padding: 20px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .activity-item:hover {
+            background: rgba(26, 115, 232, 0.02);
+            padding-left: 10px;
+            border-radius: 8px;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), #0d47a1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.2);
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-content h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+
+        .activity-content p {
+            font-size: 13px;
+            color: var(--gray);
+            line-height: 1.4;
+        }
+
+        .activity-time {
+            font-size: 12px;
+            color: var(--gray);
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        /* Loading States */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .btn .loading {
+            width: 16px;
+            height: 16px;
+            border-width: 2px;
+        }
+
+        /* Notification Enhancements */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            min-width: 300px;
+            max-width: 500px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 10000;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, var(--success), #218838);
+            color: white;
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, var(--danger), #bd2130);
+            color: white;
+        }
+
+        .notification.warning {
+            background: linear-gradient(135deg, var(--warning), #e0a800);
+            color: var(--dark);
+        }
+
+        /* Additional CSS for Enhanced Features */
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--gray);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary);
+            background: rgba(26, 115, 232, 0.1);
+        }
+
+        .password-requirements {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e1e5e9;
+        }
+
+        .requirement {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .requirement:last-child {
+            margin-bottom: 0;
+        }
+
+        .requirement i {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .requirement.valid i {
+            background: var(--success);
+            color: white;
+        }
+
+        .requirement.invalid i {
+            background: #ddd;
+            color: #999;
+        }
+
+        .required {
+            color: var(--danger);
+            font-weight: bold;
+        }
+
+        .text-muted {
+            color: var(--gray);
+            font-size: 13px;
+            margin-top: 5px;
+            display: block;
+        }
+
+        /* Enhanced Preferences Section */
+        .preference-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .preference-item:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .preference-info {
+            flex: 1;
+        }
+
+        .preference-title {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .preference-description {
+            font-size: 13px;
+            color: var(--gray);
+            line-height: 1.4;
+        }
+
+        /* Enhanced Activity Section */
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .activity-filters {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-chip {
+            padding: 6px 12px;
+            background: #f8f9fa;
+            border: 1px solid #e1e5e9;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-chip.active,
+        .filter-chip:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Status Indicators */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-indicator.success {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+        }
+
+        .status-indicator.warning {
+            background: rgba(255, 193, 7, 0.1);
+            color: var(--warning);
+        }
+
+        .status-indicator.danger {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+        }
+
+        .status-indicator.info {
+            background: rgba(26, 115, 232, 0.1);
+            color: var(--primary);
+        }
+
+        /* Skeleton Loading */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .skeleton-text {
+            height: 16px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .skeleton-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-5px);
+        }
+
+        /* Dropdown Menu */
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            min-width: 250px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+            border-radius: 12px;
+            z-index: 1001;
+            margin-top: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.1);
+            transform-origin: top right;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .user-info-header {
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary), #0d47a1);
+            color: white;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar-small {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .user-avatar-small img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .user-role {
+            font-size: 13px;
+            opacity: 0.9;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .dropdown-links {
+            padding: 10px 0;
+        }
+
+        .dropdown-links a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: var(--dark);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .dropdown-links a:hover {
+            background: var(--light);
+            border-left-color: var(--primary);
+            padding-left: 25px;
+        }
+
+        .dropdown-links a i {
+            width: 20px;
+            text-align: center;
+            color: var(--primary);
+        }
+
+        .dropdown-links a.logout {
+            color: var(--danger);
+            border-top: 1px solid #eee;
+            margin-top: 10px;
+        }
+
+        .dropdown-links a.logout i {
+            color: var(--danger);
+        }
+
+        /* Enhanced Responsive Design */
+        @media (max-width: 1200px) {
+            .profile-container {
+                grid-template-columns: 280px 1fr;
+                gap: 25px;
+                padding: 0 30px 30px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .profile-container {
+                grid-template-columns: 1fr;
+                padding: 0 20px 20px;
+                gap: 25px;
+                margin-top: 70px;
+            }
+            
+            .header-top {
+                padding: 15px 20px;
+            }
+            
+            .profile-sidebar {
+                order: 1;
+                padding: 25px;
+            }
+            
+            .profile-content {
+                order: 2;
+                padding: 25px;
+            }
+
+            .profile-avatar {
+                width: 130px;
+                height: 130px;
+            }
+
+            .avatar-img {
+                font-size: 52px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .btn-group {
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+
+            .tab-btn {
+                padding: 12px 20px;
+                font-size: 15px;
+                min-width: 110px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .user-greeting {
+                display: none;
+            }
+            
+            .profile-container {
+                margin-top: 65px;
+                padding: 0 15px 15px;
+                gap: 20px;
+            }
+            
+            .profile-sidebar {
+                padding: 20px;
+                text-align: center;
+            }
+
+            .profile-content {
+                padding: 20px;
+            }
+
+            .profile-avatar {
+                width: 110px;
+                height: 110px;
+            }
+
+            .avatar-img {
+                font-size: 44px;
+            }
+
+            .profile-tabs {
+                flex-direction: column;
+                gap: 18px;
+                margin-bottom: 35px;
+                padding: 0 10px;
+            }
+
+            .tab-btn {
+                padding: 18px 20px;
+                font-size: 15px;
+                width: 100%;
+                min-width: auto;
+                margin-bottom: 0;
+                border-radius: 12px;
+                text-align: center;
+            }
+
+            .tab-content {
+                padding: 25px 15px;
+                margin-top: 20px;
+            }
+
+            .tab-content.active {
+                margin-top: 25px;
+            }
+
+            .btn-group {
+                flex-direction: column;
+                gap: 15px;
+                margin-top: 20px;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+                padding: 16px 20px;
+                font-size: 16px;
+            }
+
+            .header-top {
+                padding: 12px 15px;
+            }
+
+            .logo h1 {
+                font-size: 24px;
+            }
+
+        @media (max-width: 480px) {
+            .dropdown-menu {
+                position: fixed;
+                top: 70px;
+                right: 10px;
+                left: auto;
+                bottom: auto;
+                width: 280px;
+                max-width: calc(100vw - 20px);
+                margin: 0;
+                border-radius: 15px;
+                max-height: calc(100vh - 90px);
+                overflow-y: auto;
+                z-index: 1002;
+                transform-origin: top right;
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .dropdown-menu {
+                position: fixed;
+                top: 70px;
+                right: 10px;
+                left: auto;
+                bottom: auto;
+                width: 260px;
+                max-width: calc(100vw - 20px);
+                margin: 0;
+                border-radius: 15px;
+                max-height: calc(100vh - 90px);
+                overflow-y: auto;
+                z-index: 1001;
+                transform-origin: top right;
+            }
+        }
+
+            .form-control {
+                padding: 16px;
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+
+            .activity-item {
+                padding: 15px 0;
+            }
+
+            .activity-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+
+            .notification {
+                bottom: 15px;
+                right: 15px;
+                left: 15px;
+                min-width: auto;
+                max-width: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .profile-container {
+                margin-top: 60px;
+                padding: 0 12px 12px;
+                gap: 15px;
+            }
+
+            .profile-sidebar {
+                padding: 15px;
+            }
+
+            .profile-content {
+                padding: 15px;
+            }
+
+            .profile-avatar {
+                width: 90px;
+                height: 90px;
+            }
+
+            .avatar-img {
+                font-size: 36px;
+            }
+
+            .profile-info h2 {
+                font-size: 18px;
+            }
+
+            .profile-info p {
+                font-size: 13px;
+            }
+
+            .tab-btn {
+                padding: 16px 20px;
+                font-size: 14px;
+                min-width: auto;
+            }
+
+            .profile-tabs {
+                gap: 20px;
+                margin-bottom: 30px;
+            }
+
+            .form-group {
+                margin-bottom: 20px;
+            }
+
+            .form-control {
+                padding: 14px;
+                font-size: 16px;
+            }
+
+            .btn {
+                padding: 14px 16px;
+                font-size: 15px;
+                min-height: 44px;
+            }
+
+            .activity-item {
+                padding: 12px 0;
+                gap: 12px;
+            }
+
+            .activity-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 14px;
+            }
+
+            .activity-content h4 {
+                font-size: 14px;
+            }
+
+            .activity-content p {
+                font-size: 12px;
+            }
+
+            .activity-time {
+                font-size: 11px;
+            }
+
+            .header-top {
+                padding: 10px 12px;
+            }
+
+            .logo h1 {
+                font-size: 20px;
+            }
+
+            .user-profile-btn {
+                padding: 6px 12px;
+                font-size: 14px;
+            }
+        }
+
+        /* High DPI Displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .avatar-img {
+                background-image: linear-gradient(135deg, var(--primary), var(--secondary));
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .dropdown-menu,
+            .btn-group,
+            .avatar-upload {
+                display: none !important;
+            }
+
+            .profile-container {
+                grid-template-columns: 1fr;
+                margin-top: 0;
+                padding: 0;
+            }
+
+            .profile-sidebar,
+            .profile-content {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+
+            .tab-content {
+                display: block !important;
+            }
+
+            .profile-tabs {
+                display: none;
+            }
+        }
+
+        /* Accessibility Improvements */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Focus Styles for Accessibility */
+        .btn:focus,
+        .form-control:focus,
+        .tab-btn:focus,
+        .user-profile-btn:focus {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        /* High Contrast Mode */
+        @media (prefers-contrast: high) {
+            .btn {
+                border: 2px solid currentColor;
+            }
+
+            .form-control {
+                border-width: 2px;
+            }
+
+            .activity-icon {
+                border: 2px solid var(--primary);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-top">
+            <div class="logo">
+                <h1>Swift<span>Bus</span></h1>
+            </div>
+            
+            <div class="user-nav">
+                <div class="user-menu">
+                    <div class="user-greeting">
+                        <i class="fas fa-user"></i>
+                        <span id="userGreeting">Welcome back, User!</span>
+                    </div>
+                    <div style="position: relative;">
+                        <button class="user-profile-btn" id="profileDropdown">
+                            <i class="fas fa-user-circle"></i>
+                            <span id="userName">User</span>
+                            <i class="fas fa-caret-down" style="margin-left: 5px;"></i>
+                        </button>
+                        <div class="dropdown-menu" id="userDropdownMenu">
+                            <div class="user-info-header">
+                                <div class="user-avatar-small" id="profileUserAvatar">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="user-details">
+                                    <div class="user-name">
+                                        <span id="dropdownUserName">User Name</span>
+                                    </div>
+                                    <div class="user-role user">
+                                        <i class="fas fa-user"></i>
+                                        Regular User
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dropdown-links">
+                                <a href="index.html">
+                                    <i class="fas fa-home"></i>
+                                    <span>Home</span>
+                                </a>
+                                <a href="search.html">
+                                    <i class="fas fa-search"></i>
+                                    <span>Book Ticket</span>
+                                </a>
+                                <a href="user-profile.html" class="active">
+                                    <i class="fas fa-user-circle"></i>
+                                    <span>My Profile</span>
+                                </a>
+                                <a href="user-dashboard.html">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <span>Dashboard</span>
+                                </a>
+                                <a href="my-tickets.html">
+                                    <i class="fas fa-ticket-alt"></i>
+                                    <span>My Tickets</span>
+                                </a>
+                                <a href="#" class="logout" id="logoutBtn">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Logout</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </header>
+
+    <!-- Profile Container -->
+    <div class="profile-container">
+        <!-- Profile Sidebar -->
+        <div class="profile-sidebar">
+            <div class="profile-avatar">
+                <div class="avatar-img" id="avatarDisplay">
+                    <i class="fas fa-user"></i>
+                </div>
+                <label class="avatar-upload">
+                    <input type="file" id="avatarUpload" accept="image/*">
+                    <i class="fas fa-camera"></i>
+                </label>
+            </div>
+            
+            <div class="profile-info">
+                <h2 id="profileName">John Doe</h2>
+                <p id="profileEmail">user@example.com</p>
+                <span class="profile-role">Verified User</span>
+            </div>
+            
+            <button class="btn btn-primary" id="downloadProfileBtn">
+                <i class="fas fa-download"></i> Download Profile
+            </button>
+        </div>
+
+        <!-- Profile Content -->
+        <div class="profile-content">
+            <div class="profile-tabs">
+                <button class="tab-btn active" data-tab="personal">Personal Info</button>
+                <button class="tab-btn" data-tab="password">Change Password</button>
+                <button class="tab-btn" data-tab="activity">Activity</button>
+            </div>
+
+            <!-- Personal Info Tab -->
+            <div class="tab-content active" id="personalTab">
+                <form id="personalInfoForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>First Name <span class="required">*</span></label>
+                            <input type="text" class="form-control readonly-input" id="firstName" required readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name <span class="required">*</span></label>
+                            <input type="text" class="form-control readonly-input" id="lastName" required readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email Address <span class="required">*</span></label>
+                        <input type="email" class="form-control readonly-input" id="email" required readonly>
+                        <small class="text-muted">Email cannot be changed. Contact support if needed.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" class="form-control readonly-input" id="phone" placeholder="+251 911 234 567" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Date of Birth</label>
+                        <input type="date" class="form-control readonly-input" id="dob" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Address</label>
+                        <input type="text" class="form-control readonly-input" id="address" placeholder="Street address" readonly>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>City</label>
+                            <input type="text" class="form-control readonly-input" id="city" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Country</label>
+                            <input type="text" class="form-control readonly-input" id="country" value="Ethiopia" readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Emergency Contact</label>
+                        <input type="tel" class="form-control readonly-input" id="emergencyContact" placeholder="+251 911 234 567" readonly>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary" id="editBtn" onclick="toggleEditMode()">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </button>
+                        <button type="button" class="btn btn-success" id="saveBtn" onclick="savePersonalInfo()" style="display: none;">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="cancelBtn" onclick="cancelEdit()" style="display: none;">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Change Password Tab -->
+            <div class="tab-content" id="passwordTab">
+                <form id="passwordForm">
+                    <div class="form-group">
+                        <label>Current Password <span class="required">*</span></label>
+                        <input type="password" class="form-control" id="currentPassword" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>New Password <span class="required">*</span></label>
+                            <input type="password" class="form-control" id="newPassword" required>
+                            <small class="text-muted">Must be at least 8 characters with at least one letter and one number</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm New Password <span class="required">*</span></label>
+                            <input type="password" class="form-control" id="confirmPassword" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Password Requirements</label>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 14px;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                                <i class="fas fa-check" id="reqLength" style="color: #ccc;"></i>
+                                <span>At least 8 characters</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                                <i class="fas fa-check" id="reqLetter" style="color: #ccc;"></i>
+                                <span>Contains at least one letter</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-check" id="reqNumber" style="color: #ccc;"></i>
+                                <span>Contains at least one number</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-success" onclick="updatePassword()">
+                            <i class="fas fa-key"></i> Update Password
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="resetPasswordForm()">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Activity Tab -->
+            <div class="tab-content" id="activityTab">
+                <div class="activity-log" id="activityLog">
+                    <!-- Activity items will be loaded here -->
+                </div>
+                
+                <button class="btn btn-secondary" onclick="loadMoreActivities()" style="margin-top: 20px;">
+                    <i class="fas fa-history"></i> Load More Activities
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in
+        document.addEventListener('DOMContentLoaded', function() {
+            checkUserAccess();
+            loadProfileData();
+            setupEventListeners();
+            setupTabs();
+            setupPasswordValidation();
+        });
+
+        async function checkUserAccess() {
+            try {
+                showLoadingState(true);
+                
+                // Check session with backend API
+                const response = await swiftBusAPI.checkSession();
+                if (!response.success) {
+                    // User not logged in, redirect to login
+                    showNotification('Please login to access your profile', 'error');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                    return;
+                }
+                
+                const userData = response.data;
+                
+                if (userData.role !== 'user') {
+                    // Redirect admin users to admin profile
+                    showNotification('Redirecting to admin profile...', 'info');
+                    setTimeout(() => {
+                        window.location.href = 'admin-profile.html';
+                    }, 1500);
+                    return;
+                }
+                
+                // Store user data globally
+                window.currentUser = userData;
+                console.log('User authenticated:', userData.name);
+                
+                // Load all profile data
+                await loadAllProfileData();
+                
+            } catch (error) {
+                console.error('Authentication check failed:', error);
+                showNotification('Authentication failed. Redirecting to login...', 'error');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+            } finally {
+                showLoadingState(false);
+            }
+        }
+
+        async function loadAllProfileData() {
+            const userData = window.currentUser;
+            if (!userData) return;
+            
+            try {
+                // Load basic profile data
+                loadProfileData();
+                
+                // Load user bookings for activity log
+                await loadUserBookings();
+                
+                console.log('All profile data loaded successfully');
+                
+            } catch (error) {
+                console.error('Error loading profile data:', error);
+                showNotification('Some profile data could not be loaded', 'warning');
+            }
+        }
+
+        function loadProfileData() {
+            const userData = window.currentUser;
+            
+            if (!userData) return;
+            
+            // Update header
+            const firstName = userData.firstName || userData.name.split(' ')[0];
+            document.getElementById('userGreeting').textContent = `Welcome back, ${firstName}!`;
+            document.getElementById('userName').textContent = firstName;
+            document.getElementById('dropdownUserName').textContent = userData.name;
+            
+            // Update profile sidebar
+            document.getElementById('profileName').textContent = userData.name;
+            document.getElementById('profileEmail').textContent = userData.email;
+            
+            // Update profile image
+            updateProfileImage(userData.profileImage);
+            
+            // Update profile image in header dropdown
+            updateProfileHeaderImage(userData.profileImage);
+            
+            // Load personal info form
+            loadPersonalInfo(userData);
+        }
+
+        function updateProfileImage(profileImagePath) {
+            const avatarDisplay = document.getElementById('avatarDisplay');
+            if (!avatarDisplay) return;
+            
+            if (profileImagePath && profileImagePath !== 'Not provided') {
+                // Show uploaded image
+                avatarDisplay.innerHTML = `<img src="${profileImagePath}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" alt="Profile picture" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-user\\'></i>'">`;
+            } else {
+                // Show default icon
+                avatarDisplay.innerHTML = '<i class="fas fa-user"></i>';
+            }
+        }
+
+        async function uploadAvatar(file) {
+            try {
+                showLoadingState(true);
+                
+                // Create FormData for file upload
+                const formData = new FormData();
+                formData.append('avatar', file);
+                
+                // Upload to server
+                const response = await fetch('api/auth.php?action=upload_avatar', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                let result;
+                try {
+                    result = await response.json();
+                } catch (jsonError) {
+                    result = {
+                        success: false,
+                        message: `Server returned ${response.status}: ${response.statusText}`
+                    };
+                }
+                
+                if (result.success) {
+                    // Update profile image in UI
+                    updateProfileImage(result.data.profileImage);
+                    
+                    // Update current user data
+                    if (window.currentUser) {
+                        window.currentUser.profileImage = result.data.profileImage;
+                    }
+                    
+                    showNotification('Profile picture updated successfully!', 'success');
+                } else {
+                    const errorMessage = result.message || 'Failed to upload profile picture';
+                    showNotification(errorMessage, 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error uploading avatar:', error);
+                showNotification('Network error: Failed to upload image. Please try again.', 'error');
+            } finally {
+                showLoadingState(false);
+            }
+        }
+
+        function updateProfileHeaderImage(profileImagePath) {
+            const profileUserAvatar = document.getElementById('profileUserAvatar');
+            if (!profileUserAvatar) return;
+            
+            if (profileImagePath && profileImagePath !== 'Not provided') {
+                // Show uploaded image
+                profileUserAvatar.innerHTML = `<img src="${profileImagePath}" alt="Profile picture" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-user\\'></i>'">`;
+            } else {
+                // Show default icon
+                profileUserAvatar.innerHTML = '<i class="fas fa-user"></i>';
+            }
+        }
+
+        async function loadUserBookings() {
+            try {
+                // Get user bookings for activity log
+                const response = await swiftBusAPI.getUserBookings({ limit: 5 });
+                if (response.success && response.data) {
+                    displayActivityLog(response.data);
+                } else {
+                    displayDefaultActivityLog();
+                }
+            } catch (error) {
+                console.error('Error loading user bookings:', error);
+                displayDefaultActivityLog();
+            }
+        }
+
+        function loadPersonalInfo(userData) {
+            // Split name into first and last
+            const nameParts = userData.name.split(' ');
+            const firstName = nameParts[0];
+            const lastName = nameParts.slice(1).join(' ');
+            
+            // Fill form fields
+            document.getElementById('firstName').value = firstName;
+            document.getElementById('lastName').value = lastName;
+            document.getElementById('email').value = userData.email;
+            document.getElementById('phone').value = userData.phone || '';
+            document.getElementById('dob').value = userData.dob || '';
+            document.getElementById('address').value = userData.address || '';
+            document.getElementById('city').value = userData.city || '';
+            document.getElementById('country').value = userData.country || 'Ethiopia';
+            document.getElementById('emergencyContact').value = userData.emergencyContact || '';
+        }
+
+        function displayActivityLog(bookings) {
+            const activityContainer = document.getElementById('activityLog');
+            if (!activityContainer) return;
+            
+            activityContainer.innerHTML = '';
+            
+            if (bookings && bookings.length > 0) {
+                bookings.forEach(booking => {
+                    const li = document.createElement('li');
+                    li.className = 'activity-item';
+                    
+                    const bookingDate = new Date(booking.booking_date || booking.created_at);
+                    const statusIcon = getBookingStatusIcon(booking.status);
+                    
+                    li.innerHTML = `
+                        <div class="activity-icon">
+                            <i class="${statusIcon}"></i>
+                        </div>
+                        <div class="activity-content">
+                            <h4>Booking ${booking.status || 'Created'}</h4>
+                            <p>Route: ${booking.origin || 'N/A'} → ${booking.destination || 'N/A'}</p>
+                            <p>Booking ID: ${booking.booking_id || booking.id}</p>
+                        </div>
+                        <div class="activity-time">${getTimeAgo(bookingDate)}</div>
+                    `;
+                    activityContainer.appendChild(li);
+                });
+            } else {
+                displayDefaultActivityLog();
+            }
+        }
+
+        function displayDefaultActivityLog() {
+            const userData = window.currentUser;
+            if (!userData) return;
+            
+            const activities = [
+                {
+                    icon: 'fas fa-user-check',
+                    title: 'Account created',
+                    description: 'Welcome to SwiftBus! Your account was created',
+                    time: getTimeAgo(new Date(userData.joinedDate || new Date()))
+                },
+                {
+                    icon: 'fas fa-star',
+                    title: 'Profile setup',
+                    description: 'You can now book tickets and manage your trips',
+                    time: 'Recently'
+                },
+                {
+                    icon: 'fas fa-info-circle',
+                    title: 'Ready to travel',
+                    description: 'Start booking your first bus ticket today!',
+                    time: 'Now'
+                }
+            ];
+            
+            const activityContainer = document.getElementById('activityLog');
+            if (activityContainer) {
+                activityContainer.innerHTML = '';
+                
+                activities.forEach(activity => {
+                    const li = document.createElement('li');
+                    li.className = 'activity-item';
+                    li.innerHTML = `
+                        <div class="activity-icon">
+                            <i class="${activity.icon}"></i>
+                        </div>
+                        <div class="activity-content">
+                            <h4>${activity.title}</h4>
+                            <p>${activity.description}</p>
+                        </div>
+                        <div class="activity-time">${activity.time}</div>
+                    `;
+                    activityContainer.appendChild(li);
+                });
+            }
+        }
+
+        function getBookingStatusIcon(status) {
+            const statusIcons = {
+                'confirmed': 'fas fa-check-circle',
+                'pending': 'fas fa-clock',
+                'cancelled': 'fas fa-times-circle',
+                'completed': 'fas fa-flag-checkered',
+                'paid': 'fas fa-credit-card'
+            };
+            return statusIcons[status] || 'fas fa-ticket-alt';
+        }
+
+        function updateUserStats() {
+            // Default stats (TODO: Replace with API calls)
+            const totalTrips = 0;
+            const totalSpent = 0;
+            const favoriteRoute = 'Not available yet';
+            
+            // Update UI elements safely
+            const totalTripsElement = document.getElementById('totalTrips');
+            const totalSpentElement = document.getElementById('totalSpent');
+            const favoriteRouteElement = document.getElementById('favoriteRoute');
+            
+            if (totalTripsElement) totalTripsElement.textContent = totalTrips;
+            if (totalSpentElement) totalSpentElement.textContent = `$${totalSpent}`;
+            if (favoriteRouteElement) favoriteRouteElement.textContent = favoriteRoute;
+        }
+
+        function loadPreferences() {
+            // TODO: Replace with API call to get user preferences
+            // For now, set default values
+            const defaultPreferences = {
+                notifyBookings: true,
+                notifyDepartures: true,
+                notifyPromotions: false,
+                profileVisible: false,
+                shareTrips: true,
+                emailNotifications: true,
+                smsNotifications: false
+            };
+            
+            // Set toggle values safely
+            const notifyBookings = document.getElementById('notifyBookings');
+            const notifyDepartures = document.getElementById('notifyDepartures');
+            const notifyPromotions = document.getElementById('notifyPromotions');
+            const profileVisible = document.getElementById('profileVisible');
+            const shareTrips = document.getElementById('shareTrips');
+            const emailNotifications = document.getElementById('emailNotifications');
+            const smsNotifications = document.getElementById('smsNotifications');
+            
+            if (notifyBookings) notifyBookings.checked = defaultPreferences.notifyBookings;
+            if (notifyDepartures) notifyDepartures.checked = defaultPreferences.notifyDepartures;
+            if (notifyPromotions) notifyPromotions.checked = defaultPreferences.notifyPromotions;
+            if (profileVisible) profileVisible.checked = defaultPreferences.profileVisible;
+            if (shareTrips) shareTrips.checked = defaultPreferences.shareTrips;
+            if (emailNotifications) emailNotifications.checked = defaultPreferences.emailNotifications;
+            if (smsNotifications) smsNotifications.checked = defaultPreferences.smsNotifications;
+        }
+
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / (1000 * 60));
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            
+            if (diffMins < 60) {
+                return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+            } else if (diffHours < 24) {
+                return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+            } else if (diffDays < 30) {
+                return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+            } else {
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            }
+        }
+
+        // Loading state management
+        function showLoadingState(show) {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            if (show) {
+                if (!loadingOverlay) {
+                    const overlay = document.createElement('div');
+                    overlay.id = 'loadingOverlay';
+                    overlay.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0,0,0,0.5);
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        z-index: 9999;
+                    `;
+                    overlay.innerHTML = `
+                        <div style="
+                            background: white;
+                            padding: 30px;
+                            border-radius: 10px;
+                            text-align: center;
+                            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                        ">
+                            <div style="
+                                width: 40px;
+                                height: 40px;
+                                border: 4px solid #f3f3f3;
+                                border-top: 4px solid var(--primary);
+                                border-radius: 50%;
+                                animation: spin 1s linear infinite;
+                                margin: 0 auto 15px;
+                            "></div>
+                            <p>Loading profile data...</p>
+                        </div>
+                    `;
+                    document.body.appendChild(overlay);
+                }
+            } else {
+                if (loadingOverlay) {
+                    loadingOverlay.remove();
+                }
+            }
+        }
+
+        async function loadMoreActivities() {
+            try {
+                showLoadingState(true);
+                
+                // TODO: Implement pagination for activities
+                // For now, just show a message
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                showNotification('No more activities to load', 'info');
+                
+            } catch (error) {
+                console.error('Error loading more activities:', error);
+                showNotification('Failed to load more activities', 'error');
+            } finally {
+                showLoadingState(false);
+            }
+        }
+
+        // Add CSS for required field indicator
+        const requiredStyle = document.createElement('style');
+        requiredStyle.textContent = `
+            .required {
+                color: var(--danger);
+                font-weight: bold;
+            }
+            .text-muted {
+                color: var(--gray);
+                font-size: 12px;
+            }
+        `;
+        document.head.appendChild(requiredStyle);
+
+        function setupEventListeners() {
+            // Profile dropdown
+            const profileDropdown = document.getElementById('profileDropdown');
+            const dropdownMenu = document.getElementById('userDropdownMenu');
+            
+            if (profileDropdown && dropdownMenu) {
+                profileDropdown.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    dropdownMenu.classList.toggle('show');
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.user-menu')) {
+                        dropdownMenu.classList.remove('show');
+                    }
+                });
+            }
+            
+            // Logout button
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    logout();
+                });
+            }
+            
+            // Avatar upload
+            const avatarUpload = document.getElementById('avatarUpload');
+            if (avatarUpload) {
+                avatarUpload.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        // Validate file type
+                        if (!file.type.startsWith('image/')) {
+                            showNotification('Please select a valid image file', 'error');
+                            return;
+                        }
+                        
+                        // Validate file size (max 5MB)
+                        if (file.size > 5 * 1024 * 1024) {
+                            showNotification('Image size must be less than 5MB', 'error');
+                            return;
+                        }
+                        
+                        // Upload the image
+                        uploadAvatar(file);
+                    }
+                });
+            }
+            
+            // Download profile button
+            const downloadProfileBtn = document.getElementById('downloadProfileBtn');
+            if (downloadProfileBtn) {
+                downloadProfileBtn.addEventListener('click', downloadProfile);
+            }
+            
+            // Form validation listeners
+            setupFormValidation();
+        }
+
+        function setupFormValidation() {
+            // Real-time validation for personal info form
+            const firstName = document.getElementById('firstName');
+            const lastName = document.getElementById('lastName');
+            const phone = document.getElementById('phone');
+            const emergencyContact = document.getElementById('emergencyContact');
+            
+            if (firstName) {
+                firstName.addEventListener('input', () => validateField(firstName, 'firstNameFeedback'));
+                firstName.addEventListener('blur', () => validateField(firstName, 'firstNameFeedback'));
+            }
+            
+            if (lastName) {
+                lastName.addEventListener('input', () => validateField(lastName, 'lastNameFeedback'));
+                lastName.addEventListener('blur', () => validateField(lastName, 'lastNameFeedback'));
+            }
+            
+            if (phone) {
+                phone.addEventListener('input', () => validatePhoneField(phone, 'phoneFeedback'));
+                phone.addEventListener('blur', () => validatePhoneField(phone, 'phoneFeedback'));
+            }
+            
+            if (emergencyContact) {
+                emergencyContact.addEventListener('input', () => validatePhoneField(emergencyContact, 'emergencyFeedback'));
+                emergencyContact.addEventListener('blur', () => validatePhoneField(emergencyContact, 'emergencyFeedback'));
+            }
+        }
+
+        function validateField(field, feedbackId) {
+            const feedback = document.getElementById(feedbackId);
+            const value = field.value.trim();
+            
+            if (field.hasAttribute('required') && !value) {
+                setFieldError(field, feedback, 'This field is required');
+                return false;
+            } else if (value.length > 0 && value.length < 2) {
+                setFieldError(field, feedback, 'Must be at least 2 characters');
+                return false;
+            } else {
+                setFieldSuccess(field, feedback, '');
+                return true;
+            }
+        }
+
+        function validatePhoneField(field, feedbackId) {
+            const feedback = document.getElementById(feedbackId);
+            const value = field.value.trim();
+            
+            if (!value) {
+                clearFieldValidation(field, feedback);
+                return true; // Optional field
+            }
+            
+            if (!validatePhoneNumber(value)) {
+                setFieldError(field, feedback, 'Please enter a valid Ethiopian phone number (+251XXXXXXXXX)');
+                return false;
+            } else {
+                setFieldSuccess(field, feedback, 'Valid phone number');
+                return true;
+            }
+        }
+
+        function setFieldError(field, feedback, message) {
+            field.classList.remove('success');
+            field.classList.add('error');
+            if (feedback) {
+                feedback.className = 'form-feedback error';
+                feedback.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+            }
+        }
+
+        function setFieldSuccess(field, feedback, message) {
+            field.classList.remove('error');
+            field.classList.add('success');
+            if (feedback && message) {
+                feedback.className = 'form-feedback success';
+                feedback.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+            } else if (feedback) {
+                feedback.className = 'form-feedback';
+                feedback.innerHTML = '';
+            }
+        }
+
+        function clearFieldValidation(field, feedback) {
+            field.classList.remove('error', 'success');
+            if (feedback) {
+                feedback.className = 'form-feedback';
+                feedback.innerHTML = '';
+            }
+        }
+
+        // Password toggle functionality
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const button = field.nextElementSibling;
+            const icon = button.querySelector('i');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+                button.setAttribute('aria-label', 'Hide password');
+            } else {
+                field.type = 'password';
+                icon.className = 'fas fa-eye';
+                button.setAttribute('aria-label', 'Show password');
+            }
+        }
+
+        function setupTabs() {
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remove active class from all buttons and contents
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    // Show corresponding content
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(tabId + 'Tab').classList.add('active');
+                });
+            });
+        }
+
+        function setupPasswordValidation() {
+            const newPasswordInput = document.getElementById('newPassword');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const reqLength = document.getElementById('reqLength');
+            const reqLetter = document.getElementById('reqLetter');
+            const reqNumber = document.getElementById('reqNumber');
+            
+            if (!newPasswordInput) return;
+            
+            newPasswordInput.addEventListener('input', function() {
+                const password = this.value;
+                
+                // Check length requirement
+                if (password.length >= 8) {
+                    reqLength.classList.remove('invalid');
+                    reqLength.classList.add('valid');
+                    reqLength.querySelector('i').className = 'fas fa-check';
+                } else {
+                    reqLength.classList.remove('valid');
+                    reqLength.classList.add('invalid');
+                    reqLength.querySelector('i').className = 'fas fa-times';
+                }
+                
+                // Check letter requirement
+                if (/[a-zA-Z]/.test(password)) {
+                    reqLetter.classList.remove('invalid');
+                    reqLetter.classList.add('valid');
+                    reqLetter.querySelector('i').className = 'fas fa-check';
+                } else {
+                    reqLetter.classList.remove('valid');
+                    reqLetter.classList.add('invalid');
+                    reqLetter.querySelector('i').className = 'fas fa-times';
+                }
+                
+                // Check number requirement
+                if (/\d/.test(password)) {
+                    reqNumber.classList.remove('invalid');
+                    reqNumber.classList.add('valid');
+                    reqNumber.querySelector('i').className = 'fas fa-check';
+                } else {
+                    reqNumber.classList.remove('valid');
+                    reqNumber.classList.add('invalid');
+                    reqNumber.querySelector('i').className = 'fas fa-times';
+                }
+                
+                // Validate confirm password if it has a value
+                if (confirmPasswordInput && confirmPasswordInput.value) {
+                    validatePasswordMatch();
+                }
+            });
+            
+            if (confirmPasswordInput) {
+                confirmPasswordInput.addEventListener('input', validatePasswordMatch);
+            }
+        }
+
+        function validatePasswordMatch() {
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const feedback = document.getElementById('confirmPasswordFeedback');
+            const confirmField = document.getElementById('confirmPassword');
+            
+            if (confirmPassword && newPassword !== confirmPassword) {
+                setFieldError(confirmField, feedback, 'Passwords do not match');
+                return false;
+            } else if (confirmPassword && newPassword === confirmPassword) {
+                setFieldSuccess(confirmField, feedback, 'Passwords match');
+                return true;
+            } else {
+                clearFieldValidation(confirmField, feedback);
+                return true;
+            }
+        }
+
+        async function savePersonalInfo() {
+            if (!isEditMode) {
+                showNotification('Please click Edit Profile to modify your information.', 'warning');
+                return;
+            }
+
+            const userData = window.currentUser;
+            if (!userData) return;
+            
+            // Get form values
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const dob = document.getElementById('dob').value;
+            const address = document.getElementById('address').value.trim();
+            const city = document.getElementById('city').value.trim();
+            const country = document.getElementById('country').value.trim();
+            const emergencyContact = document.getElementById('emergencyContact').value.trim();
+            
+            // Validation
+            if (!firstName || !lastName) {
+                showNotification('Please enter your first and last name', 'error');
+                return;
+            }
+            
+            // Validate phone number format if provided
+            if (phone && !validatePhoneNumber(phone)) {
+                showNotification('Please enter a valid phone number (+251XXXXXXXXX)', 'error');
+                return;
+            }
+            
+            try {
+                showLoadingState(true);
+                
+                // Prepare update data
+                const updateData = {
+                    firstName,
+                    lastName,
+                    phone,
+                    dob,
+                    address,
+                    city,
+                    country,
+                    emergencyContact
+                };
+                
+                // Call backend API to update profile
+                let response;
+                
+                if (typeof swiftBusAPI !== 'undefined' && swiftBusAPI.updateProfile) {
+                    response = await swiftBusAPI.updateProfile(updateData);
+                } else {
+                    // Fallback to direct API call
+                    const apiResponse = await fetch('api/auth.php?action=update_profile', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(updateData)
+                    });
+                    
+                    try {
+                        response = await apiResponse.json();
+                    } catch (jsonError) {
+                        response = {
+                            success: false,
+                            message: `Server returned ${apiResponse.status}: ${apiResponse.statusText}`
+                        };
+                    }
+                }
+                
+                if (response.success) {
+                    // Update local userData object with response data
+                    if (response.data) {
+                        Object.assign(userData, response.data);
+                    } else {
+                        // Fallback update
+                        userData.name = `${firstName} ${lastName}`;
+                        userData.firstName = firstName;
+                        userData.lastName = lastName;
+                        userData.phone = phone;
+                        userData.dob = dob;
+                        userData.address = address;
+                        userData.city = city;
+                        userData.country = country;
+                        userData.emergencyContact = emergencyContact;
+                        userData.updatedAt = new Date().toISOString();
+                    }
+                    
+                    // Update UI elements
+                    updateProfileUI(userData);
+                    
+                    // Disable edit mode after successful save
+                    disableEditMode();
+                    
+                    showNotification('Personal information updated successfully!', 'success');
+                } else {
+                    const errorMessage = response.message || 'Failed to update profile';
+                    showNotification(errorMessage, 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                showNotification('Network error: Failed to connect to server. Please try again.', 'error');
+            } finally {
+                showLoadingState(false);
+            }
+        }
+
+        function updateProfileUI(userData) {
+            const firstName = userData.firstName || userData.name.split(' ')[0];
+            
+            // Update UI elements safely
+            const profileName = document.getElementById('profileName');
+            const userName = document.getElementById('userName');
+            const userGreeting = document.getElementById('userGreeting');
+            const dropdownUserName = document.getElementById('dropdownUserName');
+            
+            if (profileName) profileName.textContent = userData.name;
+            if (userName) userName.textContent = firstName;
+            if (userGreeting) userGreeting.textContent = `Welcome back, ${firstName}!`;
+            if (dropdownUserName) dropdownUserName.textContent = userData.name;
+        }
+
+        function validatePhoneNumber(phone) {
+            // Ethiopian phone number validation
+            const phoneRegex = /^\+251[0-9]{9}$/;
+            return phoneRegex.test(phone.replace(/\s/g, ''));
+        }
+
+        // Edit mode functionality
+        let isEditMode = false;
+        let originalData = {};
+
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            
+            if (isEditMode) {
+                enableEditMode();
+            } else {
+                disableEditMode();
+            }
+        }
+
+        function enableEditMode() {
+            // Store original data for cancel functionality
+            originalData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                phone: document.getElementById('phone').value,
+                dob: document.getElementById('dob').value,
+                address: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                country: document.getElementById('country').value,
+                emergencyContact: document.getElementById('emergencyContact').value
+            };
+
+            // Enable all form fields except email
+            const formFields = ['firstName', 'lastName', 'phone', 'dob', 'address', 'city', 'country', 'emergencyContact'];
+            formFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.removeAttribute('readonly');
+                    field.classList.remove('readonly-input');
+                    field.classList.add('editable-input');
+                }
+            });
+
+            // Update button visibility
+            document.getElementById('editBtn').style.display = 'none';
+            document.getElementById('saveBtn').style.display = 'inline-flex';
+            document.getElementById('cancelBtn').style.display = 'inline-flex';
+
+            showNotification('Edit mode enabled. You can now modify your information.', 'info');
+        }
+
+        function disableEditMode() {
+            // Disable all form fields except email
+            const formFields = ['firstName', 'lastName', 'phone', 'dob', 'address', 'city', 'country', 'emergencyContact'];
+            formFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.setAttribute('readonly', true);
+                    field.classList.add('readonly-input');
+                    field.classList.remove('editable-input');
+                }
+            });
+
+            // Update button visibility
+            document.getElementById('editBtn').style.display = 'inline-flex';
+            document.getElementById('saveBtn').style.display = 'none';
+            document.getElementById('cancelBtn').style.display = 'none';
+
+            isEditMode = false;
+        }
+
+        function cancelEdit() {
+            if (confirm('Are you sure you want to cancel? All unsaved changes will be lost.')) {
+                // Restore original data
+                Object.keys(originalData).forEach(key => {
+                    const field = document.getElementById(key);
+                    if (field) {
+                        field.value = originalData[key];
+                    }
+                });
+
+                disableEditMode();
+                showNotification('Changes cancelled.', 'info');
+            }
+        }
+
+        async function updatePassword() {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Validation
+            if (!currentPassword) {
+                showNotification('Please enter your current password', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 8) {
+                showNotification('New password must be at least 8 characters', 'error');
+                return;
+            }
+            
+            if (!/[a-zA-Z]/.test(newPassword)) {
+                showNotification('New password must contain at least one letter', 'error');
+                return;
+            }
+            
+            if (!/\d/.test(newPassword)) {
+                showNotification('New password must contain at least one number', 'error');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showNotification('New passwords do not match', 'error');
+                return;
+            }
+            
+            try {
+                showLoadingState(true);
+                
+                console.log('Attempting password change...');
+                
+                // Call backend API to change password
+                let response;
+                
+                if (typeof swiftBusAPI !== 'undefined' && typeof swiftBusAPI.changePassword === 'function') {
+                    // Use API object if available
+                    response = await swiftBusAPI.changePassword({
+                        currentPassword: currentPassword,
+                        newPassword: newPassword
+                    });
+                } else {
+                    // Fallback to direct API call
+                    console.warn('Using fallback direct API call for password change');
+                    const apiResponse = await fetch('api/auth.php?action=change_password', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            currentPassword: currentPassword,
+                            newPassword: newPassword
+                        })
+                    });
+                    
+                    // Parse JSON response regardless of status code
+                    try {
+                        response = await apiResponse.json();
+                    } catch (jsonError) {
+                        // If JSON parsing fails, create error response
+                        response = {
+                            success: false,
+                            message: `Server returned ${apiResponse.status}: ${apiResponse.statusText}`
+                        };
+                    }
+                }
+                
+                console.log('Password change response:', response);
+                
+                if (response.success) {
+                    // Clear form
+                    resetPasswordForm();
+                    
+                    showNotification('Password updated successfully!', 'success');
+                    
+                    // Log activity
+                    console.log('Password changed successfully for user:', window.currentUser?.name);
+                } else {
+                    // Show specific error message from backend
+                    const errorMessage = response.message || 'Failed to update password';
+                    console.error('Password change failed:', errorMessage);
+                    showNotification(errorMessage, 'error');
+                    
+                    // If current password is incorrect, focus on current password field
+                    if (errorMessage.toLowerCase().includes('current password')) {
+                        document.getElementById('currentPassword').focus();
+                        document.getElementById('currentPassword').select();
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error updating password:', error);
+                showNotification('Network error: Failed to connect to server. Please try again.', 'error');
+            } finally {
+                showLoadingState(false);
+            }
+        }
+
+        function resetPasswordForm() {
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            
+            // Reset requirement indicators
+            document.getElementById('reqLength').style.color = '#ccc';
+            document.getElementById('reqLetter').style.color = '#ccc';
+            document.getElementById('reqNumber').style.color = '#ccc';
+        }
+
+        function downloadProfile() {
+            const userData = window.currentUser;
+            if (!userData) return;
+            
+            // Create profile data from backend user data
+            const profileData = {
+                personalInfo: {
+                    name: userData.name,
+                    email: userData.email,
+                    phone: userData.phone || 'Not provided',
+                    address: userData.address || 'Not provided',
+                    city: userData.city || 'Not provided',
+                    country: userData.country || 'Not provided',
+                    memberSince: userData.joinedDate || 'Not available',
+                    lastUpdated: userData.updatedAt || 'Not available'
+                },
+                statistics: {
+                    totalTrips: 0, // TODO: Get from API
+                    upcomingTrips: 0, // TODO: Get from API
+                    completedTrips: 0 // TODO: Get from API
+                },
+                lastUpdated: new Date().toLocaleString()
+            };
+            
+            // Create download link
+            const dataStr = JSON.stringify(profileData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            const exportFileDefaultName = `swiftbus_profile_${userData.name.replace(/\s+/g, '_')}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+
+        async function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                try {
+                    await swiftBusAPI.logout();
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    // Force logout even if API fails
+                    window.location.href = 'index.html';
+                }
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            // Remove existing notifications
+            const existingNotifications = document.querySelectorAll('.notification');
+            existingNotifications.forEach(n => n.remove());
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            
+            // Set notification style based on type
+            const styles = {
+                success: { background: 'var(--success)', icon: 'fas fa-check-circle' },
+                error: { background: 'var(--danger)', icon: 'fas fa-exclamation-circle' },
+                warning: { background: 'var(--warning)', icon: 'fas fa-exclamation-triangle' },
+                info: { background: 'var(--primary)', icon: 'fas fa-info-circle' }
+            };
+            
+            const style = styles[type] || styles.info;
+            
+            notification.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: ${style.background};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                z-index: 10000;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                max-width: 400px;
+                word-wrap: break-word;
+            `;
+            
+            notification.innerHTML = `
+                <i class="${style.icon}"></i>
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()" style="
+                    background: none;
+                    border: none;
+                    color: white;
+                    cursor: pointer;
+                    margin-left: 10px;
+                    font-size: 16px;
+                ">×</button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto remove notification after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateY(20px)';
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.remove();
+                        }
+                    }, 300);
+                }
+            }, 5000);
+        }
+    </script>
+
+    <script src="js/api.js"></script>
+</body>
+</html>

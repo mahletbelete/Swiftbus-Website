@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Book Ticket Data Loading</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; white-space: pre-wrap; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        input, select { padding: 8px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Debug Book Ticket Data Loading</h1>
+    
+    <div class="debug-section info">
+        <h3>Test localStorage Data Transfer</h3>
+        <p>This page helps test the data transfer from search/index pages to book-ticket.html</p>
+    </div>
+
+    <div class="debug-section">
+        <h3>1. Set Test Search Data</h3>
+        <p>Simulate data coming from index.html or search.html:</p>
+        
+        <div>
+            <label>From City:</label>
+            <select id="testFrom">
+                <option value="Addis Ababa">Addis Ababa</option>
+                <option value="Kombolcha">Kombolcha</option>
+                <option value="Bahirdar">Bahirdar</option>
+                <option value="Dessie">Dessie</option>
+                <option value="Adama">Adama</option>
+            </select>
+        </div>
+        
+        <div>
+            <label>To City:</label>
+            <select id="testTo">
+                <option value="Kombolcha">Kombolcha</option>
+                <option value="Addis Ababa">Addis Ababa</option>
+                <option value="Bahirdar">Bahirdar</option>
+                <option value="Dessie">Dessie</option>
+                <option value="Hawasa">Hawasa</option>
+            </select>
+        </div>
+        
+        <div>
+            <label>Date:</label>
+            <input type="date" id="testDate">
+        </div>
+        
+        <div>
+            <label>Passengers:</label>
+            <select id="testPassengers">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+            </select>
+        </div>
+        
+        <button onclick="setSearchData()">Set Search Data (index.html style)</button>
+        <button onclick="setBookingData()">Set Booking Data (search.html style)</button>
+        <button onclick="clearAllData()">Clear All Data</button>
+    </div>
+
+    <div class="debug-section">
+        <h3>2. Check Current localStorage</h3>
+        <button onclick="checkLocalStorage()">Check localStorage</button>
+        <div id="localStorageResults"></div>
+    </div>
+
+    <div class="debug-section">
+        <h3>3. Test Book Ticket Page</h3>
+        <p>After setting test data above, click the button below to go to book-ticket.html and see if data loads correctly:</p>
+        <button onclick="goToBookTicket()" style="background: #007bff; color: white; font-size: 16px; padding: 15px 30px;">
+            Go to Book Ticket Page
+        </button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        // Set tomorrow as default date
+        document.addEventListener('DOMContentLoaded', function() {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById('testDate').value = tomorrow.toISOString().split('T')[0];
+        });
+
+        function addResult(title, content, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `debug-section ${type}`;
+            
+            let contentStr;
+            if (typeof content === 'object') {
+                contentStr = JSON.stringify(content, null, 2);
+            } else {
+                contentStr = content;
+            }
+            
+            div.innerHTML = `<h3>${title}</h3><pre>${contentStr}</pre>`;
+            results.appendChild(div);
+        }
+
+        function setSearchData() {
+            const searchData = {
+                from: document.getElementById('testFrom').value,
+                to: document.getElementById('testTo').value,
+                date: document.getElementById('testDate').value,
+                passengers: parseInt(document.getElementById('testPassengers').value)
+            };
+            
+            localStorage.setItem('swiftbus_search_data', JSON.stringify(searchData));
+            addResult('✅ Search Data Set (index.html style)', searchData, 'success');
+            console.log('Set search data:', searchData);
+        }
+
+        function setBookingData() {
+            const bookingData = {
+                from: document.getElementById('testFrom').value,
+                to: document.getElementById('testTo').value,
+                date: document.getElementById('testDate').value,
+                passengers: parseInt(document.getElementById('testPassengers').value),
+                busId: 'test-bus-123',
+                company: 'Selam Bus'
+            };
+            
+            localStorage.setItem('swiftbus_current_booking', JSON.stringify(bookingData));
+            addResult('✅ Booking Data Set (search.html style)', bookingData, 'success');
+            console.log('Set booking data:', bookingData);
+        }
+
+        function clearAllData() {
+            localStorage.removeItem('swiftbus_search_data');
+            localStorage.removeItem('swiftbus_current_booking');
+            localStorage.removeItem('swiftbus_booking_data');
+            addResult('🗑️ All Data Cleared', 'Removed all SwiftBus localStorage data', 'info');
+        }
+
+        function checkLocalStorage() {
+            const results = document.getElementById('localStorageResults');
+            
+            const searchData = localStorage.getItem('swiftbus_search_data');
+            const bookingData = localStorage.getItem('swiftbus_current_booking');
+            const processedData = localStorage.getItem('swiftbus_booking_data');
+            
+            results.innerHTML = `
+                <div class="debug-section">
+                    <h4>swiftbus_search_data:</h4>
+                    <pre>${searchData || 'null'}</pre>
+                </div>
+                <div class="debug-section">
+                    <h4>swiftbus_current_booking:</h4>
+                    <pre>${bookingData || 'null'}</pre>
+                </div>
+                <div class="debug-section">
+                    <h4>swiftbus_booking_data:</h4>
+                    <pre>${processedData || 'null'}</pre>
+                </div>
+            `;
+        }
+
+        function goToBookTicket() {
+            // Check if we have data set
+            const hasSearchData = localStorage.getItem('swiftbus_search_data');
+            const hasBookingData = localStorage.getItem('swiftbus_current_booking');
+            
+            if (!hasSearchData && !hasBookingData) {
+                alert('Please set some test data first using the buttons above!');
+                return;
+            }
+            
+            // Go to book ticket page
+            window.location.href = 'book-ticket.html';
+        }
+    </script>
+</body>
+</html>

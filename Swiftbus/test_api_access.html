@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API Access</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #007cba;
+            background: #f0f8ff;
+        }
+        .success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>API Access Test</h1>
+    <p>This will test if the API files are accessible from your current location.</p>
+    
+    <button onclick="testCurrentLocation()">Test Current Location</button>
+    <button onclick="testAPIFiles()">Test API Files</button>
+    <button onclick="testWithConsole()">Test with Console Logs</button>
+    
+    <div id="results"></div>
+
+    <script>
+        function addResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = message;
+            results.appendChild(div);
+        }
+        
+        function testCurrentLocation() {
+            document.getElementById('results').innerHTML = '';
+            
+            addResult(`
+                <strong>Current Location Info:</strong><br>
+                URL: ${window.location.href}<br>
+                Origin: ${window.location.origin}<br>
+                Pathname: ${window.location.pathname}<br>
+                Hostname: ${window.location.hostname}<br>
+                Port: ${window.location.port || 'default'}<br>
+                Protocol: ${window.location.protocol}
+            `);
+            
+            // Calculate expected API path
+            const currentPath = window.location.pathname.replace(/\/[^\/]*$/, '');
+            const expectedAPIPath = window.location.origin + currentPath + '/api';
+            
+            addResult(`
+                <strong>Expected API Path:</strong><br>
+                ${expectedAPIPath}
+            `);
+        }
+        
+        async function testAPIFiles() {
+            addResult('<strong>Testing API File Access...</strong>');
+            
+            // Test different possible paths
+            const testPaths = [
+                'api/booking_clean.php',
+                './api/booking_clean.php',
+                '../api/booking_clean.php',
+                '/api/booking_clean.php'
+            ];
+            
+            for (const path of testPaths) {
+                try {
+                    addResult(`Testing: ${path}`);
+                    
+                    const response = await fetch(path + '?action=get_booking_stats');
+                    
+                    if (response.ok) {
+                        const text = await response.text();
+                        addResult(`✅ SUCCESS: ${path}<br>Status: ${response.status}<br>Response: ${text.substring(0, 200)}...`, 'success');
+                        return; // Found working path
+                    } else {
+                        addResult(`❌ FAILED: ${path}<br>Status: ${response.status} ${response.statusText}`, 'error');
+                    }
+                } catch (error) {
+                    addResult(`❌ ERROR: ${path}<br>Error: ${error.message}`, 'error');
+                }
+            }
+            
+            addResult('❌ None of the API paths worked. Check if api/booking_clean.php exists in your project folder.', 'error');
+        }
+        
+        async function testWithConsole() {
+            addResult('<strong>Testing with Console Logs (check browser console)...</strong>');
+            
+            // Load the API script and test
+            const script = document.createElement('script');
+            script.src = 'js/api.js';
+            script.onload = async function() {
+                console.log('API script loaded');
+                
+                try {
+                    const api = new SwiftBusAPI();
+                    console.log('API instance created:', api);
+                    
+                    // Test a simple API call
+                    const response = await api.checkSession();
+                    console.log('API response:', response);
+                    
+                    addResult(`API Test Result: <pre>${JSON.stringify(response, null, 2)}</pre>`, 
+                        response.success ? 'success' : 'error');
+                        
+                } catch (error) {
+                    console.error('API test error:', error);
+                    addResult(`API Test Error: ${error.message}`, 'error');
+                }
+            };
+            script.onerror = function() {
+                addResult('❌ Failed to load js/api.js', 'error');
+            };
+            document.head.appendChild(script);
+        }
+        
+        // Auto-run location test
+        document.addEventListener('DOMContentLoaded', function() {
+            testCurrentLocation();
+        });
+    </script>
+</body>
+</html>

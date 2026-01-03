@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Users Test - SwiftBus</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .warning { color: #ffc107; }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover { background: #0056b3; }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 Admin Users Final Test</h1>
+    
+    <div class="test-container">
+        <h2>📋 Test Results</h2>
+        <div id="testResults">
+            <p>Click the test buttons below to verify admin users functionality...</p>
+        </div>
+    </div>
+    
+    <div class="test-container">
+        <h2>🧪 Test Actions</h2>
+        <button class="btn" onclick="testAdminAuth()">Test Admin Authentication</button>
+        <button class="btn" onclick="testUsersAPI()">Test Users API</button>
+        <button class="btn" onclick="testViewDetailsFunction()">Test View Details Function</button>
+        <button class="btn" onclick="testSuspendFunction()">Test Suspend Function</button>
+        <button class="btn" onclick="openAdminUsers()">Open Admin Users Page</button>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let swiftBusAPI;
+        
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Initialize API
+            if (typeof SwiftBusAPI !== 'undefined') {
+                swiftBusAPI = new SwiftBusAPI();
+                showResult('✅ SwiftBusAPI initialized successfully', 'success');
+            } else {
+                showResult('❌ SwiftBusAPI not available', 'error');
+            }
+        });
+        
+        function showResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('testResults');
+            const timestamp = new Date().toLocaleTimeString();
+            resultsDiv.innerHTML += `
+                <div class="result ${type}">
+                    <strong>[${timestamp}]</strong> ${message}
+                </div>
+            `;
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+        
+        async function testAdminAuth() {
+            try {
+                showResult('🔐 Testing admin authentication...', 'warning');
+                
+                const response = await swiftBusAPI.checkSession();
+                
+                if (response.success && response.data) {
+                    const userData = response.data;
+                    if (userData.role === 'admin') {
+                        showResult(`✅ Admin authentication successful - User: ${userData.name || userData.full_name}`, 'success');
+                    } else {
+                        showResult(`❌ User authenticated but not admin - Role: ${userData.role}`, 'error');
+                    }
+                } else {
+                    showResult('❌ Authentication failed - User not logged in', 'error');
+                }
+                
+            } catch (error) {
+                showResult(`❌ Authentication test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testUsersAPI() {
+            try {
+                showResult('👥 Testing users API...', 'warning');
+                
+                const response = await swiftBusAPI.request('admin_users.php?action=get_users');
+                
+                if (response.success) {
+                    const users = response.data || [];
+                    showResult(`✅ Users API successful - Found ${users.length} users`, 'success');
+                    
+                    if (users.length > 0) {
+                        const sample = users[0];
+                        showResult(`👤 Sample user: ${sample.id || sample.user_id} - ${sample.full_name} - ${sample.email}`, 'info');
+                    }
+                } else {
+                    showResult(`⚠️ Users API returned no data - Will use fallback data`, 'warning');
+                }
+                
+            } catch (error) {
+                showResult(`❌ Users API test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        function testViewDetailsFunction() {
+            showResult('👁️ Testing view details function...', 'warning');
+            
+            // Create sample users data
+            const sampleUsers = [
+                {
+                    id: 'USR001',
+                    user_id: 'U123456',
+                    full_name: 'John Doe',
+                    email: 'john@example.com',
+                    phone: '+251911123456',
+                    status: 'active',
+                    total_bookings: 5,
+                    trips_taken: 4
+                },
+                {
+                    id: 'USR002',
+                    user_id: 'U789012',
+                    full_name: 'Jane Smith',
+                    email: 'jane@example.com',
+                    phone: '+251911789012',
+                    status: 'verified',
+                    total_bookings: 3,
+                    trips_taken: 3
+                }
+            ];
+            
+            // Test ID matching logic
+            function findUser(userId, users) {
+                let user = users.find(u => u.id === userId);
+                if (!user) {
+                    user = users.find(u => u.user_id === userId);
+                }
+                if (!user) {
+                    user = users.find(u => String(u.id) === String(userId));
+                }
+                if (!user) {
+                    user = users.find(u => String(u.user_id) === String(userId));
+                }
+                return user;
+            }
+            
+            // Test various ID formats
+            const testIds = ['USR001', 'U123456', 'USR002', 'U789012', 'INVALID'];
+            
+            testIds.forEach(testId => {
+                const foundUser = findUser(testId, sampleUsers);
+                if (foundUser) {
+                    showResult(`✅ ID matching test: ${testId} → Found ${foundUser.full_name}`, 'success');
+                } else {
+                    if (testId === 'INVALID') {
+                        showResult(`✅ ID matching test: ${testId} → Correctly not found`, 'success');
+                    } else {
+                        showResult(`❌ ID matching test: ${testId} → Should have been found`, 'error');
+                    }
+                }
+            });
+        }
+        
+        function testSuspendFunction() {
+            showResult('🚫 Testing suspend function...', 'warning');
+            
+            // Create sample users data
+            let testUsers = [
+                {
+                    id: 'USR001',
+                    full_name: 'John Doe',
+                    status: 'active'
+                },
+                {
+                    id: 'USR002',
+                    full_name: 'Jane Smith',
+                    status: 'verified'
+                }
+            ];
+            
+            // Test suspend logic
+            function testSuspendUser(userId, users) {
+                let user = users.find(u => u.id === userId);
+                if (!user) {
+                    return { success: false, message: 'User not found' };
+                }
+                
+                const userIndex = users.findIndex(u => u.id === userId);
+                if (userIndex !== -1) {
+                    users[userIndex].status = 'suspended';
+                    users[userIndex].suspension_reason = 'Test suspension';
+                    return { success: true, message: `User ${user.full_name} suspended` };
+                }
+                
+                return { success: false, message: 'Failed to suspend user' };
+            }
+            
+            // Test suspending users
+            const result1 = testSuspendUser('USR001', testUsers);
+            if (result1.success) {
+                showResult(`✅ Suspend test: ${result1.message}`, 'success');
+            } else {
+                showResult(`❌ Suspend test failed: ${result1.message}`, 'error');
+            }
+            
+            const result2 = testSuspendUser('INVALID', testUsers);
+            if (!result2.success && result2.message === 'User not found') {
+                showResult(`✅ Suspend test: Correctly handled invalid user ID`, 'success');
+            } else {
+                showResult(`❌ Suspend test: Should have failed for invalid ID`, 'error');
+            }
+            
+            // Check if user was actually suspended
+            const suspendedUser = testUsers.find(u => u.id === 'USR001');
+            if (suspendedUser && suspendedUser.status === 'suspended') {
+                showResult(`✅ Suspend test: User status correctly updated to suspended`, 'success');
+            } else {
+                showResult(`❌ Suspend test: User status not updated correctly`, 'error');
+            }
+        }
+        
+        function openAdminUsers() {
+            showResult('🚀 Opening admin users page...', 'warning');
+            window.open('admin-users-list.html', '_blank');
+            showResult('✅ Admin users page opened in new tab', 'success');
+        }
+    </script>
+</body>
+</html>

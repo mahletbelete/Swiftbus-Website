@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Test - SwiftBus</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .test-button:hover {
+            background: #0d47a1;
+        }
+        h1 { color: #1a73e8; }
+        h2 { color: #333; }
+        p { color: #666; }
+    </style>
+</head>
+<body>
+    <h1>SwiftBus Navigation Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Navigation Flow</h2>
+        <p>Use these links to test the navigation improvements:</p>
+        
+        <h3>1. Book Ticket Navigation</h3>
+        <a href="book-ticket.html" class="test-button">Normal Book Ticket (Step 1)</a>
+        <a href="book-ticket.html?step=4" class="test-button">Book Ticket Step 4 (Payment)</a>
+        
+        <h3>2. Payment Page Navigation</h3>
+        <a href="payment.html?method=telebirr" class="test-button">Payment Page (Telebirr)</a>
+        <a href="payment.html?method=card" class="test-button">Payment Page (Card)</a>
+        
+        <h3>3. Test Back Button Flow</h3>
+        <p>1. Go to <strong>search.html</strong> → select a bus → book ticket</p>
+        <p>2. Fill booking form → go to payment</p>
+        <p>3. Click "Back to Booking" → should return to step 4</p>
+        <p>4. Test back button in book-ticket.html → should go to previous page</p>
+    </div>
+    
+    <div class="test-section">
+        <h2>Navigation Improvements Implemented</h2>
+        <ul>
+            <li>✅ <strong>Book-ticket.html back button</strong>: Now uses history.back() and shows appropriate text based on referrer</li>
+            <li>✅ <strong>Payment page back button</strong>: Redirects to book-ticket.html?step=4 (payment step)</li>
+            <li>✅ <strong>URL parameter support</strong>: book-ticket.html now supports ?step=4 parameter</li>
+            <li>✅ <strong>Data persistence</strong>: Payment data is preserved when navigating back</li>
+            <li>✅ <strong>Form restoration</strong>: All form fields are restored when returning from payment</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Scenarios</h2>
+        
+        <h3>Scenario 1: Normal Booking Flow</h3>
+        <ol>
+            <li>Start from index.html or search.html</li>
+            <li>Go to book-ticket.html</li>
+            <li>Back button should say "Back to Search" or "Back to Home"</li>
+            <li>Complete booking steps 1-3</li>
+            <li>Select payment method → redirects to payment.html</li>
+        </ol>
+        
+        <h3>Scenario 2: Payment Return Flow</h3>
+        <ol>
+            <li>From payment.html, click "Back to Booking"</li>
+            <li>Should redirect to book-ticket.html?step=4</li>
+            <li>Should show step 4 (payment step) directly</li>
+            <li>All form data should be preserved</li>
+            <li>Selected seats should be restored</li>
+        </ol>
+        
+        <h3>Scenario 3: Browser Back Button</h3>
+        <ol>
+            <li>Navigate through the booking flow</li>
+            <li>Use browser back button at any point</li>
+            <li>Should maintain proper navigation state</li>
+            <li>Payment buttons should reset if returning from payment</li>
+        </ol>
+    </div>
+    
+    <div class="test-section">
+        <h2>Quick Links</h2>
+        <a href="index.html" class="test-button">Home Page</a>
+        <a href="search.html" class="test-button">Search Page</a>
+        <a href="book-ticket.html" class="test-button">Book Ticket</a>
+        <a href="my-tickets.html" class="test-button">My Tickets</a>
+    </div>
+    
+    <script>
+        // Add some test data to localStorage for testing
+        function setupTestData() {
+            const testBookingData = {
+                bus_company: 'selam-bus',
+                bus_type: 'premium-ac',
+                from_city: 'addis-ababa',
+                to_city: 'bahirdar',
+                departure_date: '2025-01-02',
+                departure_time: '08:00',
+                passenger_count: 1,
+                selected_seats: ['A1'],
+                passenger_details: {
+                    fullName: 'Test User',
+                    email: 'test@example.com',
+                    phone: '+251 911 234 567',
+                    nationality: 'ethiopian',
+                    idNumber: 'ID123456',
+                    ageGroup: 'adult'
+                },
+                total_amount: 520,
+                booking_id: 'SWB-2025-TEST123'
+            };
+            
+            localStorage.setItem('swiftbus_payment_data', JSON.stringify(testBookingData));
+            console.log('✅ Test data setup complete');
+        }
+        
+        // Setup test data when page loads
+        document.addEventListener('DOMContentLoaded', setupTestData);
+    </script>
+</body>
+</html>

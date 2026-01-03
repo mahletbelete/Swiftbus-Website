@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Buses - SwiftBus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Shared Variables from index.html */
+        :root {
+            --primary: #1a73e8;
+            --secondary: #ff6d00;
+            --dark: #222;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --border: #e0e0e0;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header - Same as index.html */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            padding: 15px 0;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo h1 {
+            color: var(--primary);
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .logo span {
+            color: var(--secondary);
+        }
+
+        .back-btn {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            color: var(--secondary);
+        }
+
+        /* Main Search Section */
+        .search-section {
+            padding: 60px 0 30px;
+        }
+
+        .search-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: var(--shadow);
+        }
+
+        .search-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            align-items: end;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            color: var(--dark);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+        }
+
+        .search-btn {
+            background: linear-gradient(135deg, var(--primary), #0d47a1);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            grid-column: span 2;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(26, 115, 232, 0.3);
+        }
+
+        /* Search Summary */
+        .search-summary {
+            background: white;
+            border-radius: var(--radius);
+            padding: 25px;
+            margin: 30px 0;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary);
+        }
+
+        .search-summary h2 {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .search-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            align-items: center;
+            padding: 15px;
+            background: var(--light);
+            border-radius: 8px;
+        }
+
+        .search-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-item i {
+            color: var(--primary);
+            font-size: 18px;
+        }
+
+        .modify-search {
+            margin-left: auto;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .modify-search:hover {
+            background: #0d47a1;
+            transform: translateY(-2px);
+        }
+
+        /* Bus Results */
+        .results-section {
+            padding: 30px 0 60px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .results-count {
+            font-size: 16px;
+            color: var(--dark);
+        }
+
+        .results-count strong {
+            color: var(--primary);
+        }
+
+        .sort-options select {
+            padding: 10px 15px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            color: var(--dark);
+            cursor: pointer;
+            min-width: 180px;
+        }
+
+        /* Bus Cards - Simple Design */
+        .bus-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .bus-card {
+            background: white;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .bus-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            border-color: var(--primary);
+        }
+
+        .bus-header {
+            background: linear-gradient(135deg, var(--primary), #0d47a1);
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .bus-logo {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: var(--primary);
+        }
+
+        .bus-info h3 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .bus-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+        }
+
+        .bus-rating i {
+            color: #ffc107;
+        }
+
+        .bus-content {
+            padding: 25px;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        .route-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: var(--light);
+            border-radius: 8px;
+        }
+
+        .route-point {
+            text-align: center;
+        }
+
+        .route-point h4 {
+            font-size: 16px;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+
+        .route-point .time {
+            font-size: 14px;
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .route-arrow {
+            font-size: 20px;
+            color: var(--secondary);
+        }
+
+        .bus-details {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .detail-item i {
+            color: var(--primary);
+            width: 20px;
+        }
+
+        .amenities {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .amenity-tag {
+            background: #e3f2fd;
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .booking-section {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .fare-amount {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .fare-label {
+            font-size: 12px;
+            color: var(--gray);
+            margin-bottom: 20px;
+        }
+
+        .seats-info {
+            background: #d4edda;
+            color: #155724;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .book-btn {
+            background: linear-gradient(135deg, var(--secondary), #ff8c00);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        .book-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 109, 0, 0.3);
+        }
+
+        /* Loading and No Results */
+        .loading-state {
+            text-align: center;
+            padding: 50px;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 50px;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .no-results i {
+            font-size: 50px;
+            color: var(--gray);
+            margin-bottom: 20px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .search-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-btn {
+                grid-column: span 1;
+            }
+            
+            .search-details {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .modify-search {
+                margin-left: 0;
+                width: 100%;
+            }
+            
+            .results-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .bus-content {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+            
+            .booking-section {
+                border-top: 1px solid var(--border);
+                padding-top: 25px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .search-card,
+            .search-summary,
+            .bus-card {
+                padding: 20px;
+            }
+            
+            .bus-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>Swift<span>Bus</span></h1>
+                </div>
+                <a href="index.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Home
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Search Section -->
+    <section class="search-section">
+        <div class="container">
+            <div class="search-card">
+                <h2>Search Buses</h2>
+                <div class="search-form" id="searchForm">
+                    <div class="form-group">
+                        <label for="fromCity">From</label>
+                        <select id="fromCity">
+                            <option value="">Select origin city</option>
+                            <option value="Addis Ababa">Addis Ababa</option>
+                            <option value="Kombolcha">Kombolcha</option>
+                            <option value="Bahirdar">Bahirdar</option>
+                            <option value="Dessie">Dessie</option>
+                            <option value="Adama">Adama</option>
+                            <option value="Hawasa">Hawasa</option>
+                            <option value="Arbaminch">Arbaminch</option>
+                            <option value="Gonder">Gonder</option>
+                            <option value="Mekele">Mekele</option>
+                            <option value="Jimma">Jimma</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="toCity">To</label>
+                        <select id="toCity">
+                            <option value="">Select destination city</option>
+                            <option value="Addis Ababa">Addis Ababa</option>
+                            <option value="Kombolcha">Kombolcha</option>
+                            <option value="Bahirdar">Bahirdar</option>
+                            <option value="Dessie">Dessie</option>
+                            <option value="Adama">Adama</option>
+                            <option value="Hawasa">Hawasa</option>
+                            <option value="Arbaminch">Arbaminch</option>
+                            <option value="Gonder">Gonder</option>
+                            <option value="Mekele">Mekele</option>
+                            <option value="Jimma">Jimma</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="travelDate">Date</label>
+                        <input type="date" id="travelDate">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="passengers">Passengers</label>
+                        <select id="passengers">
+                            <option value="1">1 Adult</option>
+                            <option value="2">2 Adults</option>
+                            <option value="3">3 Adults</option>
+                            <option value="4">4 Adults</option>
+                            <option value="5">5 Adults</option>
+                            <option value="6">6 Adults</option>
+                        </select>
+                    </div>
+                    
+                    <button class="search-btn" id="searchButton">
+                        <i class="fas fa-search"></i> Search Buses
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Summary (Initially Hidden) -->
+            <div class="search-summary" id="searchSummary" style="display: none;">
+                <h2>Search Results</h2>
+                <div class="search-details">
+                    <div class="search-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <strong>From:</strong> <span id="summaryFrom">Addis Ababa</span>
+                        </div>
+                    </div>
+                    <div class="search-item">
+                        <i class="fas fa-flag-checkered"></i>
+                        <div>
+                            <strong>To:</strong> <span id="summaryTo">Bahirdar</span>
+                        </div>
+                    </div>
+                    <div class="search-item">
+                        <i class="far fa-calendar-alt"></i>
+                        <div>
+                            <strong>Date:</strong> <span id="summaryDate">Tomorrow</span>
+                        </div>
+                    </div>
+                    <div class="search-item">
+                        <i class="fas fa-user-friends"></i>
+                        <div>
+                            <strong>Passengers:</strong> <span id="summaryPassengers">1 Adult</span>
+                        </div>
+                    </div>
+                    <button class="modify-search" id="modifySearchBtn">
+                        <i class="fas fa-edit"></i> Modify Search
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    <section class="results-section" id="resultsSection" style="display: none;">
+        <div class="container">
+            <div class="results-header">
+                <div class="results-count">
+                    Showing <strong id="resultsCount">4</strong> buses available
+                </div>
+            </div>
+
+            <!-- Bus Results -->
+            <div class="bus-cards" id="busResults">
+                <!-- Bus cards will be populated here -->
+            </div>
+
+            <!-- Loading State -->
+            <div class="loading-state" id="loadingState">
+                <div class="loading-spinner"></div>
+                <p>Searching for buses...</p>
+            </div>
+
+            <!-- No Results State -->
+            <div class="no-results" id="noResults" style="display: none;">
+                <i class="fas fa-search"></i>
+                <h3>No buses found</h3>
+                <p>Try adjusting your search criteria</p>
+                <button class="modify-search" onclick="showSearchForm()">
+                    <i class="fas fa-search"></i> Modify Search
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Comprehensive bus data with COMPLETE route coverage for all 10 cities
+        const busData = [
+            // Selam Bus - Premium service (covers ALL major routes)
+            {
+                id: 1,
+                company: "Selam Bus",
+                logo: "🚌",
+                rating: 4.8,
+                price: 350,
+                departure: "06:00 AM",
+                arrival: "10:30 AM",
+                duration: "4h 30m",
+                amenities: ["WiFi", "AC", "Toilet", "Entertainment", "Charging"],
+                type: "luxury",
+                seats: 8,
+                totalSeats: 40,
+                routes: [
+                    // From/To Addis Ababa
+                    "Addis Ababa-Hawasa", "Hawasa-Addis Ababa",
+                    "Addis Ababa-Bahirdar", "Bahirdar-Addis Ababa",
+                    "Addis Ababa-Mekele", "Mekele-Addis Ababa",
+                    "Addis Ababa-Jimma", "Jimma-Addis Ababa",
+                    "Addis Ababa-Gonder", "Gonder-Addis Ababa",
+                    "Addis Ababa-Adama", "Adama-Addis Ababa",
+                    "Addis Ababa-Dessie", "Dessie-Addis Ababa",
+                    "Addis Ababa-Kombolcha", "Kombolcha-Addis Ababa",
+                    "Addis Ababa-Arbaminch", "Arbaminch-Addis Ababa",
+                    // Inter-city routes
+                    "Bahirdar-Gonder", "Gonder-Bahirdar",
+                    "Hawasa-Arbaminch", "Arbaminch-Hawasa",
+                    "Hawasa-Adama", "Adama-Hawasa",
+                    "Jimma-Hawasa", "Hawasa-Jimma"
+                ]
+            },
+            {
+                id: 2,
+                company: "Selam Bus",
+                logo: "🚌",
+                rating: 4.8,
+                price: 280,
+                departure: "08:00 AM",
+                arrival: "12:30 PM",
+                duration: "4h 30m",
+                amenities: ["WiFi", "AC", "Toilet", "Entertainment", "Charging"],
+                type: "luxury",
+                seats: 12,
+                totalSeats: 40,
+                routes: [
+                    // Additional Selam Bus routes
+                    "Dessie-Kombolcha", "Kombolcha-Dessie",
+                    "Dessie-Mekele", "Mekele-Dessie",
+                    "Gonder-Mekele", "Mekele-Gonder",
+                    "Bahirdar-Dessie", "Dessie-Bahirdar",
+                    "Jimma-Arbaminch", "Arbaminch-Jimma",
+                    "Adama-Jimma", "Jimma-Adama"
+                ]
+            },
+            
+            // Abay Bus - Northern routes specialist (covers ALL northern combinations)
+            {
+                id: 3,
+                company: "Abay Bus",
+                logo: "🚍",
+                rating: 4.5,
+                price: 320,
+                departure: "05:00 AM",
+                arrival: "10:00 AM",
+                duration: "5h",
+                amenities: ["AC", "Snacks", "Comfortable"],
+                type: "standard",
+                seats: 15,
+                totalSeats: 45,
+                routes: [
+                    // All northern routes
+                    "Addis Ababa-Bahirdar", "Bahirdar-Addis Ababa",
+                    "Addis Ababa-Gonder", "Gonder-Addis Ababa",
+                    "Addis Ababa-Mekele", "Mekele-Addis Ababa",
+                    "Addis Ababa-Dessie", "Dessie-Addis Ababa",
+                    "Addis Ababa-Kombolcha", "Kombolcha-Addis Ababa",
+                    "Bahirdar-Gonder", "Gonder-Bahirdar",
+                    "Bahirdar-Dessie", "Dessie-Bahirdar",
+                    "Bahirdar-Mekele", "Mekele-Bahirdar",
+                    "Bahirdar-Kombolcha", "Kombolcha-Bahirdar",
+                    "Gonder-Mekele", "Mekele-Gonder",
+                    "Gonder-Dessie", "Dessie-Gonder",
+                    "Gonder-Kombolcha", "Kombolcha-Gonder",
+                    "Dessie-Mekele", "Mekele-Dessie",
+                    "Dessie-Kombolcha", "Kombolcha-Dessie"
+                ]
+            },
+            {
+                id: 4,
+                company: "Abay Bus",
+                logo: "🚍",
+                rating: 4.5,
+                price: 250,
+                departure: "07:00 AM",
+                arrival: "11:30 AM",
+                duration: "4h 30m",
+                amenities: ["AC", "Snacks", "Comfortable"],
+                type: "standard",
+                seats: 20,
+                totalSeats: 45,
+                routes: [
+                    // Additional Abay Bus routes (connecting to other regions)
+                    "Bahirdar-Hawasa", "Hawasa-Bahirdar",
+                    "Bahirdar-Jimma", "Jimma-Bahirdar",
+                    "Bahirdar-Adama", "Adama-Bahirdar",
+                    "Bahirdar-Arbaminch", "Arbaminch-Bahirdar",
+                    "Gonder-Hawasa", "Hawasa-Gonder",
+                    "Gonder-Jimma", "Jimma-Gonder",
+                    "Gonder-Adama", "Adama-Gonder",
+                    "Gonder-Arbaminch", "Arbaminch-Gonder"
+                ]
+            },
+            
+            // Ethio Bus - Budget-friendly (covers ALL southern and eastern routes)
+            {
+                id: 5,
+                company: "Ethio Bus",
+                logo: "🚐",
+                rating: 4.2,
+                price: 200,
+                departure: "08:00 AM",
+                arrival: "01:00 PM",
+                duration: "5h",
+                amenities: ["AC", "Affordable", "Frequent"],
+                type: "standard",
+                seats: 25,
+                totalSeats: 50,
+                routes: [
+                    // All southern and eastern routes
+                    "Addis Ababa-Hawasa", "Hawasa-Addis Ababa",
+                    "Addis Ababa-Adama", "Adama-Addis Ababa",
+                    "Addis Ababa-Jimma", "Jimma-Addis Ababa",
+                    "Addis Ababa-Arbaminch", "Arbaminch-Addis Ababa",
+                    "Hawasa-Arbaminch", "Arbaminch-Hawasa",
+                    "Hawasa-Adama", "Adama-Hawasa",
+                    "Hawasa-Jimma", "Jimma-Hawasa",
+                    "Adama-Jimma", "Jimma-Adama",
+                    "Adama-Arbaminch", "Arbaminch-Adama",
+                    "Jimma-Arbaminch", "Arbaminch-Jimma"
+                ]
+            },
+            {
+                id: 6,
+                company: "Ethio Bus",
+                logo: "🚐",
+                rating: 4.2,
+                price: 180,
+                departure: "09:00 AM",
+                arrival: "02:00 PM",
+                duration: "5h",
+                amenities: ["AC", "Affordable", "Frequent"],
+                type: "standard",
+                seats: 30,
+                totalSeats: 50,
+                routes: [
+                    // Cross-regional routes
+                    "Dessie-Hawasa", "Hawasa-Dessie",
+                    "Dessie-Jimma", "Jimma-Dessie",
+                    "Dessie-Adama", "Adama-Dessie",
+                    "Dessie-Arbaminch", "Arbaminch-Dessie",
+                    "Kombolcha-Hawasa", "Hawasa-Kombolcha",
+                    "Kombolcha-Jimma", "Jimma-Kombolcha",
+                    "Kombolcha-Adama", "Adama-Kombolcha",
+                    "Kombolcha-Arbaminch", "Arbaminch-Kombolcha",
+                    "Mekele-Hawasa", "Hawasa-Mekele",
+                    "Mekele-Jimma", "Jimma-Mekele",
+                    "Mekele-Adama", "Adama-Mekele",
+                    "Mekele-Arbaminch", "Arbaminch-Mekele"
+                ]
+            },
+            
+            // Habesha Bus - Cultural experience (covers ALL long-distance routes)
+            {
+                id: 7,
+                company: "Habesha Bus",
+                logo: "🚌",
+                rating: 4.4,
+                price: 300,
+                departure: "09:00 PM",
+                arrival: "02:30 AM",
+                duration: "5h 30m",
+                amenities: ["Sleeper", "Blanket", "Toilet", "AC"],
+                type: "sleeper",
+                seats: 20,
+                totalSeats: 35,
+                routes: [
+                    // All major long-distance routes
+                    "Addis Ababa-Mekele", "Mekele-Addis Ababa",
+                    "Addis Ababa-Gonder", "Gonder-Addis Ababa",
+                    "Addis Ababa-Bahirdar", "Bahirdar-Addis Ababa",
+                    "Addis Ababa-Dessie", "Dessie-Addis Ababa",
+                    "Addis Ababa-Kombolcha", "Kombolcha-Addis Ababa",
+                    "Gonder-Mekele", "Mekele-Gonder",
+                    "Bahirdar-Mekele", "Mekele-Bahirdar"
+                ]
+            },
+            {
+                id: 8,
+                company: "Habesha Bus",
+                logo: "🚌",
+                rating: 4.4,
+                price: 260,
+                departure: "10:00 PM",
+                arrival: "03:00 AM",
+                duration: "5h",
+                amenities: ["Sleeper", "Blanket", "Toilet", "AC"],
+                type: "sleeper",
+                seats: 18,
+                totalSeats: 35,
+                routes: [
+                    // Additional long-distance routes
+                    "Addis Ababa-Jimma", "Jimma-Addis Ababa",
+                    "Addis Ababa-Hawasa", "Hawasa-Addis Ababa",
+                    "Addis Ababa-Arbaminch", "Arbaminch-Addis Ababa",
+                    "Jimma-Hawasa", "Hawasa-Jimma",
+                    "Hawasa-Arbaminch", "Arbaminch-Hawasa",
+                    "Jimma-Arbaminch", "Arbaminch-Jimma"
+                ]
+            }
+        ];
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            setupEventListeners();
+            
+            // Set today's date as default
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const formattedDate = tomorrow.toISOString().split('T')[0];
+            document.getElementById('travelDate').value = formattedDate;
+            document.getElementById('travelDate').min = formattedDate;
+            
+            // Check for saved search data from index.html
+            const savedSearch = localStorage.getItem('swiftbus_search_data');
+            if (savedSearch) {
+                const searchData = JSON.parse(savedSearch);
+                prefillSearchForm(searchData);
+                performSearch(searchData);
+                localStorage.removeItem('swiftbus_search_data');
+            }
+        });
+
+        function initializePage() {
+            // Hide loading initially
+            document.getElementById('loadingState').style.display = 'none';
+        }
+
+        function prefillSearchForm(searchData) {
+            document.getElementById('fromCity').value = searchData.from;
+            document.getElementById('toCity').value = searchData.to;
+            document.getElementById('travelDate').value = searchData.date;
+            document.getElementById('passengers').value = searchData.passengers || 1;
+        }
+
+        function setupEventListeners() {
+            // Search button
+            document.getElementById('searchButton').addEventListener('click', performSearchFromForm);
+            
+            // Enter key in form
+            document.querySelectorAll('#searchForm input, #searchForm select').forEach(element => {
+                element.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        performSearchFromForm();
+                    }
+                });
+            });
+            
+            // Modify search button
+            document.getElementById('modifySearchBtn').addEventListener('click', showSearchForm);
+        }
+
+        function performSearchFromForm() {
+            const from = document.getElementById('fromCity').value;
+            const to = document.getElementById('toCity').value;
+            const date = document.getElementById('travelDate').value;
+            const passengers = document.getElementById('passengers').value;
+            
+            // Validation
+            if (!from || !to) {
+                alert('Please select both origin and destination cities');
+                return;
+            }
+            
+            if (from === to) {
+                alert('Origin and destination cannot be the same city');
+                return;
+            }
+            
+            const searchData = {
+                from: from,
+                to: to,
+                date: date,
+                passengers: passengers
+            };
+            
+            performSearch(searchData);
+        }
+
+        function performSearch(searchData) {
+            // Show loading
+            document.getElementById('loadingState').style.display = 'block';
+            document.getElementById('noResults').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'block';
+            
+            // Update search summary
+            updateSearchSummary(searchData);
+            
+            // Hide search form, show results
+            document.getElementById('searchForm').style.display = 'none';
+            document.getElementById('searchSummary').style.display = 'block';
+            
+            // Simulate API delay
+            setTimeout(() => {
+                // Filter buses based on search
+                const filteredBuses = filterBuses(searchData);
+                
+                // Display results (no sorting needed)
+                displayBusResults(filteredBuses);
+                
+                // Hide loading
+                document.getElementById('loadingState').style.display = 'none';
+            }, 1000);
+        }
+
+        function updateSearchSummary(searchData) {
+            document.getElementById('summaryFrom').textContent = searchData.from;
+            document.getElementById('summaryTo').textContent = searchData.to;
+            
+            // Format date
+            const dateObj = new Date(searchData.date);
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            let dateText;
+            if (dateObj.toDateString() === today.toDateString()) {
+                dateText = 'Today';
+            } else if (dateObj.toDateString() === tomorrow.toDateString()) {
+                dateText = 'Tomorrow';
+            } else {
+                dateText = dateObj.toLocaleDateString('en-US', { 
+                    weekday: 'short', 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+            }
+            
+            document.getElementById('summaryDate').textContent = dateText;
+            document.getElementById('summaryPassengers').textContent = 
+                searchData.passengers + (searchData.passengers === '1' ? ' Adult' : ' Adults');
+        }
+
+        function filterBuses(searchData) {
+            // Create route string for search
+            const searchRoute = `${searchData.from}-${searchData.to}`;
+            
+            // Filter buses that operate on the searched route
+            const filteredBuses = busData.filter(bus => {
+                return bus.routes.includes(searchRoute);
+            });
+            
+            // Add some variety in pricing and timing based on route
+            return filteredBuses.map(bus => {
+                // Create a copy to avoid modifying original data
+                const busCopy = { ...bus };
+                
+                // Adjust pricing based on route distance and popularity
+                const routeMultipliers = {
+                    'Addis Ababa-Mekele': 1.4,
+                    'Mekele-Addis Ababa': 1.4,
+                    'Addis Ababa-Bahirdar': 1.2,
+                    'Bahirdar-Addis Ababa': 1.2,
+                    'Addis Ababa-Gonder': 1.3,
+                    'Gonder-Addis Ababa': 1.3,
+                    'Addis Ababa-Jimma': 1.1,
+                    'Jimma-Addis Ababa': 1.1,
+                    'Gonder-Mekele': 1.2,
+                    'Mekele-Gonder': 1.2,
+                    'Bahirdar-Gonder': 0.8,
+                    'Gonder-Bahirdar': 0.8
+                };
+                
+                const multiplier = routeMultipliers[searchRoute] || 1.0;
+                busCopy.price = Math.round(bus.price * multiplier);
+                
+                // Adjust departure times based on route
+                const timeVariations = [
+                    "05:00 AM", "06:00 AM", "07:00 AM", "08:00 AM", 
+                    "09:00 AM", "10:00 AM", "02:00 PM", "03:00 PM", 
+                    "08:00 PM", "09:00 PM", "10:00 PM"
+                ];
+                
+                // Use bus ID and route to get consistent but varied times
+                const timeIndex = (bus.id + searchRoute.length) % timeVariations.length;
+                busCopy.departure = timeVariations[timeIndex];
+                
+                // Calculate arrival time (simplified)
+                const durationHours = parseInt(bus.duration);
+                const departureHour = parseInt(busCopy.departure);
+                let arrivalHour = (departureHour + durationHours) % 24;
+                const period = arrivalHour >= 12 ? 'PM' : 'AM';
+                if (arrivalHour > 12) arrivalHour -= 12;
+                if (arrivalHour === 0) arrivalHour = 12;
+                
+                busCopy.arrival = `${arrivalHour.toString().padStart(2, '0')}:30 ${period}`;
+                
+                // Set current route info
+                busCopy.currentRoute = {
+                    from: searchData.from,
+                    to: searchData.to,
+                    fromStation: `${searchData.from} Bus Station`,
+                    toStation: `${searchData.to} Bus Station`
+                };
+                
+                return busCopy;
+            });
+        }
+
+        function displayBusResults(buses) {
+            const resultsContainer = document.getElementById('busResults');
+            const noResultsElement = document.getElementById('noResults');
+            const resultsCountElement = document.getElementById('resultsCount');
+            
+            resultsCountElement.textContent = buses.length;
+            
+            if (buses.length === 0) {
+                resultsContainer.innerHTML = '';
+                noResultsElement.style.display = 'block';
+                return;
+            }
+            
+            noResultsElement.style.display = 'none';
+            
+            // Create bus cards
+            const busCardsHTML = buses.map(bus => `
+                <div class="bus-card" data-id="${bus.id}">
+                    <div class="bus-header">
+                        <div class="bus-logo">${bus.logo}</div>
+                        <div class="bus-info">
+                            <h3>${bus.company}</h3>
+                            <div class="bus-rating">
+                                ${'<i class="fas fa-star"></i>'.repeat(Math.floor(bus.rating))}
+                                ${bus.rating % 1 !== 0 ? '<i class="fas fa-star-half-alt"></i>' : ''}
+                                ${'<i class="far fa-star"></i>'.repeat(5 - Math.ceil(bus.rating))}
+                                <span>${bus.rating}/5</span>
+                            </div>
+                            <div style="font-size: 12px; opacity: 0.9;">${bus.type} Bus</div>
+                        </div>
+                    </div>
+                    
+                    <div class="bus-content">
+                        <div class="route-info">
+                            <div class="route-point">
+                                <h4>${bus.currentRoute.from}</h4>
+                                <div class="time">${bus.departure}</div>
+                                <div style="font-size: 12px; color: var(--gray);">${bus.currentRoute.fromStation}</div>
+                            </div>
+                            <div class="route-arrow">
+                                <i class="fas fa-arrow-right"></i>
+                                <div style="font-size: 12px; color: var(--gray); margin-top: 5px;">${bus.duration}</div>
+                            </div>
+                            <div class="route-point">
+                                <h4>${bus.currentRoute.to}</h4>
+                                <div class="time">${bus.arrival}</div>
+                                <div style="font-size: 12px; color: var(--gray);">${bus.currentRoute.toStation}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="bus-details">
+                            <div class="detail-item">
+                                <i class="fas fa-clock"></i>
+                                <span>Duration: <strong>${bus.duration}</strong></span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-bus"></i>
+                                <span>Type: <strong>${bus.type.charAt(0).toUpperCase() + bus.type.slice(1)}</strong></span>
+                            </div>
+                            <div class="amenities">
+                                ${bus.amenities.slice(0, 3).map(amenity => 
+                                    `<span class="amenity-tag"><i class="fas fa-check"></i>${amenity}</span>`
+                                ).join('')}
+                                ${bus.amenities.length > 3 ? 
+                                    `<span class="amenity-tag">+${bus.amenities.length - 3} more</span>` : ''}
+                            </div>
+                        </div>
+                        
+                        <div class="booking-section">
+                            <div class="fare-amount">ETB ${bus.price}</div>
+                            <div class="fare-label">per person</div>
+                            <div class="seats-info">
+                                <i class="fas fa-chair"></i>
+                                ${bus.seats} seats available
+                            </div>
+                            <button class="book-btn" onclick="bookBus(${bus.id}, '${bus.currentRoute.from}', '${bus.currentRoute.to}')">>
+                                <i class="fas fa-ticket-alt"></i> Book Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            resultsContainer.innerHTML = busCardsHTML;
+        }
+
+        function showSearchForm() {
+            document.getElementById('searchForm').style.display = 'grid';
+            document.getElementById('searchSummary').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'none';
+        }
+
+        function bookBus(busId, fromCity, toCity) {
+            // Find the bus in the filtered results (not original data)
+            const filteredBuses = filterBuses({
+                from: fromCity,
+                to: toCity,
+                date: document.getElementById('travelDate').value,
+                passengers: document.getElementById('passengers').value
+            });
+            
+            const bus = filteredBuses.find(b => b.id === busId);
+            if (!bus) return;
+            
+            // Get search data
+            const date = document.getElementById('travelDate').value;
+            const passengers = document.getElementById('passengers').value;
+            
+            // Prepare booking data
+            const bookingData = {
+                busId: bus.id,
+                busCompany: bus.company,
+                from: fromCity,
+                to: toCity,
+                price: bus.price,
+                departure: bus.departure,
+                arrival: bus.arrival,
+                duration: bus.duration,
+                date: date,
+                passengers: passengers,
+                amenities: bus.amenities,
+                type: bus.type
+            };
+            
+            // Save booking data
+            localStorage.setItem('swiftbus_current_booking', JSON.stringify(bookingData));
+            
+            // Redirect to booking page
+            window.location.href = 'book-ticket.html?busId=' + busId;
+        }
+
+        // Add Enter key support for search
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && document.getElementById('searchForm').style.display !== 'none') {
+                performSearchFromForm();
+            }
+        });
+    </script>
+
+    <script src="js/api.js"></script>
+    <script>
+        // API Integration for this page
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Check user session (optional)
+            const user = await authManager.checkAuth();
+            updateUIForUser(user);
+
+            // Load cities for dropdowns
+            try {
+                const cities = await swiftBusAPI.getCities();
+                populateCityDropdowns(cities.data);
+            } catch (error) {
+                console.error('Failed to load cities:', error);
+            }
+
+        });
+
+        // Helper functions for this page
+        function updateUIForUser(user) {
+            if (user) {
+                // Update UI for logged-in user
+                const userElements = document.querySelectorAll('.user-name');
+                userElements.forEach(el => el.textContent = user.name);
+                
+                const loginBtns = document.querySelectorAll('.login-btn');
+                loginBtns.forEach(btn => btn.style.display = 'none');
+                
+                const userMenus = document.querySelectorAll('.user-menu');
+                userMenus.forEach(menu => menu.style.display = 'block');
+            }
+        }
+
+        // Placeholder functions - implement as needed
+        function displayPopularRoutes(routes) {
+            console.log('Popular routes:', routes);
+            // Implement route display logic
+        }
+
+        function populateCityDropdowns(cities) {
+            console.log('Cities:', cities);
+            // Implement city dropdown population
+        }
+
+        function displayUserBookings(bookings) {
+            console.log('User bookings:', bookings);
+            // Implement booking display logic
+        }
+
+        function displayBookingStats(stats) {
+            console.log('Booking stats:', stats);
+            // Implement stats display logic
+        }
+
+        function displayAdminStats(stats) {
+            console.log('Admin stats:', stats);
+            // Implement admin stats display logic
+        }
+
+        function displayAllBookings(bookings) {
+            console.log('All bookings:', bookings);
+            // Implement all bookings display logic
+        }
+
+        function displayBuses(buses) {
+            console.log('Buses:', buses);
+            // Implement buses display logic
+        }
+
+        function displaySchedules(schedules) {
+            console.log('Schedules:', schedules);
+            // Implement schedules display logic
+        }
+    </script>
+</body>
+</html>

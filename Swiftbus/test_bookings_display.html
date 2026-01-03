@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Bookings Display</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .test-section { background: white; padding: 20px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        button { background: #1a73e8; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0d47a1; }
+        pre { background: #f0f0f0; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px; }
+        .success { color: green; }
+        .error { color: red; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+        th { background: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Bookings Display</h1>
+    
+    <div class="test-section">
+        <h2>Step 1: Test API</h2>
+        <button onclick="testAPI()">Test Bookings API</button>
+        <div id="apiResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Step 2: Display Bookings</h2>
+        <button onclick="loadAndDisplay()">Load & Display Bookings</button>
+        <div id="bookingsContainer">
+            <p>Click the button to load bookings...</p>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Console Log</h2>
+        <div id="consoleLog" style="max-height: 300px; overflow-y: auto;"></div>
+    </div>
+    
+    <script src="js/api.js"></script>
+    <script>
+        let api;
+        
+        // Override console.log to show in page
+        const originalLog = console.log;
+        const originalError = console.error;
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            logToPage('log', args);
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            logToPage('error', args);
+        };
+        
+        function logToPage(type, args) {
+            const logDiv = document.getElementById('consoleLog');
+            const p = document.createElement('p');
+            p.className = type === 'error' ? 'error' : '';
+            p.textContent = args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ');
+            logDiv.appendChild(p);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('Page loaded, initializing API...');
+            
+            let attempts = 0;
+            while (typeof SwiftBusAPI === 'undefined' && attempts < 10) {
+                await new Promise(r => setTimeout(r, 100));
+                attempts++;
+            }
+            
+            if (typeof SwiftBusAPI !== 'undefined') {
+                api = new SwiftBusAPI();
+                console.log('✅ API initialized');
+                console.log('API URL:', api.apiURL);
+            } else {
+                console.error('❌ Failed to initialize API');
+            }
+        });
+        
+        async function testAPI() {
+            const resultDiv = document.getElementById('apiResult');
+            resultDiv.innerHTML = '<p>Loading...</p>';
+            
+            try {
+                console.log('Testing API...');
+                const response = await api.request('admin_bookings.php?action=get_bookings');
+                console.log('API Response:', response);
+                
+                if (response.success) {
+                    resultDiv.innerHTML = `
+                        <p class="success">✅ API Success! Found ${response.data.length} bookings</p>
+                        <pre>${JSON.stringify(response, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <p class="error">❌ API Error: ${response.message}</p>
+                        <pre>${JSON.stringify(response, null, 2)}</pre>
+                    `;
+                }
+            } catch (e) {
+                console.error('API Error:', e);
+                resultDiv.innerHTML = `<p class="error">❌ Exception: ${e.message}</p>`;
+            }
+        }
+        
+        async function loadAndDisplay() {
+            const container = document.getElementById('bookingsContainer');
+            container.innerHTML = '<p>Loading bookings...</p>';
+            
+            try {
+                console.log('Loading bookings...');
+                const response = await api.request('admin_bookings.php?action=get_bookings');
+                
+                if (!response.success || !response.data) {
+                    container.innerHTML = `<p class="error">Failed to load: ${response.message || 'Unknown error'}</p>`;
+                    return;
+                }
+                
+                const bookings = response.data;
+                console.log(`Got ${bookings.length} bookings, building table...`);
+                
+                if (bookings.length === 0) {
+                    container.innerHTML = '<p>No bookings found in database.</p>';
+                    return;
+                }
+                
+                // Build simple table
+                let html = `
+                    <p class="success">✅ Loaded ${bookings.length} bookings</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>User</th>
+                                <th>Route</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                bookings.forEach(booking => {
+                    html += `
+                        <tr>
+                            <td>${booking.booking_id || booking.id}</td>
+                            <td>${booking.user_name || 'Unknown'}</td>
+                            <td>${booking.route_origin || booking.from_city} → ${booking.route_destination || booking.to_city}</td>
+                            <td>${booking.travel_date}</td>
+                            <td>${booking.booking_status}</td>
+                            <td>${booking.total_amount} ETB</td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</tbody></table>';
+                container.innerHTML = html;
+                console.log('✅ Table displayed successfully');
+                
+            } catch (e) {
+                console.error('Error:', e);
+                container.innerHTML = `<p class="error">❌ Error: ${e.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug My Tickets Authentication</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Debug My Tickets Authentication</h1>
+    
+    <div class="debug-section info">
+        <h3>Test Steps</h3>
+        <ol>
+            <li>Make sure you're logged in on another page first</li>
+            <li>Click "Test Authentication" below</li>
+            <li>Check the results and console logs</li>
+        </ol>
+    </div>
+
+    <div class="debug-section">
+        <h3>Authentication Test</h3>
+        <button onclick="testAuth()">Test Authentication</button>
+        <button onclick="testDirectAPI()">Test Direct API Call</button>
+        <button onclick="clearResults()">Clear Results</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script src="js/api.js"></script>
+    <script>
+        function addResult(title, content, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `debug-section ${type}`;
+            div.innerHTML = `<h3>${title}</h3><pre>${JSON.stringify(content, null, 2)}</pre>`;
+            results.appendChild(div);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function testAuth() {
+            console.log('=== Starting Authentication Test ===');
+            
+            try {
+                addResult('Test Started', 'Testing swiftBusAPI.checkSession()...', 'info');
+                
+                const response = await swiftBusAPI.checkSession();
+                console.log('Auth response:', response);
+                
+                if (response.success && response.data) {
+                    addResult('✅ Authentication Success', {
+                        success: response.success,
+                        message: response.message,
+                        userData: response.data
+                    }, 'success');
+                    
+                    console.log('User is authenticated:', response.data);
+                } else {
+                    addResult('❌ Authentication Failed', {
+                        success: response.success,
+                        message: response.message,
+                        data: response.data,
+                        fullResponse: response
+                    }, 'error');
+                    
+                    console.log('Authentication failed:', response);
+                }
+            } catch (error) {
+                addResult('💥 Authentication Error', {
+                    error: error.message,
+                    stack: error.stack
+                }, 'error');
+                
+                console.error('Authentication error:', error);
+            }
+        }
+
+        async function testDirectAPI() {
+            console.log('=== Testing Direct API Call ===');
+            
+            try {
+                addResult('Direct API Test Started', 'Making direct fetch to auth.php...', 'info');
+                
+                const response = await fetch('api/auth.php?action=check_session');
+                const data = await response.json();
+                
+                console.log('Direct API response:', data);
+                
+                if (data.success) {
+                    addResult('✅ Direct API Success', data, 'success');
+                } else {
+                    addResult('❌ Direct API Failed', data, 'error');
+                }
+            } catch (error) {
+                addResult('💥 Direct API Error', {
+                    error: error.message,
+                    stack: error.stack
+                }, 'error');
+                
+                console.error('Direct API error:', error);
+            }
+        }
+
+        // Auto-run test on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Debug page loaded');
+            addResult('Page Loaded', 'Debug page ready. Click buttons above to test.', 'info');
+        });
+    </script>
+</body>
+</html>

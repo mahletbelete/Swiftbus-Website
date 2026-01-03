@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Tickets Fix</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .ticket { background: #f9f9f9; padding: 10px; margin: 5px 0; border-radius: 3px; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        .status-confirmed { color: green; font-weight: bold; }
+        .status-cancelled { color: red; font-weight: bold; }
+        .status-completed { color: blue; font-weight: bold; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Test Multiple Tickets & Cancel Functionality</h1>
+    
+    <div class="section">
+        <h2>Step 1: Create Multiple Tickets</h2>
+        <button onclick="createMultipleTickets()">Create 3 Test Tickets</button>
+        <button onclick="clearAllData()">Clear All Data</button>
+        <div id="createResult"></div>
+    </div>
+    
+    <div class="section">
+        <h2>Step 2: Verify Multiple Tickets Display</h2>
+        <button onclick="loadAndDisplayTickets()">Load Tickets (like my-tickets.html)</button>
+        <div id="ticketsDisplay"></div>
+    </div>
+    
+    <div class="section">
+        <h2>Step 3: Test Cancel Functionality</h2>
+        <div id="cancelTest"></div>
+    </div>
+    
+    <div class="section">
+        <h2>Step 4: Verify Cancelled Tickets Show in Cancelled Section</h2>
+        <button onclick="showFilteredTickets()">Show Filtered Results</button>
+        <div id="filteredResults"></div>
+    </div>
+
+    <script>
+        let allTickets = [];
+
+        function createMultipleTickets() {
+            const tickets = [
+                {
+                    id: 'BK000001',
+                    bookingId: 'BK000001',
+                    fromCity: 'Addis Ababa',
+                    toCity: 'Kombolcha',
+                    departureDate: '2025-01-15',
+                    departureTime: '08:00',
+                    busCompany: 'Selam Bus',
+                    busType: 'Standard',
+                    seats: ['A1'],
+                    totalAmount: 450,
+                    paymentMethod: 'Card',
+                    bookingDate: new Date().toISOString(),
+                    status: 'confirmed',
+                    paymentStatus: 'paid',
+                    passengerName: 'John Doe',
+                    passengerEmail: 'john@example.com',
+                    passengerPhone: '+251911234567'
+                },
+                {
+                    id: 'BK000002',
+                    bookingId: 'BK000002',
+                    fromCity: 'Bahirdar',
+                    toCity: 'Gonder',
+                    departureDate: '2025-01-20',
+                    departureTime: '14:30',
+                    busCompany: 'Abay Bus',
+                    busType: 'VIP',
+                    seats: ['B2'],
+                    totalAmount: 680,
+                    paymentMethod: 'Telebirr',
+                    bookingDate: new Date().toISOString(),
+                    status: 'confirmed',
+                    paymentStatus: 'paid',
+                    passengerName: 'Jane Smith',
+                    passengerEmail: 'jane@example.com',
+                    passengerPhone: '+251922345678'
+                },
+                {
+                    id: 'BK000003',
+                    bookingId: 'BK000003',
+                    fromCity: 'Hawasa',
+                    toCity: 'Arbaminch',
+                    departureDate: '2025-01-25',
+                    departureTime: '09:15',
+                    busCompany: 'Ethio Bus',
+                    busType: 'Premium',
+                    seats: ['C3'],
+                    totalAmount: 520,
+                    paymentMethod: 'CBE',
+                    bookingDate: new Date().toISOString(),
+                    status: 'confirmed',
+                    paymentStatus: 'paid',
+                    passengerName: 'Bob Johnson',
+                    passengerEmail: 'bob@example.com',
+                    passengerPhone: '+251933456789'
+                }
+            ];
+
+            // Save each ticket using the same logic as payment.html
+            tickets.forEach((ticketData, index) => {
+                saveTicketToLocalStorage(ticketData);
+            });
+
+            document.getElementById('createResult').innerHTML = `
+                <div class="success">✅ Created ${tickets.length} test tickets successfully!</div>
+                <p>Tickets created: ${tickets.map(t => t.bookingId).join(', ')}</p>
+            `;
+        }
+
+        function saveTicketToLocalStorage(ticketData) {
+            try {
+                const bookingId = ticketData.bookingId || ticketData.booking_id;
+                console.log(`💾 Saving ticket to localStorage: ${bookingId}`);
+                
+                // Save individual ticket
+                const bookingKey = `swiftbus_booking_${bookingId}`;
+                localStorage.setItem(bookingKey, JSON.stringify(ticketData));
+                
+                // Maintain tickets array
+                let tickets = [];
+                const existingTickets = localStorage.getItem('swiftbus_tickets');
+                if (existingTickets) {
+                    try {
+                        tickets = JSON.parse(existingTickets);
+                        if (!Array.isArray(tickets)) {
+                            tickets = [];
+                        }
+                    } catch (e) {
+                        tickets = [];
+                    }
+                }
+                
+                // Check if ticket already exists
+                const existingIndex = tickets.findIndex(t => {
+                    const tId = t.bookingId || t.booking_id || t.id;
+                    return tId === bookingId;
+                });
+                
+                if (existingIndex >= 0) {
+                    tickets[existingIndex] = ticketData;
+                } else {
+                    tickets.push(ticketData);
+                }
+                
+                // Save updated array
+                localStorage.setItem('swiftbus_tickets', JSON.stringify(tickets));
+                
+                // Set as latest confirmation
+                localStorage.setItem('swiftbus_confirmation', JSON.stringify(ticketData));
+                
+                console.log(`✅ Saved ticket ${bookingId} (Total: ${tickets.length})`);
+                
+            } catch (error) {
+                console.error('Error saving ticket:', error);
+            }
+        }
+
+        function loadAndDisplayTickets() {
+            // Use the same logic as my-tickets.html
+            const tickets = [];
+            const processedBookingIds = new Set();
+            
+            try {
+                // Load from tickets array first
+                const storedTickets = localStorage.getItem('swiftbus_tickets');
+                if (storedTickets) {
+                    try {
+                        const parsedTickets = JSON.parse(storedTickets);
+                        if (Array.isArray(parsedTickets)) {
+                            parsedTickets.forEach((ticketData, index) => {
+                                if (ticketData && ticketData.bookingId && !processedBookingIds.has(ticketData.bookingId)) {
+                                    tickets.push(ticketData);
+                                    processedBookingIds.add(ticketData.bookingId);
+                                }
+                            });
+                        }
+                    } catch (e) {
+                        console.warn('Failed to parse stored tickets:', e);
+                    }
+                }
+                
+                // Load individual bookings
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('swiftbus_booking_')) {
+                        try {
+                            const bookingData = JSON.parse(localStorage.getItem(key));
+                            if (bookingData && bookingData.bookingId && !processedBookingIds.has(bookingData.bookingId)) {
+                                tickets.push(bookingData);
+                                processedBookingIds.add(bookingData.bookingId);
+                            }
+                        } catch (e) {
+                            console.warn('Failed to parse booking:', key, e);
+                        }
+                    }
+                }
+                
+                // Load confirmation
+                const confirmationData = localStorage.getItem('swiftbus_confirmation');
+                if (confirmationData) {
+                    try {
+                        const confirmation = JSON.parse(confirmationData);
+                        if (confirmation && confirmation.bookingId && !processedBookingIds.has(confirmation.bookingId)) {
+                            tickets.push(confirmation);
+                            processedBookingIds.add(confirmation.bookingId);
+                        }
+                    } catch (e) {
+                        console.warn('Failed to parse confirmation:', e);
+                    }
+                }
+                
+                allTickets = tickets;
+                
+                let html = `<h3>Loaded Tickets: ${tickets.length}</h3>`;
+                if (tickets.length === 0) {
+                    html += '<div class="error">❌ No tickets found!</div>';
+                } else {
+                    html += '<div class="success">✅ Multiple tickets loaded successfully!</div>';
+                    tickets.forEach((ticket, index) => {
+                        html += `
+                            <div class="ticket">
+                                ${index + 1}. <strong>${ticket.bookingId}</strong> - 
+                                ${ticket.fromCity} → ${ticket.toCity} - 
+                                Status: <span class="status-${ticket.status}">${ticket.status}</span>
+                                <button onclick="cancelTicket('${ticket.bookingId}')">Cancel This Ticket</button>
+                            </div>
+                        `;
+                    });
+                }
+                
+                document.getElementById('ticketsDisplay').innerHTML = html;
+                
+                // Show cancel test buttons
+                if (tickets.length > 0) {
+                    document.getElementById('cancelTest').innerHTML = `
+                        <p>Click "Cancel This Ticket" buttons above to test cancellation functionality.</p>
+                        <p><strong>Expected:</strong> Cancelled tickets should appear in the "cancelled" filter section.</p>
+                    `;
+                }
+                
+            } catch (error) {
+                document.getElementById('ticketsDisplay').innerHTML = `<div class="error">❌ Error loading tickets: ${error.message}</div>`;
+            }
+        }
+
+        function cancelTicket(bookingId) {
+            try {
+                console.log(`🚫 Cancelling ticket: ${bookingId}`);
+                
+                // Update individual ticket
+                const bookingKey = `swiftbus_booking_${bookingId}`;
+                const ticketData = localStorage.getItem(bookingKey);
+                if (ticketData) {
+                    const ticket = JSON.parse(ticketData);
+                    ticket.status = 'cancelled';
+                    localStorage.setItem(bookingKey, JSON.stringify(ticket));
+                }
+                
+                // Update in tickets array
+                const existingTickets = localStorage.getItem('swiftbus_tickets');
+                if (existingTickets) {
+                    try {
+                        const tickets = JSON.parse(existingTickets);
+                        if (Array.isArray(tickets)) {
+                            for (let i = 0; i < tickets.length; i++) {
+                                const ticket = tickets[i];
+                                const tId = ticket.bookingId || ticket.booking_id || ticket.id;
+                                if (tId === bookingId) {
+                                    tickets[i].status = 'cancelled';
+                                    localStorage.setItem('swiftbus_tickets', JSON.stringify(tickets));
+                                    console.log(`✅ Updated ticket ${bookingId} to cancelled in array`);
+                                    break;
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('Failed to update array:', e);
+                    }
+                }
+                
+                // Update in allTickets array
+                const ticketIndex = allTickets.findIndex(t => t.bookingId === bookingId);
+                if (ticketIndex >= 0) {
+                    allTickets[ticketIndex].status = 'cancelled';
+                }
+                
+                // Refresh display
+                loadAndDisplayTickets();
+                showFilteredTickets();
+                
+                alert(`✅ Ticket ${bookingId} cancelled successfully!`);
+                
+            } catch (error) {
+                alert(`❌ Error cancelling ticket: ${error.message}`);
+            }
+        }
+
+        function showFilteredTickets() {
+            if (allTickets.length === 0) {
+                document.getElementById('filteredResults').innerHTML = '<div class="error">❌ No tickets loaded. Please load tickets first.</div>';
+                return;
+            }
+            
+            const filters = ['all', 'upcoming', 'completed', 'cancelled'];
+            let html = '<h3>Filter Results:</h3>';
+            
+            filters.forEach(filter => {
+                const filtered = filterTickets(allTickets, filter);
+                html += `
+                    <div style="margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+                        <h4>${filter.toUpperCase()} (${filtered.length} tickets):</h4>
+                `;
+                
+                if (filtered.length === 0) {
+                    html += '<p style="color: #666;">No tickets in this category</p>';
+                } else {
+                    filtered.forEach(ticket => {
+                        html += `
+                            <div class="ticket">
+                                ${ticket.bookingId} - ${ticket.fromCity} → ${ticket.toCity} - 
+                                <span class="status-${ticket.status}">${ticket.status}</span>
+                            </div>
+                        `;
+                    });
+                }
+                
+                html += '</div>';
+            });
+            
+            document.getElementById('filteredResults').innerHTML = html;
+        }
+
+        function filterTickets(tickets, filter) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            return tickets.filter(ticket => {
+                const ticketDate = new Date(ticket.departureDate);
+                ticketDate.setHours(0, 0, 0, 0);
+                
+                switch (filter) {
+                    case 'upcoming':
+                        return ticketDate >= today && ticket.status !== 'cancelled';
+                    case 'completed':
+                        return ticket.status === 'completed' || (ticketDate < today && ticket.status !== 'cancelled');
+                    case 'cancelled':
+                        return ticket.status === 'cancelled';
+                    default:
+                        return true;
+                }
+            });
+        }
+
+        function clearAllData() {
+            const keys = Object.keys(localStorage);
+            keys.forEach(key => {
+                if (key.startsWith('swiftbus_')) {
+                    localStorage.removeItem(key);
+                }
+            });
+            
+            allTickets = [];
+            document.getElementById('createResult').innerHTML = '<div class="success">🗑️ All data cleared</div>';
+            document.getElementById('ticketsDisplay').innerHTML = '';
+            document.getElementById('cancelTest').innerHTML = '';
+            document.getElementById('filteredResults').innerHTML = '';
+        }
+
+        // Initialize
+        loadAndDisplayTickets();
+    </script>
+</body>
+</html>

@@ -1,0 +1,3026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Tickets - SwiftBus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- QR Code Library with fallback -->
+    <script>
+        // Load QR Code library with multiple fallbacks
+        (function() {
+            var qrLoaded = false;
+            
+            // Primary CDN
+            var script1 = document.createElement('script');
+            script1.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
+            script1.onload = function() {
+                qrLoaded = true;
+            };
+            script1.onerror = function() {
+                if (!qrLoaded) {
+                    // Fallback CDN
+                    var script2 = document.createElement('script');
+                    script2.src = 'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js';
+                    script2.onload = function() {
+                        qrLoaded = true;
+                    };
+                    script2.onerror = function() {
+                    };
+                    document.head.appendChild(script2);
+                }
+            };
+            document.head.appendChild(script1);
+        })();
+    </script>
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --secondary: #ff6d00;
+            --dark: #222;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background-color: white;
+            box-shadow: var(--shadow);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo h1 {
+            color: var(--primary);
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .logo span {
+            color: var(--secondary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-links a.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .user-profile-btn {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-profile-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .user-avatar-small {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(26, 115, 232, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .user-avatar-small img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            min-width: 250px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+            border-radius: 12px;
+            z-index: 1001;
+            margin-top: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .dropdown-menu.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-info-header {
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary), #0d47a1);
+            color: white;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info-header .user-avatar-small {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            font-size: 24px;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .user-role {
+            font-size: 13px;
+            opacity: 0.9;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .dropdown-links {
+            padding: 10px 0;
+        }
+
+        .dropdown-links a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: var(--dark);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .dropdown-links a:hover {
+            background: var(--light);
+            border-left-color: var(--primary);
+            padding-left: 25px;
+        }
+
+        .dropdown-links a i {
+            width: 20px;
+            text-align: center;
+            color: var(--primary);
+        }
+
+        .dropdown-links a.logout {
+            color: var(--danger);
+            border-top: 1px solid #eee;
+            margin-top: 10px;
+        }
+
+        .dropdown-links a.logout i {
+            color: var(--danger);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding-top: 100px;
+            padding-bottom: 80px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            color: var(--gray);
+            font-size: 1.1rem;
+        }
+
+        /* Tickets Filter */
+        .tickets-filter {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: var(--shadow);
+        }
+
+        .filter-btn {
+            padding: 8px 20px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .filter-btn:hover:not(.active) {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .search-box {
+            flex: 1;
+            position: relative;
+            min-width: 250px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 45px 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            font-size: 14px;
+        }
+
+        .search-box i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+
+        /* No Tickets State */
+        .no-tickets {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        .no-tickets i {
+            font-size: 80px;
+            color: #e9ecef;
+            margin-bottom: 20px;
+        }
+
+        .no-tickets h3 {
+            color: var(--gray);
+            margin-bottom: 15px;
+        }
+
+        .no-tickets p {
+            color: var(--gray);
+            margin-bottom: 30px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Tickets Grid */
+        .tickets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 25px;
+        }
+
+        @media (max-width: 1200px) {
+            .tickets-grid {
+                grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .tickets-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .tickets-grid {
+                gap: 10px;
+            }
+        }
+
+        /* Ticket Card */
+        .ticket-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            min-height: 420px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ticket-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .ticket-header {
+            background: linear-gradient(135deg, var(--primary), #4285f4);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            min-height: 80px;
+        }
+
+        .ticket-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            line-height: 1.2;
+            color: white !important;
+        }
+
+        .ticket-header p {
+            margin: 5px 0 0 0;
+            opacity: 0.95;
+            font-size: 14px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
+
+        .ticket-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-confirmed {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .status-pending {
+            background: rgba(255, 193, 7, 0.3);
+        }
+
+        .status-cancelled {
+            background: rgba(220, 53, 69, 0.3);
+        }
+
+        .status-completed {
+            background: rgba(40, 167, 69, 0.3);
+        }
+
+        .ticket-body {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .route-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .route-city {
+            text-align: center;
+        }
+
+        .route-city h3 {
+            font-size: 18px;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .route-city p {
+            color: var(--gray);
+            font-size: 12px;
+        }
+
+        .route-arrow {
+            color: var(--primary);
+            font-size: 24px;
+        }
+
+        .ticket-details {
+            margin-bottom: 20px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #eee;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .detail-label {
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .detail-value {
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .qr-code {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .qr-code canvas {
+            border-radius: 8px;
+        }
+
+        .qr-code p {
+            margin-top: 10px;
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        .ticket-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .ticket-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 8px 15px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            justify-content: center;
+            min-width: 80px;
+        }
+
+        .action-btn .btn-text {
+            display: inline;
+        }
+
+        @media (max-width: 480px) {
+            .action-btn {
+                padding: 10px 12px;
+                font-size: 13px;
+                min-width: 70px;
+            }
+            
+            .action-btn .btn-text {
+                display: none;
+            }
+        }
+
+        .btn-download {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-download:hover {
+            background: #0d47a1;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .btn-cancel:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: var(--dark);
+            border: 1px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: modalAppear 0.3s ease;
+        }
+
+        .modal-content.compact {
+            max-width: 500px;
+            max-height: 80vh;
+        }
+
+        .modal-content.qr-modal {
+            max-width: 400px;
+            text-align: center;
+        }
+
+        @keyframes modalAppear {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .modal {
+                padding: 15px;
+            }
+            
+            .modal-content {
+                padding: 20px;
+                max-height: 90vh;
+                border-radius: 12px;
+            }
+            
+            .modal-content.compact {
+                max-width: 100%;
+                max-height: 85vh;
+            }
+            
+            .modal-content.qr-modal {
+                max-width: 100%;
+                padding: 25px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .modal {
+                padding: 10px;
+            }
+            
+            .modal-content {
+                padding: 15px;
+                max-height: 95vh;
+                border-radius: 10px;
+            }
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .modal-body {
+            margin-bottom: 30px;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 60px 0 20px;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-column h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--secondary);
+            border-radius: 2px;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: #bbb;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: white;
+            padding-left: 5px;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #bbb;
+            font-size: 14px;
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading i {
+            font-size: 40px;
+            color: var(--primary);
+            margin-bottom: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Login Prompt */
+        .login-prompt {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        .login-prompt i {
+            font-size: 60px;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .login-prompt h3 {
+            color: var(--dark);
+            margin-bottom: 15px;
+        }
+
+        .login-prompt p {
+            color: var(--gray);
+            margin-bottom: 30px;
+        }
+
+        .login-prompt .action-btn {
+            display: inline-flex;
+            text-decoration: none;
+            padding: 12px 30px;
+            font-size: 16px;
+        }
+
+        /* Help Modal Styles */
+        .help-topic {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 15px;
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .help-topic:hover {
+            background: #f8f9fa;
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .help-topic i:first-child {
+            color: var(--primary);
+            width: 20px;
+            text-align: center;
+        }
+
+        .help-topic span {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .help-topic i:last-child {
+            color: var(--gray);
+            font-size: 12px;
+        }
+
+        .help-contact-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--dark);
+            transition: all 0.3s ease;
+        }
+
+        .help-contact-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .help-contact-btn i {
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+        .help-contact-btn strong {
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .help-contact-btn small {
+            color: var(--gray);
+            font-size: 12px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .nav-links {
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .tickets-filter {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box {
+                min-width: 100%;
+            }
+            
+            .modal-content {
+                padding: 25px;
+            }
+            
+            .ticket-card {
+                min-height: 380px;
+            }
+            
+            .ticket-header {
+                padding: 15px;
+                min-height: 70px;
+            }
+            
+            .ticket-header h3 {
+                font-size: 16px;
+            }
+            
+            .ticket-header p {
+                font-size: 13px;
+            }
+            
+            .ticket-body {
+                padding: 15px;
+            }
+            
+            .route-info {
+                margin-bottom: 20px;
+            }
+            
+            .route-city h3 {
+                font-size: 16px;
+            }
+            
+            .route-city p {
+                font-size: 11px;
+            }
+            
+            .detail-row {
+                margin-bottom: 8px;
+                padding-bottom: 8px;
+            }
+            
+            .detail-label {
+                font-size: 13px;
+            }
+            
+            .detail-value {
+                font-size: 13px;
+            }
+            
+            .ticket-actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .action-btn {
+                padding: 10px 15px;
+                font-size: 13px;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 15px;
+            }
+            
+            .page-header h1 {
+                font-size: 2rem;
+            }
+            
+            .ticket-card {
+                min-height: 360px;
+            }
+            
+            .ticket-header {
+                padding: 12px;
+                min-height: 65px;
+            }
+            
+            .ticket-header h3 {
+                font-size: 15px;
+            }
+            
+            .ticket-body {
+                padding: 12px;
+            }
+            
+            .route-info {
+                margin-bottom: 15px;
+            }
+            
+            .route-city h3 {
+                font-size: 15px;
+            }
+            
+            .qr-code canvas {
+                width: 100px !important;
+                height: 100px !important;
+            }
+            
+            .ticket-footer {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+            
+            .ticket-actions {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>Swift<span>Bus</span></h1>
+                </div>
+                
+                <div class="nav-links">
+                    <a href="#" id="helpBtn">Help</a>
+                    
+                    <div style="position: relative;">
+                        <button class="user-profile-btn" id="profileDropdown">
+                            <div class="user-avatar-small" id="ticketsUserAvatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span id="userName">Guest User</span>
+                            <i class="fas fa-caret-down" style="margin-left: 5px;"></i>
+                        </button>
+                        <div class="dropdown-menu" id="userDropdownMenu">
+                            <div class="user-info-header">
+                                <div class="user-avatar-small" id="ticketsHeaderAvatar">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="user-details">
+                                    <div class="user-name">
+                                        <span id="dropdownUserName">Guest User</span>
+                                    </div>
+                                    <div class="user-role user">
+                                        <i class="fas fa-user"></i>
+                                        Regular User
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dropdown-links">
+                                <a href="index.html">
+                                    <i class="fas fa-home"></i>
+                                    <span>Home</span>
+                                </a>
+                                <a href="search.html">
+                                    <i class="fas fa-search"></i>
+                                    <span>Book Ticket</span>
+                                </a>
+                                <a href="#" id="profileLink">
+                                    <i class="fas fa-user-circle"></i>
+                                    <span>My Profile</span>
+                                </a>
+                                <a href="user-dashboard.html">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <span>Dashboard</span>
+                                </a>
+                                <a href="my-tickets.html">
+                                    <i class="fas fa-ticket-alt"></i>
+                                    <span>My Tickets</span>
+                                </a>
+                                <a href="#" class="logout" id="logoutBtn">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Logout</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1>My Tickets</h1>
+                <p>View and manage your bus tickets</p>
+            </div>
+
+            <!-- Login Prompt (shown when not logged in) -->
+            <div class="login-prompt" id="loginPrompt" style="display: none;">
+                <i class="fas fa-user-lock"></i>
+                <h3>Please Login to View Your Tickets</h3>
+                <p>You need to be logged in to view and manage your booked tickets.</p>
+                <a href="login.html" class="action-btn btn-download">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Login Now
+                </a>
+            </div>
+
+            <!-- Tickets Content (shown when logged in) -->
+            <div id="ticketsContent" style="display: none;">
+                <!-- Tickets Filter -->
+                <div class="tickets-filter">
+                    <div class="filter-btn active" data-filter="all">All Tickets</div>
+                    <div class="filter-btn" data-filter="upcoming">Upcoming</div>
+                    <div class="filter-btn" data-filter="completed">Completed</div>
+                    <div class="filter-btn" data-filter="cancelled">Cancelled</div>
+                    
+                    <div class="search-box">
+                        <input type="text" id="searchTickets" placeholder="Search by booking ID, route, or date...">
+                        <i class="fas fa-search"></i>
+                        <button type="button" id="clearSearchBtn" style="position: absolute; right: 35px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--gray); cursor: pointer; display: none;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div class="loading" id="loadingState">
+                    <i class="fas fa-spinner"></i>
+                    <p>Loading your tickets...</p>
+                </div>
+
+                <!-- No Tickets State -->
+                <div class="no-tickets" id="noTicketsState" style="display: none;">
+                    <i class="fas fa-ticket-alt"></i>
+                    <h3>No Tickets Found</h3>
+                    <p>You haven't booked any tickets yet. Book your first bus ticket and it will appear here.</p>
+                    <a href="book-ticket.html" class="action-btn btn-download" style="display: inline-flex; text-decoration: none;">
+                        <i class="fas fa-bus"></i>
+                        Book a Ticket
+                    </a>
+                </div>
+
+                <!-- Tickets Grid -->
+                <div class="tickets-grid" id="ticketsGrid">
+                    <!-- Tickets will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Cancel Ticket Modal -->
+    <div class="modal" id="cancelModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle" style="color: var(--warning);"></i> Cancel Ticket</h3>
+                <p>Are you sure you want to cancel this ticket?</p>
+            </div>
+            <div class="modal-body">
+                <div id="cancelTicketDetails">
+                    <!-- Ticket details will be populated here -->
+                </div>
+                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 15px; border-left: 4px solid var(--warning);">
+                    <p style="color: #856404; margin: 0; font-size: 14px;">
+                        <i class="fas fa-info-circle"></i> <strong>Cancellation Policy:</strong> 
+                        Cancellations made more than 24 hours before departure receive a 75% refund. 
+                        Cancellations within 24 hours are non-refundable.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn btn-secondary" id="closeCancelModal">
+                    Keep Ticket
+                </button>
+                <button class="action-btn btn-cancel" id="confirmCancel">
+                    <i class="fas fa-times"></i>
+                    Cancel Ticket
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div class="modal" id="qrCodeModal">
+        <div class="modal-content qr-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-qrcode" style="color: var(--primary);"></i> QR Code</h3>
+                <button onclick="document.getElementById('qrCodeModal').classList.remove('active')" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--gray);">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="qrCodeContent" style="text-align: center;">
+                    <!-- QR Code will be populated here -->
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 20px; text-align: left;">
+                    <h4 style="color: var(--primary); margin-bottom: 10px; font-size: 16px;">
+                        <i class="fas fa-info-circle"></i> Boarding Instructions
+                    </h4>
+                    <ul style="margin: 0; padding-left: 20px; color: var(--dark); font-size: 14px; line-height: 1.6;">
+                        <li>Show this QR code to the bus staff when boarding</li>
+                        <li>Keep your screen brightness high for easy scanning</li>
+                        <li>Arrive at least 30 minutes before departure</li>
+                        <li>Have a valid ID ready for verification</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn btn-secondary" onclick="document.getElementById('qrCodeModal').classList.remove('active')">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ticket Details Modal -->
+    <div class="modal" id="ticketModal">
+        <div class="modal-content compact">
+            <div class="modal-header">
+                <h3><i class="fas fa-ticket-alt" style="color: var(--primary);"></i> Ticket Details</h3>
+                <button onclick="document.getElementById('ticketModal').classList.remove('active')" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--gray);">
+                    <i class="fas fa-times"></i>
+                </button>
+                <p style="margin: 5px 0 0 0; color: var(--gray);">Booking ID: <span id="modalBookingId" style="font-family: monospace; font-weight: bold;"></span></p>
+            </div>
+            <div class="modal-body">
+                <div id="modalTicketContent">
+                    <!-- Ticket details will be populated here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn btn-download" id="downloadTicketModal">
+                    <i class="fas fa-download"></i>
+                    Download Ticket
+                </button>
+                <button class="action-btn btn-secondary" id="closeTicketModal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="modal" id="helpModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-question-circle" style="color: var(--primary);"></i> Help & Support</h3>
+                <p>Get help with managing your tickets and bookings</p>
+            </div>
+            <div class="modal-body">
+                <div style="display: grid; gap: 20px;">
+                    <!-- Quick Help Topics -->
+                    <div>
+                        <h4 style="color: var(--primary); margin-bottom: 15px;">
+                            <i class="fas fa-lightbulb"></i> Quick Help Topics
+                        </h4>
+                        <div style="display: grid; gap: 10px;">
+                            <div class="help-topic" onclick="showHelpTopic('search')">
+                                <i class="fas fa-search"></i>
+                                <span>How to search and filter tickets</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                            <div class="help-topic" onclick="showHelpTopic('cancel')">
+                                <i class="fas fa-times-circle"></i>
+                                <span>How to cancel or modify tickets</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                            <div class="help-topic" onclick="showHelpTopic('download')">
+                                <i class="fas fa-download"></i>
+                                <span>How to download and print tickets</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                            <div class="help-topic" onclick="showHelpTopic('qr')">
+                                <i class="fas fa-qrcode"></i>
+                                <span>Understanding QR codes</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Support -->
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; border-left: 4px solid var(--primary);">
+                        <h4 style="color: var(--primary); margin-bottom: 15px;">
+                            <i class="fas fa-headset"></i> Need More Help?
+                        </h4>
+                        <p style="margin-bottom: 15px; color: var(--gray);">
+                            Our support team is available 24/7 to assist you with any questions or issues.
+                        </p>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                            <a href="tel:+251911234567" class="help-contact-btn">
+                                <i class="fas fa-phone"></i>
+                                <div>
+                                    <strong>Call Support</strong>
+                                    <small>+251 911 234 567</small>
+                                </div>
+                            </a>
+                            <a href="mailto:support@swiftbus.et" class="help-contact-btn">
+                                <i class="fas fa-envelope"></i>
+                                <div>
+                                    <strong>Email Support</strong>
+                                    <small>support@swiftbus.et</small>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Link -->
+                    <div style="text-align: center;">
+                        <a href="faq.html" class="action-btn btn-outline" style="display: inline-flex; text-decoration: none;">
+                            <i class="fas fa-question-circle"></i>
+                            View Full FAQ
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn btn-secondary" id="closeHelpModal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Topic Detail Modal -->
+    <div class="modal" id="helpTopicModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="helpTopicTitle">Help Topic</h3>
+            </div>
+            <div class="modal-body">
+                <div id="helpTopicContent">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="action-btn btn-secondary" id="closeHelpTopicModal">
+                    Back to Help
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>SwiftBus</h3>
+                    <p>Your trusted partner for bus travel across Ethiopia. We connect you to your destination safely and comfortably.</p>
+                    <div class="social-links">
+                        <a href="https://facebook.com" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://twitter.com" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="https://instagram.com" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.linkedin.com/" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="routes.html">Routes</a></li>
+                        <li><a href="book-ticket.html">Book Ticket</a></li>
+                        <li><a href="my-tickets.html">My Tickets</a></li>
+                        <li><a href="user-dashboard.html">User Dashboard</a></li>
+                        <li><a href="search.html">Search Buses</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Support</h3>
+                    <ul class="footer-links">
+                        <li><a href="contact-us.html">Contact Us</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                        <li><a href="terms-conditions.html">Terms & Conditions</a></li>
+                        <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Contact Info</h3>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt"></i> Kombolcha, Ethiopia</li>
+                        <li><i class="fas fa-phone"></i> +251 945710924</li>
+                        <li><i class="fas fa-envelope"></i> info@swiftbus.et</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 SwiftBus. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script>
+        // User Authentication State
+        let currentUser = null;
+        let isLoggedIn = false;
+
+        // Ticket Data Management
+        let allTickets = [];
+        let currentFilter = 'all';
+        let ticketToCancel = null;
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkUserLogin();
+            setupEventListeners();
+        });
+
+        // Check if user is logged in using the same system as other pages
+        async function checkUserLogin() {
+            try {
+                const response = await swiftBusAPI.checkSession();
+                
+                if (response.success && response.data) {
+                    currentUser = response.data;
+                    isLoggedIn = true;
+                    updateUserDisplay();
+                    showTicketsContent();
+                    loadTickets();
+                } else {
+                    isLoggedIn = false;
+                    currentUser = null;
+                    showLoginPrompt();
+                }
+            } catch (error) {
+                isLoggedIn = false;
+                currentUser = null;
+                showLoginPrompt();
+            }
+        }
+
+        // Update user display in header
+        function updateUserDisplay() {
+            const userNameElement = document.getElementById('userName');
+            const dropdownUserNameElement = document.getElementById('dropdownUserName');
+            const ticketsUserAvatar = document.getElementById('ticketsUserAvatar');
+            const ticketsHeaderAvatar = document.getElementById('ticketsHeaderAvatar');
+            
+            if (currentUser && (currentUser.name || currentUser.full_name)) {
+                const userName = currentUser.name || currentUser.full_name;
+                userNameElement.textContent = userName.split(' ')[0];
+                dropdownUserNameElement.textContent = userName;
+                
+                // Update profile images
+                updateTicketsProfileImage(currentUser.profileImage, ticketsUserAvatar);
+                updateTicketsProfileImage(currentUser.profileImage, ticketsHeaderAvatar);
+            }
+        }
+
+        function updateTicketsProfileImage(profileImagePath, avatarElement) {
+            if (!avatarElement) return;
+            
+            if (profileImagePath && profileImagePath !== 'Not provided') {
+                // Show uploaded image
+                avatarElement.innerHTML = `<img src="${profileImagePath}" alt="Profile picture" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-user\\'></i>'">`;
+            } else {
+                // Show default icon
+                avatarElement.innerHTML = '<i class="fas fa-user"></i>';
+            }
+        }
+
+        function getUserInitials(userName) {
+            const names = userName.split(' ');
+            return names.map(n => n.charAt(0).toUpperCase()).join('').substring(0, 2);
+        }
+
+        // Show login prompt
+        function showLoginPrompt() {
+            document.getElementById('loginPrompt').style.display = 'block';
+            document.getElementById('ticketsContent').style.display = 'none';
+            document.getElementById('userName').textContent = 'Guest User';
+        }
+
+        // Show tickets content
+        function showTicketsContent() {
+            document.getElementById('loginPrompt').style.display = 'none';
+            document.getElementById('ticketsContent').style.display = 'block';
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // User profile dropdown
+            const profileDropdown = document.getElementById('profileDropdown');
+            const dropdownMenu = document.getElementById('userDropdownMenu');
+            
+            if (profileDropdown && dropdownMenu) {
+                profileDropdown.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    dropdownMenu.classList.toggle('show');
+                });
+                
+                document.addEventListener('click', function() {
+                    dropdownMenu.classList.remove('show');
+                });
+                
+                // Close dropdown when clicking any dropdown link
+                dropdownMenu.addEventListener('click', function(e) {
+                    if (e.target.tagName === 'A') {
+                        dropdownMenu.classList.remove('show');
+                    }
+                });
+            }
+            
+            // Logout button
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                handleLogout();
+            });
+            
+            // Profile link
+            document.getElementById('profileLink').addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Check user role and redirect accordingly
+                if (currentUser && currentUser.role === 'admin') {
+                    window.location.href = 'admin-profile.html';
+                } else {
+                    window.location.href = 'user-profile.html';
+                }
+                
+                // Close dropdown
+                dropdownMenu.classList.remove('show');
+            });
+            
+            // Filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFilter = this.getAttribute('data-filter');
+                    displayTickets(allTickets);
+                });
+            });
+            
+            // Search input with enhanced functionality
+            const searchInput = document.getElementById('searchTickets');
+            const clearSearchBtn = document.getElementById('clearSearchBtn');
+            
+            searchInput.addEventListener('input', function() {
+                const query = this.value.trim();
+                
+                // Show/hide clear button
+                if (query.length > 0) {
+                    clearSearchBtn.style.display = 'block';
+                } else {
+                    clearSearchBtn.style.display = 'none';
+                }
+                
+                searchTickets(query);
+            });
+            
+            // Clear search button
+            clearSearchBtn.addEventListener('click', function() {
+                searchInput.value = '';
+                clearSearchBtn.style.display = 'none';
+                displayTickets(allTickets);
+            });
+            
+            // Modal close buttons
+            document.getElementById('closeCancelModal').addEventListener('click', function() {
+                document.getElementById('cancelModal').classList.remove('active');
+            });
+            
+            document.getElementById('closeTicketModal').addEventListener('click', function() {
+                document.getElementById('ticketModal').classList.remove('active');
+            });
+            
+            // Help modal functionality
+            document.getElementById('helpBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('helpModal').classList.add('active');
+            });
+            
+            document.getElementById('closeHelpModal').addEventListener('click', function() {
+                document.getElementById('helpModal').classList.remove('active');
+            });
+            
+            document.getElementById('closeHelpTopicModal').addEventListener('click', function() {
+                document.getElementById('helpTopicModal').classList.remove('active');
+                document.getElementById('helpModal').classList.add('active');
+            });
+            
+            // Confirm cancellation - UPDATED: Database-only approach
+            document.getElementById('confirmCancel').addEventListener('click', async function() {
+                if (ticketToCancel) {
+                    try {
+                        // Show loading state
+                        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cancelling...';
+                        this.disabled = true;
+                        
+                        console.log('🚫 Cancelling ticket:', ticketToCancel);
+                        
+                        // Cancel ticket via API
+                        const response = await swiftBusAPI.cancelBooking(ticketToCancel, 'User requested cancellation');
+                        
+                        if (response && response.success) {
+                            console.log('✅ Ticket cancelled successfully via API');
+                            
+                            // Update the ticket in allTickets array immediately for better UX
+                            const ticketIndex = allTickets.findIndex(t => t.bookingId === ticketToCancel);
+                            if (ticketIndex >= 0) {
+                                allTickets[ticketIndex].status = 'cancelled';
+                                allTickets[ticketIndex].paymentStatus = response.data.refund_amount > 0 ? 'refunded' : 'paid';
+                            }
+                            
+                            // Refresh display immediately
+                            displayTickets(allTickets);
+                            
+                            // Show success message
+                            const refundInfo = response.data.refund_amount > 0 
+                                ? ` A refund of ETB ${response.data.refund_amount} will be processed.`
+                                : '';
+                            showNotification(`Ticket cancelled successfully!${refundInfo}`, 'success');
+                            
+                            // Reload tickets from database to get updated data
+                            setTimeout(() => {
+                                loadTickets();
+                            }, 1000);
+                            
+                        } else {
+                            console.error('❌ API cancellation failed:', response?.message || 'Unknown error');
+                            showNotification(response?.message || 'Failed to cancel ticket. Please try again.', 'error');
+                        }
+                        
+                    } catch (error) {
+                        console.error('❌ Error cancelling ticket:', error);
+                        showNotification('Failed to cancel ticket. Please check your connection and try again.', 'error');
+                    } finally {
+                        // Reset button
+                        this.innerHTML = '<i class="fas fa-times"></i> Cancel Ticket';
+                        this.disabled = false;
+                        document.getElementById('cancelModal').classList.remove('active');
+                        ticketToCancel = null;
+                    }
+                }
+            });
+            
+            // Download ticket from modal
+            document.getElementById('downloadTicketModal').addEventListener('click', function() {
+                const bookingId = document.getElementById('modalBookingId').textContent;
+                const ticket = allTickets.find(t => t.bookingId === bookingId);
+                if (ticket) {
+                    downloadTicket(ticket.id);
+                }
+                document.getElementById('ticketModal').classList.remove('active');
+            });
+            
+            // Close modals when clicking outside
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        this.classList.remove('active');
+                    }
+                });
+            });
+        }
+
+        // Handle logout
+        async function handleLogout() {
+            try {
+                // Use API logout
+                await swiftBusAPI.logout();
+            } catch (error) {
+                // Logout failed, but continue with redirect
+            }
+            
+            // Redirect to home page
+            window.location.href = 'index.html';
+        }
+
+        // ENHANCED: Load tickets from database with better error handling
+        async function loadTickets() {
+            const loadingState = document.getElementById('loadingState');
+            const noTicketsState = document.getElementById('noTicketsState');
+            const ticketsGrid = document.getElementById('ticketsGrid');
+            
+            console.log('🎫 Loading tickets from database...');
+            
+            try {
+                allTickets = [];
+                
+                // Show loading state
+                loadingState.style.display = 'block';
+                noTicketsState.style.display = 'none';
+                ticketsGrid.innerHTML = '';
+                
+                // **ENHANCED: Check authentication first with detailed logging**
+                console.log('🔐 Checking authentication before loading tickets...');
+                const authResponse = await swiftBusAPI.checkSession();
+                console.log('🔐 Auth response:', authResponse);
+                
+                if (!authResponse || !authResponse.success) {
+                    console.error('❌ Authentication failed:', authResponse?.message || 'No response');
+                    
+                    // Handle specific authentication errors
+                    if (authResponse?.error_code === 'SESSION_EXPIRED' || authResponse?.error_code === 'AUTH_REQUIRED') {
+                        console.log('🔄 Session expired, redirecting to login...');
+                        loadingState.style.display = 'none';
+                        showAuthenticationError('Your session has expired. Please log in again.');
+                        return;
+                    }
+                    
+                    loadingState.style.display = 'none';
+                    showLoginPrompt();
+                    return;
+                }
+                
+                if (!authResponse.data) {
+                    console.error('❌ No user data in auth response');
+                    loadingState.style.display = 'none';
+                    showLoginPrompt();
+                    return;
+                }
+                
+                console.log('✅ Authentication successful, user:', authResponse.data.user_id || authResponse.data.email);
+                
+                // Load tickets from database via API
+                console.log('📡 Making getUserBookings API call...');
+                const response = await swiftBusAPI.getUserBookings();
+                console.log('📡 getUserBookings response:', response);
+                
+                // Handle authentication errors from booking API
+                if (!response.success && (response.error_code === 'AUTH_REQUIRED' || response.error_code === 'SESSION_EXPIRED' || response.error_code === 'INVALID_SESSION')) {
+                    console.error('❌ Authentication error from booking API:', response.message);
+                    loadingState.style.display = 'none';
+                    showAuthenticationError(response.message || 'Authentication failed. Please log in again.');
+                    return;
+                }
+                
+                if (response && response.success && response.data && response.data.bookings) {
+                    console.log('📊 Raw bookings from API:', response.data.bookings);
+                    
+                    const databaseTickets = response.data.bookings.map(booking => {
+                        console.log('⚙️ Processing booking:', booking.booking_id, booking);
+                        return createTicketFromAPIBooking(booking);
+                    });
+                    
+                    allTickets = databaseTickets;
+                    console.log('✅ Processed tickets:', allTickets.length, allTickets);
+                    
+                    // Sort tickets by booking date (newest first)
+                    allTickets.sort((a, b) => new Date(b.bookingDate) - new Date(a.bookingDate));
+                    
+                    console.log(`📊 Total tickets loaded: ${allTickets.length}`);
+                    
+                    // Display tickets
+                    loadingState.style.display = 'none';
+                    if (allTickets.length > 0) {
+                        noTicketsState.style.display = 'none';
+                        displayTickets(allTickets);
+                    } else {
+                        console.log('📭 No tickets to display');
+                        showNoTicketsState();
+                    }
+                    
+                } else {
+                    console.log('📭 No tickets found in database response:', response);
+                    loadingState.style.display = 'none';
+                    
+                    // Show appropriate message based on response
+                    if (response && !response.success) {
+                        showErrorState(response.message || 'Failed to load tickets');
+                    } else {
+                        showNoTicketsState();
+                    }
+                }
+                
+            } catch (error) {
+                console.error('❌ Error loading tickets from database:', error);
+                console.error('❌ Error stack:', error.stack);
+                loadingState.style.display = 'none';
+                
+                // Show error state with helpful information
+                showErrorState('Unable to connect to the server. Please check your internet connection and try again.');
+            }
+        }
+        
+        // Helper function to show authentication error
+        function showAuthenticationError(message) {
+            const noTicketsState = document.getElementById('noTicketsState');
+            noTicketsState.innerHTML = `
+                <i class="fas fa-user-lock" style="color: #dc3545;"></i>
+                <h3>Authentication Required</h3>
+                <p>${message}</p>
+                <div style="margin-top: 20px;">
+                    <a href="login.html" class="action-btn btn-download" style="display: inline-flex; text-decoration: none; margin-right: 10px;">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Login Again
+                    </a>
+                    <button onclick="loadTickets()" class="action-btn btn-secondary">
+                        <i class="fas fa-redo"></i>
+                        Retry
+                    </button>
+                </div>
+            `;
+            noTicketsState.style.display = 'block';
+            document.getElementById('ticketsGrid').innerHTML = '';
+        }
+        
+        // Helper function to show error state
+        function showErrorState(message) {
+            const noTicketsState = document.getElementById('noTicketsState');
+            noTicketsState.innerHTML = `
+                <i class="fas fa-exclamation-triangle" style="color: #dc3545;"></i>
+                <h3>Unable to Load Tickets</h3>
+                <p>${message}</p>
+                <div style="margin-top: 20px;">
+                    <button onclick="loadTickets()" class="action-btn btn-primary" style="margin-right: 10px;">
+                        <i class="fas fa-redo"></i>
+                        Try Again
+                    </button>
+                    <a href="login.html" class="action-btn btn-secondary" style="display: inline-flex; text-decoration: none; margin-right: 10px;">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Login Again
+                    </a>
+                    <a href="book-ticket.html" class="action-btn btn-secondary" style="display: inline-flex; text-decoration: none;">
+                        <i class="fas fa-bus"></i>
+                        Book New Ticket
+                    </a>
+                </div>
+            `;
+            noTicketsState.style.display = 'block';
+            document.getElementById('ticketsGrid').innerHTML = '';
+        }
+        
+        // Helper function to show no tickets state
+        function showNoTicketsState() {
+            const noTicketsState = document.getElementById('noTicketsState');
+            noTicketsState.innerHTML = `
+                <i class="fas fa-ticket-alt"></i>
+                <h3>No Tickets Found</h3>
+                <p>You haven't booked any tickets yet. Book your first bus ticket and it will appear here.</p>
+                <a href="book-ticket.html" class="action-btn btn-download" style="display: inline-flex; text-decoration: none;">
+                    <i class="fas fa-bus"></i>
+                    Book Your First Ticket
+                </a>
+            `;
+            noTicketsState.style.display = 'block';
+        }
+        
+        // UPDATED: Enhanced createTicketFromAPIBooking for database-only approach
+        function createTicketFromAPIBooking(booking) {
+            const today = new Date();
+            const departureDate = new Date(booking.departure_date || booking.travel_date);
+            let status = booking.booking_status || 'confirmed';
+            
+            // Auto-determine status based on date if not set
+            if (status === 'confirmed' && departureDate < today) {
+                status = 'completed';
+            }
+            
+            // Handle passenger details - it might be a JSON string or object
+            let passengerDetails = {};
+            if (booking.passenger_details) {
+                if (typeof booking.passenger_details === 'string') {
+                    try {
+                        passengerDetails = JSON.parse(booking.passenger_details);
+                    } catch (e) {
+                        passengerDetails = {};
+                    }
+                } else {
+                    passengerDetails = booking.passenger_details;
+                }
+            }
+            
+            // Handle selected seats - it might be a JSON string or array
+            let selectedSeats = [];
+            if (booking.selected_seats) {
+                if (typeof booking.selected_seats === 'string') {
+                    try {
+                        selectedSeats = JSON.parse(booking.selected_seats);
+                    } catch (e) {
+                        selectedSeats = ['N/A'];
+                    }
+                } else if (Array.isArray(booking.selected_seats)) {
+                    selectedSeats = booking.selected_seats;
+                } else {
+                    selectedSeats = ['N/A'];
+                }
+            } else {
+                selectedSeats = ['N/A'];
+            }
+            
+            // Enhanced ticket object with all details from database
+            const processedTicket = {
+                id: booking.booking_id,
+                bookingId: booking.booking_id,
+                fromCity: booking.from_city_display || getCityDisplayName(booking.from_city) || booking.from_city,
+                toCity: booking.to_city_display || getCityDisplayName(booking.to_city) || booking.to_city,
+                departureDate: booking.departure_date || booking.travel_date,
+                departureTime: booking.departure_time,
+                busCompany: booking.company_name || booking.bus_company_display || getBusCompanyDisplayName(booking.bus_company) || booking.bus_company,
+                busType: booking.bus_type_display || getBusTypeDisplayName(booking.bus_type) || booking.bus_type || 'Standard Bus',
+                passengerCount: booking.passenger_count || 1,
+                seats: selectedSeats,
+                totalAmount: parseFloat(booking.total_amount) || 0,
+                paymentMethod: getPaymentMethodDisplayName(booking.payment_method) || booking.payment_method || 'Unknown',
+                bookingDate: booking.booking_date || booking.created_at,
+                status: status,
+                paymentStatus: booking.payment_status || 'pending',
+                passengerName: passengerDetails.fullName || (currentUser ? (currentUser.name || currentUser.full_name) : 'Passenger'),
+                passengerEmail: passengerDetails.email || (currentUser ? currentUser.email : 'N/A'),
+                passengerPhone: passengerDetails.phone || 'N/A',
+                passengerIdNumber: passengerDetails.idNumber || 'N/A',
+                qrCode: booking.qr_code || `SwiftBus-${booking.booking_id}`,
+                specialRequirements: booking.special_requirements || 'None'
+            };
+            
+            return processedTicket;
+        }
+        
+        // Helper function to get payment method display name
+        function getPaymentMethodDisplayName(method) {
+            const methods = {
+                'telebirr': 'TeleBirr',
+                'cbe': 'Commercial Bank of Ethiopia',
+                'dashen': 'Dashen Bank',
+                'card': 'Credit/Debit Card',
+                'cash': 'Cash Payment'
+            };
+            return methods[method] || method;
+        }
+        
+        // Helper function to get city display name
+        function getCityDisplayName(cityCode) {
+            const cities = {
+                'addis-ababa': 'Addis Ababa',
+                'kombolcha': 'Kombolcha',
+                'bahirdar': 'Bahirdar',
+                'dessie': 'Dessie',
+                'adama': 'Adama',
+                'hawasa': 'Hawasa',
+                'arbaminch': 'Arbaminch',
+                'gonder': 'Gonder',
+                'mekele': 'Mekele',
+                'jimma': 'Jimma'
+            };
+            return cities[cityCode] || (cityCode ? cityCode.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : cityCode);
+        }
+        
+        // Helper function to get bus company display name
+        function getBusCompanyDisplayName(companyCode) {
+            const companies = {
+                'selam-bus': 'Selam Bus',
+                'abay-bus': 'Abay Bus',
+                'ethio-bus': 'Ethio Bus',
+                'habesha-bus': 'Habesha Bus'
+            };
+            return companies[companyCode] || (companyCode ? companyCode.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : companyCode);
+        }
+        
+        // Helper function to get bus type display name
+        function getBusTypeDisplayName(typeCode) {
+            const types = {
+                'premium-ac': 'Premium AC Bus',
+                'standard-ac': 'Standard AC Bus',
+                'luxury': 'Luxury Bus',
+                'standard': 'Standard Bus',
+                'economy': 'Economy Bus'
+            };
+            return types[typeCode] || (typeCode ? typeCode.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : typeCode);
+        }
+
+        function filterTickets(tickets, filter) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            return tickets.filter(ticket => {
+                const ticketDate = new Date(ticket.departureDate);
+                ticketDate.setHours(0, 0, 0, 0);
+                
+                switch (filter) {
+                    case 'upcoming':
+                        return ticketDate >= today && ticket.status !== 'cancelled';
+                    case 'completed':
+                        return ticket.status === 'completed' || (ticketDate < today && ticket.status !== 'cancelled');
+                    case 'cancelled':
+                        return ticket.status === 'cancelled';
+                    default:
+                        return true;
+                }
+            });
+        }
+
+        function displayTickets(tickets) {
+            const ticketsGrid = document.getElementById('ticketsGrid');
+            const filteredTickets = filterTickets(tickets, currentFilter);
+            
+            if (filteredTickets.length === 0) {
+                ticketsGrid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        <i class="fas fa-search" style="font-size: 60px; color: #e9ecef; margin-bottom: 20px;"></i>
+                        <h3 style="color: var(--gray);">No tickets match your filter</h3>
+                        <p style="color: var(--gray);">Try changing your filter or search term</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            ticketsGrid.innerHTML = filteredTickets.map(ticket => createTicketCard(ticket)).join('');
+            
+            // Generate QR codes for each ticket with delay to ensure DOM is ready
+            setTimeout(() => {
+                filteredTickets.forEach(ticket => {
+                    generateQRCode(ticket.bookingId);
+                });
+            }, 100);
+            
+            // Add event listeners to new ticket cards
+            addTicketCardListeners();
+        }
+
+        function createTicketCard(ticket) {
+            const departureDate = new Date(ticket.departureDate);
+            const formattedDate = departureDate.toLocaleDateString('en-US', { 
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric',
+                year: 'numeric'
+            });
+            
+            const timeText = getTimeText(ticket.departureTime);
+            const statusClass = `status-${ticket.status}`;
+            const canCancel = ticket.status === 'confirmed' && ticket.paymentStatus === 'paid';
+            
+            // Format seats display
+            const seatsDisplay = Array.isArray(ticket.seats) && ticket.seats.length > 0 && ticket.seats[0] !== 'N/A' 
+                ? ticket.seats.join(', ') 
+                : 'Not assigned';
+            
+            // Format amount display
+            const amountDisplay = ticket.totalAmount > 0 ? `ETB ${ticket.totalAmount.toFixed(2)}` : 'ETB 0.00';
+            
+            return `
+                <div class="ticket-card" data-ticket-id="${ticket.id}">
+                    <div class="ticket-header">
+                        <div style="flex: 1;">
+                            <h3>${ticket.busCompany}</h3>
+                            <p>${ticket.busType}</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <span class="ticket-status ${statusClass}">${ticket.status.toUpperCase()}</span>
+                            <p style="margin: 5px 0 0 0; font-size: 12px; color: rgba(255, 255, 255, 0.8);">
+                                ${ticket.paymentStatus === 'paid' ? 'Paid' : 'Pending Payment'}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="ticket-body">
+                        <div class="route-info">
+                            <div class="route-city">
+                                <h3>${ticket.fromCity}</h3>
+                                <p>Departure</p>
+                            </div>
+                            <div class="route-arrow">
+                                <i class="fas fa-long-arrow-alt-right"></i>
+                                <div style="font-size: 12px; color: var(--gray); margin-top: 5px;">
+                                    ${Math.abs(new Date(ticket.departureDate) - new Date()) / (1000 * 60 * 60 * 24) < 1 ? 'Today' : formattedDate}
+                                </div>
+                            </div>
+                            <div class="route-city">
+                                <h3>${ticket.toCity}</h3>
+                                <p>Destination</p>
+                            </div>
+                        </div>
+                        
+                        <div class="ticket-details" style="flex: 1;">
+                            <div class="detail-row">
+                                <span class="detail-label"><i class="fas fa-calendar"></i> Date & Time</span>
+                                <span class="detail-value">${formattedDate}, ${timeText}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label"><i class="fas fa-user"></i> Passenger</span>
+                                <span class="detail-value">${ticket.passengerName}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label"><i class="fas fa-chair"></i> Seats</span>
+                                <span class="detail-value">${seatsDisplay}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label"><i class="fas fa-hashtag"></i> Booking ID</span>
+                                <span class="detail-value" style="font-family: monospace; font-weight: bold; font-size: 12px;">${ticket.bookingId}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="qr-code" style="margin: 15px 0;">
+                            <div style="display: flex; justify-content: center; margin-bottom: 8px;">
+                                <canvas id="qr-${ticket.bookingId}" style="width: 140px; height: 140px; border: 2px solid #ddd; border-radius: 6px; background: white;"></canvas>
+                            </div>
+                            <p style="text-align: center; font-family: monospace; font-size: 10px; color: var(--gray); margin: 0;">${ticket.bookingId}</p>
+                        </div>
+                        
+                        <div class="ticket-footer" style="margin-top: auto;">
+                            <div style="text-align: center; margin-bottom: 15px;">
+                                <span style="font-weight: bold; color: var(--primary); font-size: 18px;">${amountDisplay}</span>
+                                <p style="font-size: 12px; color: var(--gray); margin: 2px 0 0 0;">
+                                    <i class="fas fa-check-circle" style="color: var(--success);"></i> 
+                                    Paid via ${ticket.paymentMethod}
+                                </p>
+                            </div>
+                            
+                            <div class="ticket-actions">
+                                <button class="action-btn btn-download" onclick="downloadTicket('${ticket.bookingId}'); event.stopPropagation();" title="Download Ticket">
+                                    <i class="fas fa-download"></i>
+                                    <span class="btn-text">Download</span>
+                                </button>
+                                <button class="action-btn btn-secondary" onclick="showQRCodeModal('${ticket.bookingId}'); event.stopPropagation();" title="View QR Code">
+                                    <i class="fas fa-qrcode"></i>
+                                    <span class="btn-text">QR Code</span>
+                                </button>
+                                <button class="action-btn btn-secondary" onclick="showTicketDetails('${ticket.bookingId}'); event.stopPropagation();" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                    <span class="btn-text">Details</span>
+                                </button>
+                                ${canCancel ? `
+                                    <button class="action-btn btn-cancel" onclick="showCancelModal('${ticket.bookingId}'); event.stopPropagation();" title="Cancel Booking">
+                                        <i class="fas fa-times"></i>
+                                        <span class="btn-text">Cancel</span>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Generate QR code for ticket with simple, readable format
+        function generateQRCode(bookingId) {
+            const canvas = document.getElementById(`qr-${bookingId}`);
+            if (!canvas) {
+                return;
+            }
+
+            // Find the ticket data for this booking ID
+            const ticket = allTickets.find(t => t.bookingId === bookingId);
+            
+            // Create simple, clean QR code data that's easy to read and scan
+            const qrData = `SwiftBus Ticket
+Booking: ${bookingId}
+Passenger: ${ticket ? ticket.passengerName : 'Passenger'}
+Route: ${ticket ? ticket.fromCity : 'Origin'} to ${ticket ? ticket.toCity : 'Destination'}
+Date: ${ticket ? new Date(ticket.departureDate).toLocaleDateString() : 'N/A'}
+Time: ${ticket ? ticket.departureTime : '00:00'}
+Bus: ${ticket ? ticket.busCompany : 'SwiftBus'}
+Seats: ${ticket && Array.isArray(ticket.seats) ? ticket.seats.join(', ') : 'N/A'}
+Amount: ETB ${ticket ? ticket.totalAmount : 0}
+Status: ${ticket ? ticket.status.toUpperCase() : 'CONFIRMED'}
+Phone: ${ticket ? ticket.passengerPhone : 'N/A'}
+Support: +251 911 234 567`;
+            
+            // Try to generate QR code with optimized settings for scanning
+            function tryGenerateQR() {
+                if (typeof QRCode !== 'undefined') {
+                    QRCode.toCanvas(canvas, qrData, {
+                        width: 140, // Increased size for better scanning
+                        height: 140,
+                        margin: 2, // Increased margin for better scanning
+                        color: {
+                            dark: '#000000', // Pure black for maximum contrast
+                            light: '#ffffff' // Pure white background
+                        },
+                        errorCorrectionLevel: 'M' // Medium correction - balance between size and reliability
+                    }, function(error) {
+                        if (error) {
+                            console.warn('QR Code generation failed:', error);
+                            generateQRWithAPI();
+                        } else {
+                            canvas.style.display = 'block';
+                            console.log('✅ QR Code generated successfully for:', bookingId);
+                        }
+                    });
+                } else {
+                    console.log('📱 QRCode library not available, using API fallback');
+                    generateQRWithAPI();
+                }
+            }
+            
+            // Enhanced API fallback with better scanning parameters
+            function generateQRWithAPI() {
+                // Hide canvas and show image instead
+                canvas.style.display = 'none';
+                
+                // Remove any existing fallback images
+                const existingImg = canvas.parentNode.querySelector('img[alt*="QR Code"]');
+                if (existingImg) {
+                    existingImg.remove();
+                }
+                
+                const img = document.createElement('img');
+                // Optimized API parameters for better scanning
+                const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(qrData)}&color=000000&bgcolor=ffffff&ecc=M&margin=2`;
+                
+                img.src = qrApiUrl;
+                img.style.cssText = 'width: 140px; height: 140px; border: 2px solid #ddd; border-radius: 8px; background: white;';
+                img.alt = 'QR Code for ' + bookingId;
+                
+                img.onload = function() {
+                    console.log('✅ QR Code API generated successfully for:', bookingId);
+                };
+                
+                img.onerror = function() {
+                    console.warn('❌ QR Code API failed for:', bookingId);
+                    showFallback();
+                };
+                
+                canvas.parentNode.insertBefore(img, canvas);
+            }
+            
+            function showFallback() {
+                canvas.style.display = 'none';
+                
+                // Remove any existing fallback
+                const existingFallback = canvas.parentNode.querySelector('.qr-fallback');
+                if (existingFallback) {
+                    existingFallback.remove();
+                }
+                
+                const fallback = document.createElement('div');
+                fallback.className = 'qr-fallback';
+                fallback.innerHTML = `
+                    <div style="width: 140px; height: 140px; background: white; border: 2px solid #ddd; color: #333; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 8px; font-size: 12px; text-align: center;">
+                        <i class="fas fa-ticket-alt" style="font-size: 28px; margin-bottom: 10px; color: #1a73e8;"></i>
+                        <strong style="font-size: 12px; line-height: 1.2; margin-bottom: 5px;">${bookingId}</strong>
+                        <small style="font-size: 10px; color: #666;">Booking Code</small>
+                        <small style="font-size: 9px; color: #999; margin-top: 5px;">Show to staff</small>
+                    </div>
+                `;
+                canvas.parentNode.appendChild(fallback);
+                console.log('📋 QR Code fallback displayed for:', bookingId);
+            }
+            
+            // Try to generate QR code
+            tryGenerateQR();
+            
+            // Retry after delay if library not loaded
+            setTimeout(function() {
+                if (canvas.style.display === 'none' && typeof QRCode !== 'undefined') {
+                    console.log('🔄 Retrying QR Code generation for:', bookingId);
+                    tryGenerateQR();
+                }
+            }, 2000);
+        }
+
+        function addTicketCardListeners() {
+            // Listeners are added via onclick attributes in the template
+        }
+
+        // Show QR Code in a dedicated modal with enhanced details
+        function showQRCodeModal(ticketId) {
+            // Find ticket by multiple possible ID fields
+            const ticket = allTickets.find(t => 
+                t.id === ticketId || 
+                t.bookingId === ticketId || 
+                t.booking_id === ticketId
+            );
+            
+            if (!ticket) {
+                console.error('Ticket not found for QR code:', ticketId);
+                alert('Ticket not found. Please refresh the page and try again.');
+                return;
+            }
+            
+            const modal = document.getElementById('qrCodeModal');
+            const qrContent = document.getElementById('qrCodeContent');
+            
+            // Create QR code content with enhanced ticket information
+            qrContent.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <h4 style="color: var(--primary); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-bus"></i>
+                        ${ticket.busCompany}
+                    </h4>
+                    <p style="color: var(--gray); margin-bottom: 20px; font-size: 16px; font-weight: 500;">
+                        <i class="fas fa-route" style="margin-right: 8px;"></i>
+                        ${ticket.fromCity} → ${ticket.toCity}
+                    </p>
+                </div>
+                
+                <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+                    <div style="position: relative;">
+                        <canvas id="modal-qr-large-${ticket.bookingId}" style="width: 250px; height: 250px; border: 3px solid #ddd; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); background: white;"></canvas>
+                        <div id="qr-loading-${ticket.bookingId}" style="position: absolute; top: 0; left: 0; width: 250px; height: 250px; background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; border-radius: 12px;">
+                            <i class="fas fa-spinner fa-spin" style="font-size: 24px; color: var(--primary);"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #e9ecef; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <h5 style="color: var(--primary); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-info-circle"></i>
+                        Ticket Details
+                    </h5>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 14px;">
+                        <div>
+                            <strong style="color: var(--gray); display: flex; align-items: center; gap: 5px;">
+                                <i class="fas fa-hashtag"></i> Booking ID:
+                            </strong>
+                            <p style="margin: 5px 0 0 0; font-family: monospace; font-weight: bold; color: var(--primary); font-size: 13px;">${ticket.bookingId}</p>
+                        </div>
+                        <div>
+                            <strong style="color: var(--gray); display: flex; align-items: center; gap: 5px;">
+                                <i class="fas fa-user"></i> Passenger:
+                            </strong>
+                            <p style="margin: 5px 0 0 0; font-weight: 500;">${ticket.passengerName}</p>
+                        </div>
+                        <div>
+                            <strong style="color: var(--gray); display: flex; align-items: center; gap: 5px;">
+                                <i class="fas fa-calendar"></i> Date:
+                            </strong>
+                            <p style="margin: 5px 0 0 0;">${new Date(ticket.departureDate).toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                        </div>
+                        <div>
+                            <strong style="color: var(--gray); display: flex; align-items: center; gap: 5px;">
+                                <i class="fas fa-clock"></i> Time:
+                            </strong>
+                            <p style="margin: 5px 0 0 0; font-weight: 500;">${getTimeText(ticket.departureTime)}</p>
+                        </div>
+                        <div>
+                            <strong style="color: var(--gray); display: flex; align-items: center; gap: 5px;">
+                                <i class="fas fa-chair"></i> Seats:
+                            </strong>
+                            <p style="margin: 5px 0 0 0; font-weight: 500;">${Array.isArray(ticket.seats) && ticket.seats.length > 0 && ticket.seats[0] !== 'N/A' ? ticket.seats.join(', ') : 'Not assigned'}</p>
+                        </div>
+                        <div>
+                            <strong style="color: var(--gray); display: flex; align-items: center; gap: 5px;">
+                                <i class="fas fa-money-bill-wave"></i> Amount:
+                            </strong>
+                            <p style="margin: 5px 0 0 0; font-weight: bold; color: var(--success);">ETB ${ticket.totalAmount.toFixed(2)}</p>
+                        </div>
+                        <div>
+                            <strong style="color: var(--gray); display: flex; align-items: center; gap: 5px;">
+                                <i class="fas fa-credit-card"></i> Payment:
+                            </strong>
+                            <p style="margin: 5px 0 0 0;">${ticket.paymentMethod}</p>
+                        </div>
+                        <div>
+                            <strong style="color: var(--gray); display: flex; align-items: center; gap: 5px;">
+                                <i class="fas fa-check-circle"></i> Status:
+                            </strong>
+                            <p style="margin: 5px 0 0 0; font-weight: 500; color: var(--success); text-transform: capitalize;">${ticket.status}</p>
+                        </div>
+                    </div>
+                    
+                    ${ticket.passengerIdNumber && ticket.passengerIdNumber !== 'N/A' ? `
+                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+                            <strong style="color: var(--gray); display: flex; align-items: center; gap: 5px;">
+                                <i class="fas fa-id-card"></i> ID Number:
+                            </strong>
+                            <p style="margin: 5px 0 0 0; font-family: monospace; font-weight: 500;">${ticket.passengerIdNumber}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${ticket.specialRequirements && ticket.specialRequirements !== 'None' ? `
+                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+                            <strong style="color: var(--gray); display: flex; align-items: center; gap: 5px;">
+                                <i class="fas fa-exclamation-circle"></i> Special Requirements:
+                            </strong>
+                            <p style="margin: 5px 0 0 0;">${ticket.specialRequirements}</p>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            // Show modal
+            modal.classList.add('active');
+            
+            // Generate large QR code with simple, readable format
+            setTimeout(() => {
+                const canvas = document.getElementById(`modal-qr-large-${ticket.bookingId}`);
+                const loadingDiv = document.getElementById(`qr-loading-${ticket.bookingId}`);
+                
+                if (canvas) {
+                    // Create simple, clean QR code data (same as card QR)
+                    const qrData = `SwiftBus Ticket
+Booking: ${ticket.bookingId}
+Passenger: ${ticket.passengerName}
+Route: ${ticket.fromCity} to ${ticket.toCity}
+Date: ${new Date(ticket.departureDate).toLocaleDateString()}
+Time: ${ticket.departureTime}
+Bus: ${ticket.busCompany}
+Seats: ${Array.isArray(ticket.seats) ? ticket.seats.join(', ') : 'N/A'}
+Amount: ETB ${ticket.totalAmount}
+Status: ${ticket.status.toUpperCase()}
+Phone: ${ticket.passengerPhone}
+ID: ${ticket.passengerIdNumber}
+Support: +251 911 234 567`;
+                    
+                    // Try to generate with QRCode library first
+                    if (typeof QRCode !== 'undefined') {
+                        QRCode.toCanvas(canvas, qrData, {
+                            width: 250, // Larger size for modal
+                            height: 250,
+                            margin: 3, // Larger margin for better scanning
+                            color: {
+                                dark: '#000000', // Pure black for maximum contrast
+                                light: '#ffffff' // Pure white background
+                            },
+                            errorCorrectionLevel: 'M' // Medium correction for balance
+                        }, function(error) {
+                            loadingDiv.style.display = 'none';
+                            if (error) {
+                                console.warn('Modal QR Code generation failed, trying API fallback:', error);
+                                generateModalQRWithAPI(canvas, qrData, ticket.bookingId);
+                            } else {
+                                console.log('✅ Modal QR Code generated successfully for:', ticket.bookingId);
+                            }
+                        });
+                    } else {
+                        console.log('📱 QRCode library not available, using API fallback');
+                        generateModalQRWithAPI(canvas, qrData, ticket.bookingId);
+                        loadingDiv.style.display = 'none';
+                    }
+                }
+            }, 100);
+        }
+        
+        // Helper function to generate QR code using API for modal (optimized for scanning)
+        function generateModalQRWithAPI(canvas, qrData, bookingId) {
+            canvas.style.display = 'none';
+            
+            const img = document.createElement('img');
+            // Optimized API parameters for better scanning
+            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrData)}&color=000000&bgcolor=ffffff&ecc=M&margin=3`;
+            
+            img.src = qrApiUrl;
+            img.style.cssText = 'width: 250px; height: 250px; border: 3px solid #ddd; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); background: white;';
+            img.alt = 'QR Code for ' + bookingId;
+            
+            img.onload = function() {
+                console.log('✅ Modal QR Code API generated successfully for:', bookingId);
+            };
+            
+            img.onerror = function() {
+                console.warn('❌ Modal QR Code API failed for:', bookingId);
+                showModalQRFallback(canvas, bookingId);
+            };
+            
+            canvas.parentNode.insertBefore(img, canvas);
+        }
+        
+        // Helper function to show fallback for modal QR code
+        function showModalQRFallback(canvas, bookingId) {
+            canvas.style.display = 'none';
+            
+            const fallback = document.createElement('div');
+            fallback.innerHTML = `
+                <div style="width: 250px; height: 250px; background: white; border: 3px solid #ddd; color: #333; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 12px; font-size: 18px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <i class="fas fa-ticket-alt" style="font-size: 50px; margin-bottom: 20px; color: #1a73e8;"></i>
+                    <strong style="font-size: 16px; line-height: 1.2; margin-bottom: 10px;">${bookingId}</strong>
+                    <small style="font-size: 14px; color: #666;">Booking Code</small>
+                    <small style="font-size: 12px; color: #999; margin-top: 10px;">Show this to bus staff</small>
+                </div>
+            `;
+            canvas.parentNode.appendChild(fallback);
+            console.log('📋 Modal QR Code fallback displayed for:', bookingId);
+        }
+
+        // Show detailed ticket information in a modal
+        function showTicketDetails(ticketId) {
+            // Find ticket by multiple possible ID fields
+            const ticket = allTickets.find(t => 
+                t.id === ticketId || 
+                t.bookingId === ticketId || 
+                t.booking_id === ticketId
+            );
+            
+            if (!ticket) {
+                console.error('Ticket not found for details:', ticketId);
+                alert('Ticket not found. Please refresh the page and try again.');
+                return;
+            }
+            
+            const modal = document.getElementById('ticketModal');
+            const modalBookingId = document.getElementById('modalBookingId');
+            const modalContent = document.getElementById('modalTicketContent');
+            
+            modalBookingId.textContent = ticket.bookingId;
+            
+            const departureDate = new Date(ticket.departureDate);
+            const formattedDate = departureDate.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                month: 'long', 
+                day: 'numeric',
+                year: 'numeric'
+            });
+            
+            const seatsDisplay = Array.isArray(ticket.seats) && ticket.seats.length > 0 && ticket.seats[0] !== 'N/A' 
+                ? ticket.seats.join(', ') 
+                : 'Not assigned';
+            
+            modalContent.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <div style="background: linear-gradient(135deg, var(--primary), #4285f4); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h3 style="margin: 0; font-size: 18px; font-weight: 700;">${ticket.busCompany}</h3>
+                                <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 14px;">${ticket.busType}</p>
+                            </div>
+                            <div style="background: rgba(255, 255, 255, 0.2); padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                                ${ticket.status.toUpperCase()}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                        <div style="text-align: center; flex: 1;">
+                            <h4 style="margin: 0; color: var(--dark); font-size: 16px;">${ticket.fromCity}</h4>
+                            <p style="margin: 5px 0 0 0; color: var(--gray); font-size: 12px;">Departure</p>
+                        </div>
+                        <div style="color: var(--primary); font-size: 24px; margin: 0 20px;">
+                            <i class="fas fa-long-arrow-alt-right"></i>
+                        </div>
+                        <div style="text-align: center; flex: 1;">
+                            <h4 style="margin: 0; color: var(--dark); font-size: 16px;">${ticket.toCity}</h4>
+                            <p style="margin: 5px 0 0 0; color: var(--gray); font-size: 12px;">Destination</p>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                        <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
+                            <p style="color: var(--gray); margin: 0 0 5px 0; font-size: 12px; font-weight: 600; text-transform: uppercase;">Travel Date</p>
+                            <p style="margin: 0; font-weight: 500; color: var(--dark);">${formattedDate}</p>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
+                            <p style="color: var(--gray); margin: 0 0 5px 0; font-size: 12px; font-weight: 600; text-transform: uppercase;">Departure Time</p>
+                            <p style="margin: 0; font-weight: 500; color: var(--dark);">${getTimeText(ticket.departureTime)}</p>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
+                            <p style="color: var(--gray); margin: 0 0 5px 0; font-size: 12px; font-weight: 600; text-transform: uppercase;">Passengers</p>
+                            <p style="margin: 0; font-weight: 500; color: var(--dark);">${ticket.passengerCount} ${ticket.passengerCount === 1 ? 'Person' : 'People'}</p>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
+                            <p style="color: var(--gray); margin: 0 0 5px 0; font-size: 12px; font-weight: 600; text-transform: uppercase;">Seat Numbers</p>
+                            <p style="margin: 0; font-weight: 500; color: var(--dark);">${seatsDisplay}</p>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                        <h4 style="color: var(--primary); margin: 0 0 15px 0; font-size: 16px;">
+                            <i class="fas fa-user"></i> Passenger Information
+                        </h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                            <div>
+                                <p style="color: var(--gray); margin: 0 0 3px 0; font-size: 12px; font-weight: 600;">Full Name</p>
+                                <p style="margin: 0; font-weight: 500;">${ticket.passengerName}</p>
+                            </div>
+                            <div>
+                                <p style="color: var(--gray); margin: 0 0 3px 0; font-size: 12px; font-weight: 600;">Email</p>
+                                <p style="margin: 0; font-weight: 500;">${ticket.passengerEmail}</p>
+                            </div>
+                            ${ticket.passengerPhone !== 'N/A' ? `
+                                <div>
+                                    <p style="color: var(--gray); margin: 0 0 3px 0; font-size: 12px; font-weight: 600;">Phone</p>
+                                    <p style="margin: 0; font-weight: 500;">${ticket.passengerPhone}</p>
+                                </div>
+                            ` : ''}
+                            ${ticket.passengerIdNumber !== 'N/A' ? `
+                                <div>
+                                    <p style="color: var(--gray); margin: 0 0 3px 0; font-size: 12px; font-weight: 600;">ID Number</p>
+                                    <p style="margin: 0; font-weight: 500;">${ticket.passengerIdNumber}</p>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                        <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
+                            <p style="color: var(--gray); margin: 0 0 5px 0; font-size: 12px; font-weight: 600; text-transform: uppercase;">Total Amount</p>
+                            <p style="margin: 0; font-size: 18px; font-weight: bold; color: var(--primary);">ETB ${ticket.totalAmount.toFixed(2)}</p>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
+                            <p style="color: var(--gray); margin: 0 0 5px 0; font-size: 12px; font-weight: 600; text-transform: uppercase;">Payment Method</p>
+                            <p style="margin: 0; font-weight: 500; color: var(--dark);">${ticket.paymentMethod}</p>
+                        </div>
+                    </div>
+                    
+                    ${ticket.specialRequirements !== 'None' ? `
+                        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107; margin-bottom: 20px;">
+                            <p style="color: var(--gray); margin: 0 0 5px 0; font-size: 12px; font-weight: 600; text-transform: uppercase;">Special Requirements</p>
+                            <p style="margin: 0; color: #856404;">${ticket.specialRequirements}</p>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            modal.classList.add('active');
+        }
+
+        function getTimeText(timeValue) {
+            const times = {
+                '06:00': '06:00 AM',
+                '08:00': '08:00 AM',
+                '10:00': '10:00 AM',
+                '14:00': '02:00 PM',
+                '18:00': '06:00 PM',
+                '20:00': '08:00 PM',
+                '22:00': '10:00 PM'
+            };
+            return times[timeValue] || timeValue;
+        }
+
+        function showCancelModal(ticketId) {
+            // Try to find ticket with flexible ID matching
+            let ticket = allTickets.find(t => t.bookingId === ticketId);
+            if (!ticket) {
+                ticket = allTickets.find(t => t.id === ticketId);
+            }
+            if (!ticket) {
+                ticket = allTickets.find(t => t.booking_id === ticketId);
+            }
+            
+            if (!ticket) {
+                console.error('Ticket not found for cancellation:', ticketId);
+                alert('Ticket not found. Please refresh the page and try again.');
+                return;
+            }
+            
+            // Use the booking ID for cancellation (consistent with API)
+            ticketToCancel = ticket.bookingId;
+            
+            const departureDate = new Date(ticket.departureDate);
+            const formattedDate = departureDate.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                month: 'long', 
+                day: 'numeric'
+            });
+            
+            document.getElementById('cancelTicketDetails').innerHTML = `
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px;">
+                    <p style="margin: 5px 0;"><strong>Booking ID:</strong> ${ticket.bookingId}</p>
+                    <p style="margin: 5px 0;"><strong>Passenger:</strong> ${ticket.passengerName}</p>
+                    <p style="margin: 5px 0;"><strong>Route:</strong> ${ticket.fromCity} → ${ticket.toCity}</p>
+                    <p style="margin: 5px 0;"><strong>Date & Time:</strong> ${formattedDate}, ${getTimeText(ticket.departureTime)}</p>
+                    <p style="margin: 5px 0;"><strong>Bus:</strong> ${ticket.busCompany} (${ticket.busType})</p>
+                    <p style="margin: 5px 0;"><strong>Seats:</strong> ${Array.isArray(ticket.seats) ? ticket.seats.join(', ') : ticket.seats}</p>
+                    <p style="margin: 5px 0;"><strong>Amount:</strong> ETB ${ticket.totalAmount}</p>
+                </div>
+            `;
+            
+            document.getElementById('cancelModal').classList.add('active');
+        }
+
+        function downloadTicket(ticketId) {
+            // Find ticket by multiple possible ID fields
+            const ticket = allTickets.find(t => 
+                t.id === ticketId || 
+                t.bookingId === ticketId || 
+                t.booking_id === ticketId
+            );
+            
+            if (!ticket) {
+                console.error('Ticket not found for download:', ticketId);
+                alert('Ticket not found. Please refresh the page and try again.');
+                return;
+            }
+            
+            const ticketContent = `
+SwiftBus - E-Ticket
+===================
+
+Booking ID: ${ticket.bookingId}
+Status: ${ticket.status.toUpperCase()}
+
+PASSENGER INFORMATION
+---------------------
+Name: ${ticket.passengerName}
+Email: ${ticket.passengerEmail}
+
+ROUTE INFORMATION
+-----------------
+From: ${ticket.fromCity}
+To: ${ticket.toCity}
+Date: ${new Date(ticket.departureDate).toLocaleDateString()}
+Time: ${getTimeText(ticket.departureTime)}
+
+BUS DETAILS
+-----------
+Bus Company: ${ticket.busCompany}
+Bus Type: ${ticket.busType}
+Seats: ${Array.isArray(ticket.seats) ? ticket.seats.join(', ') : ticket.seats}
+
+PAYMENT DETAILS
+---------------
+Amount: ETB ${ticket.totalAmount}
+Payment Method: ${ticket.paymentMethod}
+Booking Date: ${new Date(ticket.bookingDate).toLocaleDateString()}
+
+INSTRUCTIONS
+------------
+1. Present this ticket at boarding
+2. Arrive at least 30 minutes before departure
+3. Bring valid identification
+
+For assistance, call +251 911 234 567
+            `;
+            
+            const blob = new Blob([ticketContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `swiftbus-ticket-${ticket.bookingId}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert(`Ticket ${ticket.bookingId} downloaded successfully!`);
+        }
+
+        // Enhanced Search functionality
+        function searchTickets(query) {
+            if (!query || query.trim() === '') {
+                // If search is empty, show all tickets with current filter
+                displayTickets(allTickets);
+                return;
+            }
+            
+            const filteredTickets = allTickets.filter(ticket => {
+                const searchable = [
+                    ticket.bookingId,
+                    ticket.fromCity,
+                    ticket.toCity,
+                    ticket.departureDate,
+                    ticket.busCompany,
+                    ticket.status,
+                    ticket.passengerName,
+                    ticket.busType || '',
+                    ticket.seatNumber || ''
+                ].join(' ').toLowerCase();
+                
+                return searchable.includes(query.toLowerCase().trim());
+            });
+            
+            // Display filtered results
+            displayFilteredSearchResults(filteredTickets, query);
+        }
+        
+        // Display search results with special handling
+        function displayFilteredSearchResults(tickets, query) {
+            const ticketsGrid = document.getElementById('ticketsGrid');
+            
+            if (tickets.length === 0) {
+                ticketsGrid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        <i class="fas fa-search" style="font-size: 60px; color: #e9ecef; margin-bottom: 20px;"></i>
+                        <h3 style="color: var(--gray);">No tickets found for "${query}"</h3>
+                        <p style="color: var(--gray);">Try searching with different keywords like booking ID, city names, or dates</p>
+                        <button class="action-btn btn-secondary" onclick="clearSearch()" style="margin-top: 15px;">
+                            <i class="fas fa-times"></i> Clear Search
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            ticketsGrid.innerHTML = tickets.map(ticket => createTicketCard(ticket)).join('');
+            
+            // Generate QR codes for each ticket with delay to ensure DOM is ready
+            setTimeout(() => {
+                tickets.forEach(ticket => {
+                    generateQRCode(ticket.bookingId);
+                });
+            }, 100);
+            
+            // Add event listeners to new ticket cards
+            addTicketCardListeners();
+        }
+        
+        // Clear search function
+        function clearSearch() {
+            document.getElementById('searchTickets').value = '';
+            displayTickets(allTickets);
+        }
+        
+        // Help system functionality
+        function showHelpTopic(topic) {
+            const helpTopics = {
+                search: {
+                    title: 'How to Search and Filter Tickets',
+                    content: `
+                        <div style="line-height: 1.6;">
+                            <h4 style="color: var(--primary); margin-bottom: 15px;">
+                                <i class="fas fa-search"></i> Searching Your Tickets
+                            </h4>
+                            <p style="margin-bottom: 15px;">Use the search box to quickly find specific tickets:</p>
+                            <ul style="margin-bottom: 20px; padding-left: 20px;">
+                                <li><strong>Booking ID:</strong> Enter your booking reference number</li>
+                                <li><strong>Cities:</strong> Search by departure or destination city</li>
+                                <li><strong>Passenger Name:</strong> Find tickets by passenger name</li>
+                                <li><strong>Date:</strong> Search by travel date</li>
+                                <li><strong>Bus Company:</strong> Filter by bus operator</li>
+                            </ul>
+                            
+                            <h4 style="color: var(--primary); margin-bottom: 15px;">
+                                <i class="fas fa-filter"></i> Using Filters
+                            </h4>
+                            <p style="margin-bottom: 15px;">Use the filter buttons to view specific ticket types:</p>
+                            <ul style="padding-left: 20px;">
+                                <li><strong>All Tickets:</strong> View all your bookings</li>
+                                <li><strong>Upcoming:</strong> Show only future trips</li>
+                                <li><strong>Completed:</strong> View past journeys</li>
+                                <li><strong>Cancelled:</strong> See cancelled bookings</li>
+                            </ul>
+                        </div>
+                    `
+                },
+                cancel: {
+                    title: 'How to Cancel or Modify Tickets',
+                    content: `
+                        <div style="line-height: 1.6;">
+                            <h4 style="color: var(--primary); margin-bottom: 15px;">
+                                <i class="fas fa-times-circle"></i> Cancelling Tickets
+                            </h4>
+                            <p style="margin-bottom: 15px;">To cancel a confirmed ticket:</p>
+                            <ol style="margin-bottom: 20px; padding-left: 20px;">
+                                <li>Find your ticket in the list</li>
+                                <li>Click the "Cancel Ticket" button</li>
+                                <li>Review the cancellation policy</li>
+                                <li>Confirm your cancellation</li>
+                            </ol>
+                            
+                            <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid var(--warning); margin-bottom: 20px;">
+                                <h5 style="color: #856404; margin-bottom: 10px;">
+                                    <i class="fas fa-exclamation-triangle"></i> Cancellation Policy
+                                </h5>
+                                <ul style="color: #856404; margin: 0; padding-left: 20px;">
+                                    <li>More than 24 hours before departure: 75% refund</li>
+                                    <li>Within 24 hours of departure: No refund</li>
+                                    <li>Refunds are processed within 3-5 business days</li>
+                                </ul>
+                            </div>
+                            
+                            <h4 style="color: var(--primary); margin-bottom: 15px;">
+                                <i class="fas fa-edit"></i> Modifying Tickets
+                            </h4>
+                            <p>For ticket modifications (date/time changes), please contact our support team at <strong>+251 911 234 567</strong> or <strong>support@swiftbus.et</strong></p>
+                        </div>
+                    `
+                },
+                download: {
+                    title: 'How to Download and Print Tickets',
+                    content: `
+                        <div style="line-height: 1.6;">
+                            <h4 style="color: var(--primary); margin-bottom: 15px;">
+                                <i class="fas fa-download"></i> Downloading Tickets
+                            </h4>
+                            <p style="margin-bottom: 15px;">To download your ticket:</p>
+                            <ol style="margin-bottom: 20px; padding-left: 20px;">
+                                <li>Click on any ticket card to view details</li>
+                                <li>Click the "Download Ticket" button</li>
+                                <li>Your ticket will be saved as a PDF file</li>
+                                <li>You can also download directly from the ticket list</li>
+                            </ol>
+                            
+                            <h4 style="color: var(--primary); margin-bottom: 15px;">
+                                <i class="fas fa-print"></i> Printing Guidelines
+                            </h4>
+                            <ul style="margin-bottom: 20px; padding-left: 20px;">
+                                <li>Print on A4 paper for best results</li>
+                                <li>Ensure QR code is clearly visible</li>
+                                <li>Keep printed ticket clean and readable</li>
+                                <li>Bring printed ticket or show on mobile device</li>
+                            </ul>
+                            
+                            <div style="background: #d4edda; padding: 15px; border-radius: 8px; border-left: 4px solid var(--success);">
+                                <p style="color: #155724; margin: 0;">
+                                    <i class="fas fa-lightbulb"></i> <strong>Tip:</strong> 
+                                    You can also show your ticket directly from this page on your mobile device - no printing required!
+                                </p>
+                            </div>
+                        </div>
+                    `
+                },
+                qr: {
+                    title: 'Understanding QR Codes',
+                    content: `
+                        <div style="line-height: 1.6;">
+                            <h4 style="color: var(--primary); margin-bottom: 15px;">
+                                <i class="fas fa-qrcode"></i> What is a QR Code?
+                            </h4>
+                            <p style="margin-bottom: 15px;">
+                                The QR code on your ticket contains all your booking information in a digital format 
+                                that can be quickly scanned by our staff.
+                            </p>
+                            
+                            <h4 style="color: var(--primary); margin-bottom: 15px;">
+                                <i class="fas fa-mobile-alt"></i> How to Use QR Codes
+                            </h4>
+                            <ul style="margin-bottom: 20px; padding-left: 20px;">
+                                <li>Show the QR code to staff when boarding</li>
+                                <li>Keep your screen brightness high for easy scanning</li>
+                                <li>Ensure the QR code is not damaged if printed</li>
+                                <li>Have a backup (screenshot or printed copy)</li>
+                            </ul>
+                            
+                            <h4 style="color: var(--primary); margin-bottom: 15px;">
+                                <i class="fas fa-shield-alt"></i> Security Features
+                            </h4>
+                            <p style="margin-bottom: 15px;">Your QR code contains:</p>
+                            <ul style="margin-bottom: 20px; padding-left: 20px;">
+                                <li>Booking ID and verification code</li>
+                                <li>Passenger details and seat information</li>
+                                <li>Route and travel date/time</li>
+                                <li>Security encryption to prevent fraud</li>
+                            </ul>
+                            
+                            <div style="background: #e8f0fe; padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary);">
+                                <p style="color: var(--primary); margin: 0;">
+                                    <i class="fas fa-info-circle"></i> <strong>Important:</strong> 
+                                    Never share your QR code with others as it contains your personal booking information.
+                                </p>
+                            </div>
+                        </div>
+                    `
+                }
+            };
+            
+            const topicData = helpTopics[topic];
+            if (topicData) {
+                document.getElementById('helpTopicTitle').innerHTML = `<i class="fas fa-arrow-left" onclick="document.getElementById('helpTopicModal').classList.remove('active'); document.getElementById('helpModal').classList.add('active');" style="cursor: pointer; margin-right: 10px;"></i> ${topicData.title}`;
+                document.getElementById('helpTopicContent').innerHTML = topicData.content;
+                
+                document.getElementById('helpModal').classList.remove('active');
+                document.getElementById('helpTopicModal').classList.add('active');
+            }
+        }
+        
+        // REMOVED: localStorage functions - now using database-only approach
+        // All ticket data is now loaded from and saved to the database via API calls
+        
+        // Check for new tickets from payment page on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if we came from payment page with new ticket data
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('from') === 'payment' && urlParams.get('booking_id')) {
+                // Refresh tickets to show the new one
+                setTimeout(() => {
+                    loadTickets();
+                }, 500);
+            }
+        });
+
+        // FIXED: Add notification system for better user feedback
+        function showNotification(message, type = 'info') {
+            // Remove any existing notifications
+            const existingNotifications = document.querySelectorAll('.notification-toast');
+            existingNotifications.forEach(n => n.remove());
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification-toast ${type}`;
+            notification.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i>
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; margin-left: 10px; cursor: pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            // Add styles
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : type === 'warning' ? '#ffc107' : '#17a2b8'};
+                color: ${type === 'warning' ? '#000' : '#fff'};
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-weight: 500;
+                max-width: 400px;
+                animation: slideInRight 0.3s ease;
+            `;
+            
+            // Add to page
+            document.body.appendChild(notification);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.remove();
+                        }
+                    }, 300);
+                }
+            }, 5000);
+        }
+
+        // Add CSS animations for notifications
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+
+
+</body>
+</html>

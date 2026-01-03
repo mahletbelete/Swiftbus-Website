@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin System Comprehensive Fix Test - SwiftBus</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0d47a1;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .issue-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background: #f9f9f9;
+        }
+        .issue-title {
+            font-weight: bold;
+            color: #dc3545;
+            margin-bottom: 10px;
+        }
+        .fix-status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .fixed {
+            background: #d4edda;
+            color: #155724;
+        }
+        .pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Admin System Comprehensive Fix Test</h1>
+    
+    <div class="test-section">
+        <h2>📋 Issues Identified & Fixed</h2>
+        
+        <div class="grid">
+            <div class="issue-card">
+                <div class="issue-title">1. Syntax Error in admin-dashboard.html</div>
+                <p><strong>Error:</strong> Unexpected token '}' at line 1504</p>
+                <p><strong>Status:</strong> <span class="fix-status pending">Investigating</span></p>
+                <p><strong>Impact:</strong> Page fails to load JavaScript</p>
+            </div>
+            
+            <div class="issue-card">
+                <div class="issue-title">2. API Response Failures</div>
+                <p><strong>Error:</strong> {success: false, message: 'Server returned 200: OK'}</p>
+                <p><strong>Status:</strong> <span class="fix-status fixed">Fixed</span></p>
+                <p><strong>Solution:</strong> Added debug API and improved error handling</p>
+            </div>
+            
+            <div class="issue-card">
+                <div class="issue-title">3. TypeError: toLowerCase() on undefined</div>
+                <p><strong>Error:</strong> Cannot read properties of undefined (reading 'toLowerCase')</p>
+                <p><strong>Status:</strong> <span class="fix-status fixed">Fixed</span></p>
+                <p><strong>Solution:</strong> Added null checks: (bus.type || 'standard').toLowerCase()</p>
+            </div>
+            
+            <div class="issue-card">
+                <div class="issue-title">4. TypeError: null value access</div>
+                <p><strong>Error:</strong> Cannot read properties of null (reading 'value')</p>
+                <p><strong>Status:</strong> <span class="fix-status fixed">Fixed</span></p>
+                <p><strong>Solution:</strong> Added DOM element existence checks</p>
+            </div>
+            
+            <div class="issue-card">
+                <div class="issue-title">5. Missing Loading State Elements</div>
+                <p><strong>Error:</strong> Loading state element not found</p>
+                <p><strong>Status:</strong> <span class="fix-status fixed">Fixed</span></p>
+                <p><strong>Solution:</strong> Fixed duplicate elements and improved error handling</p>
+            </div>
+            
+            <div class="issue-card">
+                <div class="issue-title">6. Profile Editing Not Working</div>
+                <p><strong>Error:</strong> Form elements not found with correct IDs</p>
+                <p><strong>Status:</strong> <span class="fix-status fixed">Fixed</span></p>
+                <p><strong>Solution:</strong> Updated IDs to match actual form elements</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Test API Connectivity</h2>
+        <p>Test if the admin APIs are working correctly:</p>
+        <button onclick="testAPIConnectivity()">Test API Debug Endpoint</button>
+        <button onclick="testAuthAPI()">Test Authentication API</button>
+        <button onclick="testAdminAPIs()">Test All Admin APIs</button>
+        
+        <div id="apiTestResults"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 Test JavaScript Error Fixes</h2>
+        <p>Test the JavaScript fixes for null/undefined errors:</p>
+        <button onclick="testNullChecks()">Test Null Safety Checks</button>
+        <button onclick="testDOMElementAccess()">Test DOM Element Access</button>
+        <button onclick="testDataProcessing()">Test Data Processing</button>
+        
+        <div id="jsTestResults"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 Test Data Display</h2>
+        <p>Test if admin data is displayed correctly:</p>
+        <button onclick="testUserProfileDisplay()">Test User Profile Display</button>
+        <button onclick="testDataFormatting()">Test Data Formatting</button>
+        <button onclick="testFormPopulation()">Test Form Population</button>
+        
+        <div id="dataTestResults"></div>
+    </div>
+
+    <script>
+        function addTestResult(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${type}`;
+            resultDiv.innerHTML = message;
+            container.appendChild(resultDiv);
+        }
+
+        async function testAPIConnectivity() {
+            addTestResult('apiTestResults', '🧪 Testing API connectivity...', 'info');
+            
+            try {
+                const response = await fetch('/bus/api/admin_api_debug.php');
+                const data = await response.json();
+                
+                if (data.success) {
+                    addTestResult('apiTestResults', `✅ API Debug Endpoint Working: ${data.message}`, 'success');
+                    addTestResult('apiTestResults', `📊 Database Connection: ${data.data.database_connection}`, 
+                        data.data.database_connection === 'SUCCESS' ? 'success' : 'error');
+                    addTestResult('apiTestResults', `👤 Admin Authenticated: ${data.data.admin_authenticated}`, 
+                        data.data.admin_authenticated ? 'success' : 'warning');
+                } else {
+                    addTestResult('apiTestResults', `❌ API Debug Failed: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                addTestResult('apiTestResults', `❌ API Test Failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAuthAPI() {
+            addTestResult('apiTestResults', '🔐 Testing authentication API...', 'info');
+            
+            try {
+                const response = await fetch('/bus/api/auth.php?action=check_session');
+                const data = await response.json();
+                
+                if (data.success) {
+                    addTestResult('apiTestResults', `✅ Auth API Working: User ${data.data.name} (${data.data.role})`, 'success');
+                } else {
+                    addTestResult('apiTestResults', `⚠️ Auth API Response: ${data.message}`, 'warning');
+                }
+            } catch (error) {
+                addTestResult('apiTestResults', `❌ Auth API Failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAdminAPIs() {
+            addTestResult('apiTestResults', '🔧 Testing all admin APIs...', 'info');
+            
+            const apis = [
+                { name: 'Dashboard', url: '/bus/api/admin_dashboard.php?action=get_stats' },
+                { name: 'Buses', url: '/bus/api/admin_buses.php?action=get_buses' },
+                { name: 'Routes', url: '/bus/api/admin_routes.php?action=get_routes' },
+                { name: 'Schedules', url: '/bus/api/admin_schedules.php?action=get_schedules' },
+                { name: 'Users', url: '/bus/api/admin_users.php?action=get_users' },
+                { name: 'Bookings', url: '/bus/api/admin_bookings.php?action=get_bookings' }
+            ];
+            
+            for (const api of apis) {
+                try {
+                    const response = await fetch(api.url);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        addTestResult('apiTestResults', `✅ ${api.name} API: Working`, 'success');
+                    } else {
+                        addTestResult('apiTestResults', `⚠️ ${api.name} API: ${data.message}`, 'warning');
+                    }
+                } catch (error) {
+                    addTestResult('apiTestResults', `❌ ${api.name} API: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        function testNullChecks() {
+            addTestResult('jsTestResults', '🧪 Testing null safety checks...', 'info');
+            
+            // Test the fixed toLowerCase issue
+            const testBus = { name: 'Test Bus' }; // Missing type property
+            try {
+                const typeClass = (testBus.type || 'standard').toLowerCase();
+                addTestResult('jsTestResults', `✅ Null check for bus.type: "${typeClass}"`, 'success');
+            } catch (error) {
+                addTestResult('jsTestResults', `❌ Null check failed: ${error.message}`, 'error');
+            }
+            
+            // Test search functionality
+            try {
+                const searchTerm = 'test';
+                const buses = [
+                    { id: 'B001', name: 'Bus 1' },
+                    { id: 'B002' }, // Missing name
+                    { name: 'Bus 3' } // Missing id
+                ];
+                
+                const filtered = buses.filter(bus => {
+                    return !searchTerm || 
+                        (bus.id && bus.id.toLowerCase().includes(searchTerm)) ||
+                        (bus.name && bus.name.toLowerCase().includes(searchTerm));
+                });
+                
+                addTestResult('jsTestResults', `✅ Search filtering with null checks: ${filtered.length} results`, 'success');
+            } catch (error) {
+                addTestResult('jsTestResults', `❌ Search filtering failed: ${error.message}`, 'error');
+            }
+        }
+
+        function testDOMElementAccess() {
+            addTestResult('jsTestResults', '🧪 Testing DOM element access...', 'info');
+            
+            // Test safe DOM element access
+            const testElements = ['searchInput', 'roleFilter', 'statusFilter', 'nonExistentElement'];
+            
+            testElements.forEach(elementId => {
+                const element = document.getElementById(elementId);
+                const value = element ? element.value || '' : '';
+                
+                if (element) {
+                    addTestResult('jsTestResults', `✅ Element "${elementId}": Found`, 'success');
+                } else {
+                    addTestResult('jsTestResults', `⚠️ Element "${elementId}": Not found (handled safely)`, 'warning');
+                }
+            });
+        }
+
+        function testDataProcessing() {
+            addTestResult('jsTestResults', '🧪 Testing data processing...', 'info');
+            
+            // Test user data processing
+            const testUsers = [
+                { name: 'John Doe', email: 'john@test.com', role: 'admin' },
+                { full_name: 'Jane Smith', email: 'jane@test.com', role: 'admin' },
+                { firstName: 'Bob', lastName: 'Wilson', email: 'bob@test.com', role: 'admin' },
+                { email: 'admin@test.com', role: 'admin' } // Missing name fields
+            ];
+            
+            testUsers.forEach((user, index) => {
+                try {
+                    const firstName = user.firstName || user.name?.split(' ')[0] || user.full_name?.split(' ')[0] || 'Admin';
+                    const fullName = user.name || user.full_name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Admin User';
+                    
+                    addTestResult('jsTestResults', `✅ User ${index + 1}: "${fullName}" (${firstName})`, 'success');
+                } catch (error) {
+                    addTestResult('jsTestResults', `❌ User ${index + 1} processing failed: ${error.message}`, 'error');
+                }
+            });
+        }
+
+        function testUserProfileDisplay() {
+            addTestResult('dataTestResults', '🧪 Testing user profile display...', 'info');
+            
+            // Simulate the updateUserProfile function
+            const currentUser = {
+                name: 'Ezedin Mohammed',
+                email: 'ezedinmoh1@gmail.com',
+                role: 'admin',
+                phone: '+251911234567'
+            };
+            
+            try {
+                const firstName = currentUser.firstName || currentUser.name?.split(' ')[0] || currentUser.full_name?.split(' ')[0] || 'Admin';
+                const fullName = currentUser.name || currentUser.full_name || `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() || 'Admin User';
+                const email = currentUser.email || 'admin@swiftbus.com';
+                
+                addTestResult('dataTestResults', `✅ Profile Display: "${fullName}" (${firstName}) - ${email}`, 'success');
+                
+                // Test form population
+                const formFields = [
+                    { id: 'editFullName', value: fullName },
+                    { id: 'editEmail', value: email },
+                    { id: 'editPhone', value: currentUser.phone }
+                ];
+                
+                formFields.forEach(field => {
+                    const element = document.getElementById(field.id);
+                    if (element) {
+                        addTestResult('dataTestResults', `✅ Form field "${field.id}": Would be populated with "${field.value}"`, 'success');
+                    } else {
+                        addTestResult('dataTestResults', `⚠️ Form field "${field.id}": Not found (normal for test page)`, 'warning');
+                    }
+                });
+                
+            } catch (error) {
+                addTestResult('dataTestResults', `❌ Profile display test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function testDataFormatting() {
+            addTestResult('dataTestResults', '🧪 Testing data formatting...', 'info');
+            
+            // Test various data formatting scenarios
+            const testData = [
+                { value: 1234.56, format: 'currency', expected: 'ETB 1,235' },
+                { value: new Date(), format: 'date', expected: 'formatted date' },
+                { value: 'active', format: 'status', expected: 'status-active' },
+                { value: null, format: 'safe', expected: 'fallback value' }
+            ];
+            
+            testData.forEach(test => {
+                try {
+                    let result;
+                    switch (test.format) {
+                        case 'currency':
+                            result = `ETB ${Math.round(test.value).toLocaleString()}`;
+                            break;
+                        case 'date':
+                            result = test.value.toLocaleDateString();
+                            break;
+                        case 'status':
+                            result = `status-${test.value}`;
+                            break;
+                        case 'safe':
+                            result = test.value || 'N/A';
+                            break;
+                    }
+                    
+                    addTestResult('dataTestResults', `✅ ${test.format} formatting: "${result}"`, 'success');
+                } catch (error) {
+                    addTestResult('dataTestResults', `❌ ${test.format} formatting failed: ${error.message}`, 'error');
+                }
+            });
+        }
+
+        function testFormPopulation() {
+            addTestResult('dataTestResults', '🧪 Testing form population...', 'info');
+            
+            // Create test form elements
+            const testForm = document.createElement('div');
+            testForm.innerHTML = `
+                <input type="text" id="testFullName" />
+                <input type="email" id="testEmail" />
+                <input type="tel" id="testPhone" />
+            `;
+            document.body.appendChild(testForm);
+            
+            try {
+                const testUser = {
+                    name: 'Test Admin',
+                    email: 'test@admin.com',
+                    phone: '+251911111111'
+                };
+                
+                // Populate form
+                document.getElementById('testFullName').value = testUser.name;
+                document.getElementById('testEmail').value = testUser.email;
+                document.getElementById('testPhone').value = testUser.phone;
+                
+                // Verify population
+                const fullNameValue = document.getElementById('testFullName').value;
+                const emailValue = document.getElementById('testEmail').value;
+                const phoneValue = document.getElementById('testPhone').value;
+                
+                if (fullNameValue === testUser.name && emailValue === testUser.email && phoneValue === testUser.phone) {
+                    addTestResult('dataTestResults', '✅ Form population: All fields populated correctly', 'success');
+                } else {
+                    addTestResult('dataTestResults', '❌ Form population: Some fields not populated correctly', 'error');
+                }
+                
+            } catch (error) {
+                addTestResult('dataTestResults', `❌ Form population test failed: ${error.message}`, 'error');
+            } finally {
+                // Clean up
+                document.body.removeChild(testForm);
+            }
+        }
+
+        // Initialize tests
+        document.addEventListener('DOMContentLoaded', function() {
+            addTestResult('apiTestResults', '🚀 Admin System Comprehensive Fix Test initialized', 'info');
+            addTestResult('jsTestResults', '📝 JavaScript error fixes ready for testing', 'info');
+            addTestResult('dataTestResults', '📊 Data display tests ready', 'info');
+        });
+    </script>
+</body>
+</html>

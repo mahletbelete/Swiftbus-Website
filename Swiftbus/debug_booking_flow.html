@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Booking Flow</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .debug-section {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .success { border-left: 4px solid #28a745; background: #d4edda; }
+        .error { border-left: 4px solid #dc3545; background: #f8d7da; }
+        .warning { border-left: 4px solid #ffc107; background: #fff3cd; }
+        .info { border-left: 4px solid #17a2b8; background: #d1ecf1; }
+        
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #005a87; }
+        
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+        }
+        
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .step-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Booking Flow</h1>
+    <p>This will help us understand why bookings aren't appearing in My Tickets.</p>
+    
+    <div class="debug-section">
+        <button onclick="checkCurrentUser()">1️⃣ Check Current User</button>
+        <button onclick="checkRecentBookings()">2️⃣ Check Recent Bookings</button>
+        <button onclick="testMyTicketsAPI()">3️⃣ Test My Tickets API</button>
+        <button onclick="runFullDiagnosis()">🚀 Run Full Diagnosis</button>
+        <button onclick="clearResults()">🗑️ Clear Results</button>
+    </div>
+    
+    <div id="results"></div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let debugResults = [];
+        
+        function addStep(title, content, type = 'info', data = null) {
+            const step = {
+                title,
+                content,
+                type,
+                data,
+                timestamp: new Date().toLocaleTimeString()
+            };
+            debugResults.push(step);
+            displayResults();
+        }
+        
+        function displayResults() {
+            const container = document.getElementById('results');
+            container.innerHTML = debugResults.map(step => `
+                <div class="debug-section ${step.type}">
+                    <div class="step-title">[${step.timestamp}] ${step.title}</div>
+                    <div>${step.content}</div>
+                    ${step.data ? `<pre>${JSON.stringify(step.data, null, 2)}</pre>` : ''}
+                </div>
+            `).join('');
+        }
+        
+        function clearResults() {
+            debugResults = [];
+            displayResults();
+        }
+        
+        async function checkCurrentUser() {
+            addStep('🔐 Checking Current User', 'Verifying who is currently logged in...', 'info');
+            
+            try {
+                const response = await swiftBusAPI.checkSession();
+                
+                if (response.success && response.data) {
+                    addStep('✅ User Session Found', `
+                        Current user details:<br>
+                        • User ID: ${response.data.user_id}<br>
+                        • Name: ${response.data.full_name || response.data.name}<br>
+                        • Email: ${response.data.email}<br>
+                        • Role: ${response.data.role}
+                    `, 'success', response.data);
+                    
+                    window.currentUserData = response.data;
+                    return response.data;
+                } else {
+                    addStep('❌ No User Session', `
+                        User is not logged in or session expired.<br>
+                        Please <a href="login.html">login first</a>.
+                    `, 'error');
+                    return null;
+                }
+            } catch (error) {
+                addStep('❌ Session Check Failed', `
+                    Error checking user session: ${error.message}
+                `, 'error');
+                return null;
+            }
+        }
+        
+        async function checkRecentBookings() {
+            addStep('📋 Checking Recent Bookings', 'Looking for recent bookings in database...', 'info');
+            
+            try {
+                // First check if user is logged in
+                const user = await checkCurrentUser();
+                if (!user) return;
+                
+                // Make direct API call to check bookings
+                const response = await fetch('api/booking_clean.php?action=get_user_bookings');
+                const text = await response.text();
+                
+                addStep('📄 Raw API Response', 'Direct API response:', 'info');
+                console.log('Raw response:', text);
+                
+                try {
+                    const data = JSON.parse(text);
+                    
+                    if (data.success) {
+                        if (data.data && data.data.bookings && data.data.bookings.length > 0) {
+                            addStep('✅ Bookings Found via API', `
+                                Found ${data.data.bookings.length} booking(s) via API:<br>
+                                • Total in database: ${data.data.total}<br>
+                                • Returned in this call: ${data.data.bookings.length}
+                            `, 'success');
+                            
+                            // Show details of each booking
+                            data.data.bookings.forEach((booking, index) => {
+                                addStep(`🎫 Booking ${index + 1}`, `
+                                    Booking ID: ${booking.booking_id}<br>
+                                    Route: ${booking.from_city} → ${booking.to_city}<br>
+                                    Date: ${booking.departure_date || booking.travel_date}<br>
+                                    Status: ${booking.booking_status}<br>
+                                    Payment: ${booking.payment_status}
+                                `, 'info', booking);
+                            });
+                        } else {
+                            addStep('⚠️ No Bookings Found via API', `
+                                API call succeeded but returned no bookings.<br>
+                                This means either:<br>
+                                • No bookings exist for this user<br>
+                                • There's a user ID mismatch<br>
+                                • Bookings exist but query is not finding them
+                            `, 'warning', data);
+                        }
+                    } else {
+                        addStep('❌ API Error', `
+                            API returned error: ${data.message}
+                        `, 'error', data);
+                    }
+                } catch (parseError) {
+                    addStep('❌ JSON Parse Error', `
+                        API returned non-JSON response:<br>
+                        Parse Error: ${parseError.message}<br>
+                        Raw Response: ${text.substring(0, 500)}...
+                    `, 'error');
+                }
+                
+            } catch (error) {
+                addStep('❌ Booking Check Failed', `
+                    Error checking bookings: ${error.message}
+                `, 'error');
+            }
+        }
+        
+        async function testMyTicketsAPI() {
+            addStep('🎯 Testing My Tickets API', 'Testing the exact API call that my-tickets.html makes...', 'info');
+            
+            try {
+                const response = await swiftBusAPI.getUserBookings();
+                
+                addStep('📊 My Tickets API Response', 'Response from swiftBusAPI.getUserBookings():', 'info', response);
+                
+                if (response.success) {
+                    if (response.data && response.data.bookings && response.data.bookings.length > 0) {
+                        addStep('✅ My Tickets API Success', `
+                            My Tickets API found ${response.data.bookings.length} booking(s).<br>
+                            This means the API is working correctly.
+                        `, 'success');
+                        
+                        // Test data processing
+                        try {
+                            const processedTickets = response.data.bookings.map(booking => {
+                                return processBookingData(booking);
+                            });
+                            
+                            addStep('✅ Data Processing Success', `
+                                Successfully processed ${processedTickets.length} ticket(s).<br>
+                                The data processing is working correctly.
+                            `, 'success', processedTickets[0]);
+                            
+                        } catch (processError) {
+                            addStep('❌ Data Processing Failed', `
+                                Error processing booking data: ${processError.message}<br>
+                                This is likely where the issue is!
+                            `, 'error');
+                        }
+                        
+                    } else {
+                        addStep('⚠️ My Tickets API Empty', `
+                            My Tickets API succeeded but returned no bookings.<br>
+                            This explains why my-tickets.html shows "No Tickets Found".
+                        `, 'warning', response);
+                    }
+                } else {
+                    addStep('❌ My Tickets API Failed', `
+                        My Tickets API returned error: ${response.message}
+                    `, 'error', response);
+                }
+                
+            } catch (error) {
+                addStep('❌ My Tickets API Error', `
+                    Error calling My Tickets API: ${error.message}
+                `, 'error');
+            }
+        }
+        
+        async function runFullDiagnosis() {
+            clearResults();
+            addStep('🚀 Starting Full Diagnosis', 'Running comprehensive diagnosis...', 'info');
+            
+            // Step 1: Check user
+            const user = await checkCurrentUser();
+            if (!user) {
+                addStep('🛑 Diagnosis Stopped', 'Cannot continue without valid user session', 'error');
+                return;
+            }
+            
+            // Step 2: Check bookings
+            await checkRecentBookings();
+            
+            // Step 3: Test My Tickets API
+            await testMyTicketsAPI();
+            
+            // Step 4: Check database directly
+            await checkDatabaseDirectly();
+            
+            addStep('✅ Diagnosis Complete', 'Full diagnosis completed. Review results above.', 'success');
+        }
+        
+        async function checkDatabaseDirectly() {
+            addStep('🗄️ Checking Database Directly', 'Making direct database query...', 'info');
+            
+            try {
+                const response = await fetch('check_bookings_database.php');
+                const html = await response.text();
+                
+                if (html.includes('Bookings for current user')) {
+                    // Extract the number from the HTML
+                    const match = html.match(/Bookings for current user[^:]*:\s*(\d+)/);
+                    if (match) {
+                        const bookingCount = parseInt(match[1]);
+                        if (bookingCount > 0) {
+                            addStep('✅ Database Has Bookings', `
+                                Database shows ${bookingCount} booking(s) for current user.<br>
+                                The bookings exist in the database.
+                            `, 'success');
+                        } else {
+                            addStep('⚠️ Database Shows No Bookings', `
+                                Database shows 0 bookings for current user.<br>
+                                This means bookings are either:<br>
+                                • Not being created properly<br>
+                                • Created under a different user ID<br>
+                                • Being deleted after creation
+                            `, 'warning');
+                        }
+                    }
+                } else {
+                    addStep('❌ Database Check Failed', `
+                        Could not parse database check results.<br>
+                        Please check check_bookings_database.php manually.
+                    `, 'error');
+                }
+                
+            } catch (error) {
+                addStep('❌ Database Check Error', `
+                    Error checking database: ${error.message}
+                `, 'error');
+            }
+        }
+        
+        // Simple booking data processor for testing
+        function processBookingData(booking) {
+            const today = new Date();
+            const departureDate = new Date(booking.departure_date || booking.travel_date);
+            let status = booking.booking_status || 'confirmed';
+            
+            if (status === 'confirmed' && departureDate < today) {
+                status = 'completed';
+            }
+            
+            let passengerDetails = {};
+            if (booking.passenger_details) {
+                if (typeof booking.passenger_details === 'string') {
+                    try {
+                        passengerDetails = JSON.parse(booking.passenger_details);
+                    } catch (e) {
+                        passengerDetails = {};
+                    }
+                } else {
+                    passengerDetails = booking.passenger_details;
+                }
+            }
+            
+            let selectedSeats = [];
+            if (booking.selected_seats) {
+                if (typeof booking.selected_seats === 'string') {
+                    try {
+                        selectedSeats = JSON.parse(booking.selected_seats);
+                    } catch (e) {
+                        selectedSeats = ['N/A'];
+                    }
+                } else if (Array.isArray(booking.selected_seats)) {
+                    selectedSeats = booking.selected_seats;
+                } else {
+                    selectedSeats = ['N/A'];
+                }
+            } else {
+                selectedSeats = ['N/A'];
+            }
+            
+            return {
+                id: booking.booking_id,
+                bookingId: booking.booking_id,
+                fromCity: booking.from_city_display || booking.from_city,
+                toCity: booking.to_city_display || booking.to_city,
+                departureDate: booking.departure_date || booking.travel_date,
+                departureTime: booking.departure_time,
+                busCompany: booking.company_name || booking.bus_company_display || booking.bus_company,
+                busType: booking.bus_type_display || booking.bus_type || 'Standard Bus',
+                passengerCount: booking.passenger_count || 1,
+                seats: selectedSeats,
+                totalAmount: booking.total_amount,
+                paymentMethod: booking.payment_method || booking.payment_status || 'Unknown',
+                bookingDate: booking.booking_date || booking.created_at,
+                status: status,
+                passengerName: passengerDetails.fullName || (window.currentUserData ? (window.currentUserData.name || window.currentUserData.full_name) : 'Passenger'),
+                passengerEmail: passengerDetails.email || (window.currentUserData ? window.currentUserData.email : 'N/A')
+            };
+        }
+        
+        // Auto-run basic check on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            addStep('🔍 Debug Tool Ready', 'Click buttons above to start diagnosis', 'info');
+        });
+    </script>
+</body>
+</html>

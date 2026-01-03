@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Logout Functionality</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .info { color: blue; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        .storage-item { background: #f5f5f5; padding: 10px; margin: 5px 0; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>🚪 Logout Functionality Test</h1>
+    
+    <div class="test-section">
+        <h3>Step 1: Create Test Session Data</h3>
+        <button onclick="createTestSession()">Create Test Session</button>
+        <div id="sessionResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Step 2: Check Current Storage</h3>
+        <button onclick="checkStorage()">Check localStorage & sessionStorage</button>
+        <div id="storageResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Step 3: Test Logout Function</h3>
+        <button onclick="testLogout()">Test Logout Function</button>
+        <div id="logoutResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Step 4: Verify Data Cleared</h3>
+        <button onclick="verifyCleared()">Verify All Data Cleared</button>
+        <div id="verifyResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Step 5: Test Dashboard Logout Button</h3>
+        <a href="user-dashboard.html" target="_blank" style="display: inline-block; padding: 10px 15px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;">Open Dashboard & Test Logout</a>
+        <p class="info">Open the dashboard and click the logout button in the user dropdown menu</p>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        function createTestSession() {
+            // Create test user session data
+            const testUser = {
+                id: 1,
+                user_id: 'USR001',
+                name: 'Test User',
+                email: 'test@example.com',
+                role: 'user'
+            };
+            
+            // Store in various formats
+            localStorage.setItem('swiftbus_user', JSON.stringify(testUser));
+            localStorage.setItem('swiftbus_session', 'test_session_token');
+            localStorage.setItem('swiftbus_auth_token', 'test_auth_token');
+            sessionStorage.setItem('user_session', 'active');
+            
+            // Create some test tickets
+            const testTickets = [
+                {
+                    bookingId: 'BK123456',
+                    fromCity: 'Addis Ababa',
+                    toCity: 'Bahirdar',
+                    status: 'confirmed'
+                }
+            ];
+            localStorage.setItem('swiftbus_tickets', JSON.stringify(testTickets));
+            localStorage.setItem('swiftbus_confirmation', JSON.stringify(testTickets[0]));
+            
+            document.getElementById('sessionResult').innerHTML = `
+                <div class="success">✅ Test session data created successfully!</div>
+                <div class="info">Created: swiftbus_user, swiftbus_session, swiftbus_auth_token, user_session, swiftbus_tickets, swiftbus_confirmation</div>
+            `;
+        }
+        
+        function checkStorage() {
+            let html = '<h4>Current Storage Contents:</h4>';
+            
+            // Check localStorage
+            html += '<h5>localStorage:</h5>';
+            let localCount = 0;
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                html += `<div class="storage-item"><strong>${key}:</strong> ${value.substring(0, 100)}${value.length > 100 ? '...' : ''}</div>`;
+                localCount++;
+            }
+            html += `<div class="info">Total localStorage items: ${localCount}</div>`;
+            
+            // Check sessionStorage
+            html += '<h5>sessionStorage:</h5>';
+            let sessionCount = 0;
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                const value = sessionStorage.getItem(key);
+                html += `<div class="storage-item"><strong>${key}:</strong> ${value}</div>`;
+                sessionCount++;
+            }
+            html += `<div class="info">Total sessionStorage items: ${sessionCount}</div>`;
+            
+            document.getElementById('storageResult').innerHTML = html;
+        }
+        
+        async function testLogout() {
+            try {
+                document.getElementById('logoutResult').innerHTML = '<div class="info">🔄 Testing logout function...</div>';
+                
+                // Simulate the enhanced logout function from dashboard
+                console.log('🚪 Testing logout...');
+                
+                // Call backend logout API if available
+                if (typeof swiftBusAPI !== 'undefined') {
+                    try {
+                        console.log('📡 Calling backend logout API...');
+                        const response = await swiftBusAPI.request('auth.php?action=logout');
+                        console.log('✅ Backend logout response:', response);
+                    } catch (apiError) {
+                        console.warn('⚠️ Backend logout failed:', apiError.message);
+                    }
+                }
+                
+                // Clear all session and user data from localStorage
+                console.log('🧹 Clearing localStorage data...');
+                const keysToRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && (key.startsWith('swiftbus_') || key.includes('user') || key.includes('session') || key.includes('auth'))) {
+                        keysToRemove.push(key);
+                    }
+                }
+                
+                keysToRemove.forEach(key => {
+                    localStorage.removeItem(key);
+                    console.log(`🗑️ Removed: ${key}`);
+                });
+                
+                // Clear session storage
+                sessionStorage.clear();
+                
+                console.log('✅ Logout test completed');
+                
+                document.getElementById('logoutResult').innerHTML = `
+                    <div class="success">✅ Logout function test completed!</div>
+                    <div class="info">Cleared ${keysToRemove.length} localStorage items</div>
+                    <div class="info">Cleared all sessionStorage items</div>
+                    <div class="info">Items removed: ${keysToRemove.join(', ')}</div>
+                `;
+                
+            } catch (error) {
+                document.getElementById('logoutResult').innerHTML = `
+                    <div class="error">❌ Logout test failed: ${error.message}</div>
+                `;
+            }
+        }
+        
+        function verifyCleared() {
+            let html = '<h4>Verification Results:</h4>';
+            
+            // Check if SwiftBus data is cleared
+            const swiftBusKeys = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('swiftbus_')) {
+                    swiftBusKeys.push(key);
+                }
+            }
+            
+            if (swiftBusKeys.length === 0) {
+                html += '<div class="success">✅ All SwiftBus localStorage data cleared</div>';
+            } else {
+                html += `<div class="error">❌ ${swiftBusKeys.length} SwiftBus items still remain: ${swiftBusKeys.join(', ')}</div>`;
+            }
+            
+            // Check sessionStorage
+            if (sessionStorage.length === 0) {
+                html += '<div class="success">✅ All sessionStorage data cleared</div>';
+            } else {
+                html += `<div class="error">❌ ${sessionStorage.length} sessionStorage items still remain</div>`;
+            }
+            
+            // Check for any user/auth related keys
+            const authKeys = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.includes('user') || key.includes('session') || key.includes('auth'))) {
+                    authKeys.push(key);
+                }
+            }
+            
+            if (authKeys.length === 0) {
+                html += '<div class="success">✅ No user/auth data found in localStorage</div>';
+            } else {
+                html += `<div class="error">❌ ${authKeys.length} user/auth items still remain: ${authKeys.join(', ')}</div>`;
+            }
+            
+            document.getElementById('verifyResult').innerHTML = html;
+        }
+        
+        // Show notification function for testing
+        function showNotification(message, type = 'info') {
+            console.log(`Notification [${type}]: ${message}`);
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#d4edda' : type === 'error' ? '#f8d7da' : '#d1ecf1'};
+                color: ${type === 'success' ? '#155724' : type === 'error' ? '#721c24' : '#0c5460'};
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+                z-index: 10000;
+                min-width: 300px;
+                border-left: 4px solid ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8'};
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

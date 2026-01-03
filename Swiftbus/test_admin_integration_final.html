@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Integration Test - SwiftBus</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid;
+        }
+        .success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border-color: #17a2b8;
+            color: #0c5460;
+        }
+        .warning {
+            background: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #007bff;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Admin Integration Test Suite</h1>
+    <p>Testing the admin integration script and unified API functionality.</p>
+
+    <div class="test-section">
+        <h2>📋 Test Results</h2>
+        <div id="testResults"></div>
+        <button onclick="runAllTests()">🚀 Run All Tests</button>
+        <button onclick="clearResults()">🧹 Clear Results</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 Dashboard Statistics</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalBookings">-</div>
+                <div class="stat-label">Total Bookings</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalUsers">-</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalRevenue">-</div>
+                <div class="stat-label">Total Revenue</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="activeBuses">-</div>
+                <div class="stat-label">Active Buses</div>
+            </div>
+        </div>
+        <button onclick="testDashboardData()">📈 Test Dashboard Data</button>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 API Test Results</h2>
+        <div id="apiResults"></div>
+        <button onclick="testUnifiedAPI()">🌐 Test Unified API</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 Console Logs</h2>
+        <pre id="consoleLogs"></pre>
+        <button onclick="clearLogs()">🧹 Clear Logs</button>
+    </div>
+
+    <!-- Load required scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/admin-integration.js"></script>
+
+    <script>
+        let testResults = [];
+        let consoleLogs = [];
+
+        // Override console.log to capture logs
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+        
+        console.log = function(...args) {
+            consoleLogs.push(`[LOG] ${new Date().toLocaleTimeString()}: ${args.join(' ')}`);
+            updateConsoleLogs();
+            originalConsoleLog.apply(console, args);
+        };
+        
+        console.error = function(...args) {
+            consoleLogs.push(`[ERROR] ${new Date().toLocaleTimeString()}: ${args.join(' ')}`);
+            updateConsoleLogs();
+            originalConsoleError.apply(console, args);
+        };
+
+        function addTestResult(test, status, message, details = null) {
+            const result = {
+                test,
+                status,
+                message,
+                details,
+                timestamp: new Date().toLocaleTimeString()
+            };
+            testResults.push(result);
+            updateTestResults();
+        }
+
+        function updateTestResults() {
+            const container = document.getElementById('testResults');
+            container.innerHTML = testResults.map(result => `
+                <div class="test-result ${result.status}">
+                    <strong>[${result.timestamp}] ${result.test}</strong><br>
+                    ${result.message}
+                    ${result.details ? `<pre>${JSON.stringify(result.details, null, 2)}</pre>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function updateConsoleLogs() {
+            const container = document.getElementById('consoleLogs');
+            container.textContent = consoleLogs.slice(-20).join('\n'); // Show last 20 logs
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function clearResults() {
+            testResults = [];
+            updateTestResults();
+        }
+
+        function clearLogs() {
+            consoleLogs = [];
+            updateConsoleLogs();
+        }
+
+        async function runAllTests() {
+            clearResults();
+            addTestResult('Test Suite', 'info', 'Starting comprehensive admin integration tests...');
+
+            // Test 1: Check if scripts are loaded
+            await testScriptLoading();
+            
+            // Test 2: Test API initialization
+            await testAPIInitialization();
+            
+            // Test 3: Test admin data manager
+            await testAdminDataManager();
+            
+            // Test 4: Test unified API endpoints
+            await testUnifiedAPI();
+            
+            // Test 5: Test dashboard data loading
+            await testDashboardData();
+
+            addTestResult('Test Suite', 'success', 'All tests completed! Check individual results above.');
+        }
+
+        async function testScriptLoading() {
+            try {
+                // Check if API script is loaded
+                if (typeof swiftBusAPI !== 'undefined') {
+                    addTestResult('Script Loading', 'success', 'swiftBusAPI is loaded and available');
+                } else {
+                    addTestResult('Script Loading', 'error', 'swiftBusAPI is not loaded');
+                }
+
+                // Check if admin integration script is loaded
+                if (typeof window.simpleAdminDataManager !== 'undefined') {
+                    addTestResult('Script Loading', 'success', 'Admin integration script is loaded');
+                } else {
+                    addTestResult('Script Loading', 'warning', 'Admin integration script may not be fully initialized yet');
+                }
+
+            } catch (error) {
+                addTestResult('Script Loading', 'error', 'Error checking script loading: ' + error.message);
+            }
+        }
+
+        async function testAPIInitialization() {
+            try {
+                if (typeof swiftBusAPI === 'undefined') {
+                    addTestResult('API Initialization', 'error', 'swiftBusAPI is not available');
+                    return;
+                }
+
+                // Test basic API properties
+                const apiInfo = {
+                    baseURL: swiftBusAPI.baseURL || 'Not set',
+                    apiURL: swiftBusAPI.apiURL || 'Not set'
+                };
+
+                addTestResult('API Initialization', 'success', 'API initialized successfully', apiInfo);
+
+            } catch (error) {
+                addTestResult('API Initialization', 'error', 'API initialization failed: ' + error.message);
+            }
+        }
+
+        async function testAdminDataManager() {
+            try {
+                // Wait a bit for the data manager to initialize
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                if (typeof window.simpleAdminDataManager !== 'undefined') {
+                    addTestResult('Admin Data Manager', 'success', 'Admin data manager is available');
+                    
+                    // Test data manager methods
+                    if (typeof window.simpleAdminDataManager.getData === 'function') {
+                        addTestResult('Admin Data Manager', 'success', 'getData method is available');
+                    } else {
+                        addTestResult('Admin Data Manager', 'error', 'getData method is not available');
+                    }
+                } else {
+                    addTestResult('Admin Data Manager', 'warning', 'Admin data manager is not yet available');
+                }
+
+            } catch (error) {
+                addTestResult('Admin Data Manager', 'error', 'Error testing admin data manager: ' + error.message);
+            }
+        }
+
+        async function testUnifiedAPI() {
+            try {
+                if (typeof swiftBusAPI === 'undefined') {
+                    addTestResult('Unified API', 'error', 'swiftBusAPI is not available');
+                    return;
+                }
+
+                addTestResult('Unified API', 'info', 'Testing unified API endpoints...');
+
+                // Test dashboard data endpoint
+                try {
+                    const dashboardResponse = await swiftBusAPI.request('api/admin_unified.php?action=get_dashboard_data');
+                    if (dashboardResponse.success) {
+                        addTestResult('Unified API', 'success', 'Dashboard data endpoint working', {
+                            data_keys: Object.keys(dashboardResponse.data || {}),
+                            metadata: dashboardResponse.metadata
+                        });
+                        
+                        // Update API results display
+                        document.getElementById('apiResults').innerHTML = `
+                            <div class="test-result success">
+                                <strong>Dashboard API Response:</strong>
+                                <pre>${JSON.stringify(dashboardResponse, null, 2)}</pre>
+                            </div>
+                        `;
+                    } else {
+                        addTestResult('Unified API', 'warning', 'Dashboard endpoint returned error: ' + dashboardResponse.message);
+                    }
+                } catch (apiError) {
+                    addTestResult('Unified API', 'error', 'Dashboard API failed: ' + apiError.message);
+                    
+                    document.getElementById('apiResults').innerHTML = `
+                        <div class="test-result error">
+                            <strong>API Error:</strong> ${apiError.message}
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                addTestResult('Unified API', 'error', 'Error testing unified API: ' + error.message);
+            }
+        }
+
+        async function testDashboardData() {
+            try {
+                addTestResult('Dashboard Data', 'info', 'Testing dashboard data loading...');
+
+                if (typeof window.simpleAdminDataManager !== 'undefined') {
+                    try {
+                        const dashboardData = await window.simpleAdminDataManager.getData('dashboard');
+                        
+                        if (dashboardData) {
+                            addTestResult('Dashboard Data', 'success', 'Dashboard data loaded successfully', {
+                                data_structure: Object.keys(dashboardData),
+                                sample_data: dashboardData
+                            });
+
+                            // Update dashboard display
+                            updateDashboardDisplay(dashboardData);
+                        } else {
+                            addTestResult('Dashboard Data', 'warning', 'Dashboard data is empty or null');
+                        }
+                    } catch (dataError) {
+                        addTestResult('Dashboard Data', 'error', 'Failed to load dashboard data: ' + dataError.message);
+                    }
+                } else {
+                    addTestResult('Dashboard Data', 'warning', 'Admin data manager not available for testing');
+                }
+
+            } catch (error) {
+                addTestResult('Dashboard Data', 'error', 'Error testing dashboard data: ' + error.message);
+            }
+        }
+
+        function updateDashboardDisplay(data) {
+            try {
+                // Update stats display
+                if (data.bookings) {
+                    document.getElementById('totalBookings').textContent = data.bookings.month?.total || data.bookings.month?.count || 0;
+                }
+                if (data.users) {
+                    document.getElementById('totalUsers').textContent = data.users.total || 0;
+                }
+                if (data.bookings && data.bookings.month) {
+                    const revenue = data.bookings.month.revenue || 0;
+                    document.getElementById('totalRevenue').textContent = `ETB ${revenue.toLocaleString()}`;
+                }
+                if (data.buses) {
+                    document.getElementById('activeBuses').textContent = data.buses.total || 0;
+                }
+
+                addTestResult('Dashboard Display', 'success', 'Dashboard statistics updated successfully');
+            } catch (error) {
+                addTestResult('Dashboard Display', 'error', 'Error updating dashboard display: ' + error.message);
+            }
+        }
+
+        // Initialize tests when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            addTestResult('Page Load', 'info', 'Test page loaded successfully');
+            
+            // Wait a bit for scripts to initialize, then run basic tests
+            setTimeout(() => {
+                testScriptLoading();
+                testAPIInitialization();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

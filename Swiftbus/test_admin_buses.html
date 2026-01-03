@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Buses - SwiftBus</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-title {
+            color: #1a73e8;
+            border-bottom: 2px solid #1a73e8;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .test-result {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .btn {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover { background: #0d47a1; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border: 1px solid #e9ecef;
+        }
+        .bus-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .bus-header {
+            font-weight: bold;
+            color: #1a73e8;
+            margin-bottom: 10px;
+        }
+        .bus-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .detail-item {
+            background: white;
+            padding: 8px;
+            border-radius: 3px;
+            border-left: 3px solid #1a73e8;
+        }
+        .detail-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+        }
+        .detail-value {
+            font-weight: bold;
+            color: #333;
+        }
+        .type-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .type-standard { background: #6c757d; color: white; }
+        .type-vip { background: #ffc107; color: #212529; }
+        .type-luxury { background: #1a73e8; color: white; }
+    </style>
+</head>
+<body>
+    <h1>🚌 Admin Buses API Test</h1>
+    
+    <div class="test-container">
+        <h2 class="test-title">Authentication Test</h2>
+        <button class="btn" onclick="testAuthentication()">Test Authentication</button>
+        <div id="authResult"></div>
+    </div>
+
+    <div class="test-container">
+        <h2 class="test-title">Buses API Tests</h2>
+        <button class="btn" onclick="testGetBuses()">Get All Buses</button>
+        <button class="btn" onclick="testGetBusesWithFilters()">Get Buses with Filters</button>
+        <button class="btn" onclick="testCreateBus()">Create Sample Bus</button>
+        <button class="btn" onclick="testUpdateBus()">Update Bus</button>
+        <button class="btn btn-danger" onclick="testDeleteBus()">Delete Bus</button>
+        <div id="busesResult"></div>
+    </div>
+
+    <div class="test-container">
+        <h2 class="test-title">Buses Display</h2>
+        <div id="busesDisplay"></div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let swiftBusAPI;
+        let testBusId = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof SwiftBusAPI !== 'undefined') {
+                swiftBusAPI = new SwiftBusAPI();
+                console.log('✅ SwiftBusAPI initialized for testing');
+                showResult('authResult', 'API initialized successfully', 'info');
+            } else {
+                showResult('authResult', 'SwiftBusAPI not available', 'error');
+            }
+        });
+
+        async function testAuthentication() {
+            try {
+                showResult('authResult', 'Testing authentication...', 'info');
+                
+                const response = await swiftBusAPI.checkSession();
+                console.log('Auth response:', response);
+                
+                if (response.success && response.data) {
+                    const userData = response.data;
+                    if (userData.role === 'admin') {
+                        showResult('authResult', 
+                            `✅ Admin authenticated successfully!<br>
+                            Name: ${userData.name || userData.full_name}<br>
+                            Role: ${userData.role}<br>
+                            Email: ${userData.email}`, 'success');
+                    } else {
+                        showResult('authResult', 
+                            `❌ Admin access required. Current role: ${userData.role}`, 'error');
+                    }
+                } else {
+                    showResult('authResult', '❌ Authentication failed: ' + (response.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Auth test error:', error);
+                showResult('authResult', '❌ Authentication test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testGetBuses() {
+            try {
+                showResult('busesResult', 'Loading all buses...', 'info');
+                
+                const response = await swiftBusAPI.request('admin_buses.php?action=get_buses');
+                console.log('Get buses response:', response);
+                
+                if (response.success && response.data) {
+                    const buses = response.data;
+                    showResult('busesResult', 
+                        `✅ Successfully loaded ${buses.length} buses`, 'success');
+                    
+                    displayBuses(buses);
+                } else {
+                    showResult('busesResult', '❌ Failed to load buses: ' + (response.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Get buses test error:', error);
+                showResult('busesResult', '❌ Get buses test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testGetBusesWithFilters() {
+            try {
+                showResult('busesResult', 'Loading buses with filters...', 'info');
+                
+                const response = await swiftBusAPI.request('admin_buses.php?action=get_buses&type=VIP&search=Swift');
+                console.log('Get filtered buses response:', response);
+                
+                if (response.success && response.data) {
+                    const buses = response.data;
+                    showResult('busesResult', 
+                        `✅ Successfully loaded ${buses.length} filtered buses (VIP type, search: "Swift")`, 'success');
+                    
+                    displayBuses(buses);
+                } else {
+                    showResult('busesResult', '❌ Failed to load filtered buses: ' + (response.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Get filtered buses test error:', error);
+                showResult('busesResult', '❌ Get filtered buses test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testCreateBus() {
+            try {
+                showResult('busesResult', 'Creating test bus...', 'info');
+                
+                const busData = {
+                    name: 'Test Bus Express',
+                    type: 'Standard',
+                    capacity: 45,
+                    plate_number: 'ET-TEST-999',
+                    status: 'active',
+                    manufacturer: 'Test Motors',
+                    year: 2023
+                };
+                
+                const response = await swiftBusAPI.request('admin_buses.php', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'create_bus',
+                        ...busData
+                    })
+                });
+                
+                console.log('Create bus response:', response);
+                
+                if (response.success && response.data) {
+                    testBusId = response.data.id;
+                    showResult('busesResult', 
+                        `✅ Successfully created bus: ${response.data.id}<br>
+                        Name: ${response.data.name}<br>
+                        Type: ${response.data.type}<br>
+                        Capacity: ${response.data.capacity} seats<br>
+                        Plate: ${response.data.plate_number}`, 'success');
+                } else {
+                    showResult('busesResult', '❌ Failed to create bus: ' + (response.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Create bus test error:', error);
+                showResult('busesResult', '❌ Create bus test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testUpdateBus() {
+            if (!testBusId) {
+                showResult('busesResult', '❌ No test bus available. Create a bus first.', 'error');
+                return;
+            }
+            
+            try {
+                showResult('busesResult', 'Updating test bus...', 'info');
+                
+                const updateData = {
+                    action: 'update_bus',
+                    id: testBusId,
+                    name: 'Updated Test Bus Express',
+                    capacity: 50,
+                    status: 'maintenance'
+                };
+                
+                const response = await swiftBusAPI.request('admin_buses.php', {
+                    method: 'POST',
+                    body: JSON.stringify(updateData)
+                });
+                
+                console.log('Update bus response:', response);
+                
+                if (response.success && response.data) {
+                    showResult('busesResult', 
+                        `✅ Successfully updated bus: ${response.data.id}<br>
+                        Name: ${response.data.name}<br>
+                        Capacity: ${response.data.capacity} seats<br>
+                        Status: ${response.data.status}`, 'success');
+                } else {
+                    showResult('busesResult', '❌ Failed to update bus: ' + (response.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Update bus test error:', error);
+                showResult('busesResult', '❌ Update bus test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testDeleteBus() {
+            if (!testBusId) {
+                showResult('busesResult', '❌ No test bus available. Create a bus first.', 'error');
+                return;
+            }
+            
+            if (!confirm(`Are you sure you want to delete test bus ${testBusId}?`)) {
+                return;
+            }
+            
+            try {
+                showResult('busesResult', 'Deleting test bus...', 'info');
+                
+                const response = await swiftBusAPI.request('admin_buses.php', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'delete_bus',
+                        id: testBusId
+                    })
+                });
+                
+                console.log('Delete bus response:', response);
+                
+                if (response.success) {
+                    showResult('busesResult', 
+                        `✅ Successfully deleted bus: ${testBusId}`, 'success');
+                    testBusId = null;
+                } else {
+                    showResult('busesResult', '❌ Failed to delete bus: ' + (response.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Delete bus test error:', error);
+                showResult('busesResult', '❌ Delete bus test failed: ' + error.message, 'error');
+            }
+        }
+
+        function displayBuses(buses) {
+            const container = document.getElementById('busesDisplay');
+            
+            if (!buses || buses.length === 0) {
+                container.innerHTML = '<div class="info">No buses to display</div>';
+                return;
+            }
+            
+            let html = `<h3>🚌 Buses Data (${buses.length} buses)</h3>`;
+            
+            buses.forEach(bus => {
+                html += `
+                    <div class="bus-item">
+                        <div class="bus-header">
+                            ${bus.id} - ${bus.name}
+                            <span class="type-badge type-${bus.type.toLowerCase()}">${bus.type}</span>
+                        </div>
+                        <div class="bus-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Bus ID</div>
+                                <div class="detail-value">${bus.id}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Name / Type</div>
+                                <div class="detail-value">${bus.name} (${bus.type})</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Capacity 💺</div>
+                                <div class="detail-value">${bus.capacity} seats</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">License Plate</div>
+                                <div class="detail-value">${bus.plate_number}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Assigned Routes</div>
+                                <div class="detail-value">${bus.assigned_routes || 0}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Assigned Schedules</div>
+                                <div class="detail-value">${bus.assigned_schedules || 0}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Status</div>
+                                <div class="detail-value">${bus.status}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Manufacturer</div>
+                                <div class="detail-value">${bus.manufacturer || 'N/A'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Year</div>
+                                <div class="detail-value">${bus.year || 'N/A'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Created</div>
+                                <div class="detail-value">${new Date(bus.created_at).toLocaleDateString()}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function showResult(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `<div class="test-result ${type}">${message}</div>`;
+        }
+    </script>
+</body>
+</html>

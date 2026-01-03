@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin APIs - Fixed</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .test-button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        .test-button:hover { background: #0056b3; }
+        .result { margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 3px; white-space: pre-wrap; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>Test Admin APIs - Fixed Database Integration</h1>
+    
+    <div class="test-section">
+        <h2>Admin Dashboard API</h2>
+        <button class="test-button" onclick="testAPI('api/admin_dashboard.php', 'Dashboard')">Test Dashboard</button>
+        <div id="dashboard-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Admin Buses API</h2>
+        <button class="test-button" onclick="testAPI('api/admin_buses.php?action=get_buses', 'Buses')">Get Buses</button>
+        <div id="buses-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Admin Routes API</h2>
+        <button class="test-button" onclick="testAPI('api/admin_routes.php?action=get_routes', 'Routes')">Get Routes</button>
+        <div id="routes-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Admin Schedules API</h2>
+        <button class="test-button" onclick="testAPI('api/admin_schedules.php?action=get_schedules', 'Schedules')">Get Schedules</button>
+        <div id="schedules-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Admin Users API</h2>
+        <button class="test-button" onclick="testAPI('api/admin_users.php?action=get_users', 'Users')">Get Users</button>
+        <div id="users-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Admin Bookings API</h2>
+        <button class="test-button" onclick="testAPI('api/admin_bookings.php?action=get_bookings', 'Bookings')">Get Bookings</button>
+        <div id="bookings-result" class="result"></div>
+    </div>
+
+    <script>
+        async function testAPI(url, name) {
+            const resultDiv = document.getElementById(name.toLowerCase() + '-result');
+            resultDiv.textContent = 'Testing...';
+            resultDiv.className = 'result';
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ ${name} API Success!\n\nData Count: ${data.data ? data.data.length : 'N/A'}\n\nSample Response:\n${JSON.stringify(data, null, 2)}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `❌ ${name} API Error:\n${data.message || 'Unknown error'}\n\nFull Response:\n${JSON.stringify(data, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ ${name} API Network Error:\n${error.message}`;
+            }
+        }
+        
+        // Test all APIs on page load
+        window.onload = function() {
+            console.log('Testing all admin APIs...');
+            setTimeout(() => testAPI('api/admin_dashboard.php', 'Dashboard'), 100);
+            setTimeout(() => testAPI('api/admin_buses.php?action=get_buses', 'Buses'), 200);
+            setTimeout(() => testAPI('api/admin_routes.php?action=get_routes', 'Routes'), 300);
+            setTimeout(() => testAPI('api/admin_schedules.php?action=get_schedules', 'Schedules'), 400);
+            setTimeout(() => testAPI('api/admin_users.php?action=get_users', 'Users'), 500);
+            setTimeout(() => testAPI('api/admin_bookings.php?action=get_bookings', 'Bookings'), 600);
+        };
+    </script>
+</body>
+</html>

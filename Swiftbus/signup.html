@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - SwiftBus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .signup-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .signup-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #ff6d00, #ff8c00);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            color: #1a73e8;
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .logo span {
+            color: #ff6d00;
+        }
+
+        .logo p {
+            color: #666;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .signup-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .signup-header h2 {
+            color: #222;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .signup-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .signup-form {
+            width: 100%;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-label .required {
+            color: #dc3545;
+            margin-left: 2px;
+        }
+
+        .form-label .optional {
+            color: #666;
+            font-weight: normal;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px 45px 15px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #1a73e8;
+            background: white;
+            box-shadow: 0 5px 15px rgba(26, 115, 232, 0.1);
+        }
+
+        .form-control.error {
+            border-color: #dc3545;
+            background: #fff5f5;
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 45px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        .terms-agreement {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .terms-agreement input {
+            margin-top: 3px;
+        }
+
+        .terms-agreement label {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .terms-agreement a {
+            color: #1a73e8;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .terms-agreement a:hover {
+            text-decoration: underline;
+        }
+
+        .signup-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(45deg, #1a73e8, #0d47a1);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .signup-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(26, 115, 232, 0.3);
+        }
+
+        .signup-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 25px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .login-link a {
+            color: #1a73e8;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .error-message.active {
+            display: flex;
+        }
+
+        .success-message {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .success-message.active {
+            display: flex;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #1a73e8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .back-home {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-home a {
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .back-home a:hover {
+            color: #1a73e8;
+        }
+
+        /* Password Strength Indicator */
+        .password-strength {
+            margin-top: 8px;
+            height: 5px;
+            border-radius: 3px;
+            background: #e0e0e0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .strength-meter {
+            height: 100%;
+            width: 0%;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .strength-weak { background: #ff5252; }
+        .strength-fair { background: #ff9800; }
+        .strength-good { background: #4caf50; }
+        .strength-strong { background: #2e7d32; }
+
+        .strength-text {
+            font-size: 12px;
+            margin-top: 5px;
+            color: #666;
+            text-align: right;
+        }
+
+        .strength-text.weak { color: #ff5252; }
+        .strength-text.fair { color: #ff9800; }
+        .strength-text.good { color: #4caf50; }
+        .strength-text.strong { color: #2e7d32; }
+
+        /* Validation Error Styles */
+        .error-text {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-text.active {
+            display: block;
+        }
+
+        /* Social Media Styles */
+        .social-media {
+            display: flex;
+            justify-content: center;
+            margin: 25px 0;
+            gap: 15px;
+        }
+
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .social-icon:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .facebook {
+            background: #3b5998;
+        }
+
+        .twitter {
+            background: #1da1f2;
+        }
+
+        .instagram {
+            background: linear-gradient(45deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d);
+        }
+
+        .linkedin {
+            background: #0077b5;
+        }
+
+        .social-divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .social-divider::before,
+        .social-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e0e0e0;
+        }
+
+        .social-divider span {
+            padding: 0 15px;
+        }
+
+        /* Password Requirements */
+        .password-requirements {
+            margin-top: 15px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .requirement-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+
+        .requirement-item i {
+            font-size: 14px;
+        }
+
+        .requirement-item.valid i {
+            color: #4caf50;
+        }
+
+        .requirement-item.invalid i {
+            color: #9e9e9e;
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <div class="logo">
+            <h1>Swift<span>Bus</span></h1>
+            <p>Create your account</p>
+        </div>
+
+        <div class="signup-header">
+            <h2>Join SwiftBus Today</h2>
+            <p>Create an account to book buses, track journeys, and enjoy exclusive benefits</p>
+        </div>
+
+        <!-- Error Message -->
+        <div class="error-message" id="errorMessage">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="errorText">Please fill in all required fields correctly</span>
+        </div>
+
+        <!-- Success Message -->
+        <div class="success-message" id="successMessage">
+            <i class="fas fa-check-circle"></i>
+            <span id="successText">Account created successfully! Redirecting...</span>
+        </div>
+
+        <form class="signup-form" id="signupForm">
+            <!-- Personal Information Section -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="firstName">First Name <span class="required">*</span></label>
+                    <div class="input-with-icon">
+                        <input type="text" class="form-control" id="firstName" placeholder="Enter your first name" required>
+                        <i class="fas fa-user input-icon"></i>
+                    </div>
+                    <div class="error-text" id="firstNameError">Please enter a valid first name (letters only, minimum 2 characters)</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="lastName">Last Name <span class="required">*</span></label>
+                    <div class="input-with-icon">
+                        <input type="text" class="form-control" id="lastName" placeholder="Enter your last name" required>
+                        <i class="fas fa-user input-icon"></i>
+                    </div>
+                    <div class="error-text" id="lastNameError">Please enter a valid last name (letters only, minimum 2 characters)</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="email">Email Address <span class="required">*</span></label>
+                <div class="input-with-icon">
+                    <input type="email" class="form-control" id="email" placeholder="Enter your email address" required>
+                    <i class="fas fa-envelope input-icon"></i>
+                </div>
+                <div class="error-text" id="emailError">Please enter a valid email address</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="phone">Phone Number <span class="optional">(Optional)</span></label>
+                <div class="input-with-icon">
+                    <input type="tel" class="form-control" id="phone" placeholder="+251 911 234 567">
+                    <i class="fas fa-phone input-icon"></i>
+                </div>
+                <div class="error-text" id="phoneError">Please enter a valid Ethiopian phone number (+251 format, 9 digits)</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">Create Password <span class="required">*</span></label>
+                <div class="input-with-icon">
+                    <input type="password" class="form-control" id="password" placeholder="Create a strong password" required>
+                    <button type="button" class="password-toggle" id="passwordToggle">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <i class="fas fa-lock input-icon"></i>
+                </div>
+                
+                <!-- Password Strength Indicator -->
+                <div class="password-strength">
+                    <div class="strength-meter" id="strengthMeter"></div>
+                </div>
+                <div class="strength-text" id="strengthText">Password strength</div>
+                
+                <div class="error-text" id="passwordError">Password must be at least 8 characters with uppercase, lowercase, number, and special character</div>
+                
+                <!-- Password Requirements with dynamic validation -->
+                <div class="password-requirements" id="passwordRequirements">
+                    <div class="requirement-item" id="reqLength">
+                        <i class="far fa-circle"></i>
+                        <span>At least 8 characters</span>
+                    </div>
+                    <div class="requirement-item" id="reqUppercase">
+                        <i class="far fa-circle"></i>
+                        <span>Uppercase letter</span>
+                    </div>
+                    <div class="requirement-item" id="reqLowercase">
+                        <i class="far fa-circle"></i>
+                        <span>Lowercase letter</span>
+                    </div>
+                    <div class="requirement-item" id="reqNumber">
+                        <i class="far fa-circle"></i>
+                        <span>At least one number</span>
+                    </div>
+                    <div class="requirement-item" id="reqSpecial">
+                        <i class="far fa-circle"></i>
+                        <span>At least one special character (@$!%*?&)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="confirmPassword">Confirm Password <span class="required">*</span></label>
+                <div class="input-with-icon">
+                    <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm your password" required>
+                    <button type="button" class="password-toggle" id="confirmPasswordToggle">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <i class="fas fa-lock input-icon"></i>
+                </div>
+                <div class="error-text" id="confirmPasswordError">Passwords do not match</div>
+            </div>
+
+            <div class="terms-agreement">
+                <input type="checkbox" id="terms" required>
+                <label for="terms">
+                    I agree to the <a href="terms.html">Terms of Service</a> and <a href="privacy.html">Privacy Policy</a>
+                    <span class="required">*</span>
+                </label>
+            </div>
+            <div class="error-text" id="termsError">You must agree to the terms and conditions</div>
+
+            <button type="submit" class="signup-btn" id="signupBtn">Create Account</button>
+        </form>
+
+        <div class="social-divider">
+            <span>Or sign up with</span>
+        </div>
+
+        <!-- Social Media Links -->
+        <div class="social-media">
+            <a href="#" class="social-icon facebook" title="Sign up with Facebook">
+                <i class="fab fa-facebook-f"></i>
+            </a>
+            <a href="#" class="social-icon twitter" title="Sign up with Twitter">
+                <i class="fab fa-twitter"></i>
+            </a>
+            <a href="#" class="social-icon instagram" title="Sign up with Instagram">
+                <i class="fab fa-instagram"></i>
+            </a>
+            <a href="#" class="social-icon linkedin" title="Sign up with LinkedIn">
+                <i class="fab fa-linkedin-in"></i>
+            </a>
+        </div>
+
+        <div class="login-link">
+            Already have an account? <a href="login.html">Login here</a>
+        </div>
+
+        <div class="back-home">
+            <a href="index.html">
+                <i class="fas fa-arrow-left"></i>
+                Back to Home
+            </a>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            setupPasswordStrength();
+            setupFormValidation();
+            
+            // Check if user is already logged in via backend
+            checkExistingLogin();
+        });
+
+        async function checkExistingLogin() {
+            // Check if we should bypass the redirect (for debugging or forced access)
+            const urlParams = new URLSearchParams(window.location.search);
+            const forceAccess = urlParams.get('force') === 'true';
+            
+            if (forceAccess) {
+                console.log('Forced access - skipping session check');
+                return;
+            }
+            
+            try {
+                // Check session with backend
+                const response = await swiftBusAPI.checkSession();
+                if (response.success) {
+                    // User is already logged in, redirect based on role
+                    const userData = response.data;
+                    console.log('User already logged in, redirecting...');
+                    if (userData.role === 'admin') {
+                        window.location.href = 'admin-dashboard.html';
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                }
+            } catch (error) {
+                // User not logged in, continue with signup page
+                console.log('No active session');
+            }
+        }
+
+        function setupEventListeners() {
+            // Password toggles
+            setupPasswordToggle('passwordToggle', 'password');
+            setupPasswordToggle('confirmPasswordToggle', 'confirmPassword');
+            
+            // Form submission
+            document.getElementById('signupForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                handleSignup();
+            });
+        }
+
+        function setupPasswordStrength() {
+            const passwordInput = document.getElementById('password');
+            const strengthMeter = document.getElementById('strengthMeter');
+            const strengthText = document.getElementById('strengthText');
+            
+            passwordInput.addEventListener('input', function() {
+                const password = this.value;
+                updatePasswordRequirements(password);
+                const strength = calculatePasswordStrength(password);
+                
+                // Update strength meter
+                let width = 0;
+                let strengthClass = '';
+                let text = '';
+                
+                switch(strength.level) {
+                    case 0:
+                        width = 25;
+                        strengthClass = 'strength-weak';
+                        text = 'Weak';
+                        break;
+                    case 1:
+                        width = 50;
+                        strengthClass = 'strength-fair';
+                        text = 'Fair';
+                        break;
+                    case 2:
+                        width = 75;
+                        strengthClass = 'strength-good';
+                        text = 'Good';
+                        break;
+                    case 3:
+                        width = 100;
+                        strengthClass = 'strength-strong';
+                        text = 'Strong';
+                        break;
+                }
+                
+                strengthMeter.style.width = width + '%';
+                strengthMeter.className = 'strength-meter ' + strengthClass;
+                strengthText.textContent = text;
+                strengthText.className = 'strength-text ' + text.toLowerCase();
+            });
+        }
+
+        function updatePasswordRequirements(password) {
+            // Update requirement icons based on password content
+            const hasLength = password.length >= 8;
+            const hasUppercase = /[A-Z]/.test(password);
+            const hasLowercase = /[a-z]/.test(password);
+            const hasNumber = /\d/.test(password);
+            const hasSpecial = /[@$!%*?&]/.test(password);
+            
+            // Update icons
+            updateRequirementIcon('reqLength', hasLength);
+            updateRequirementIcon('reqUppercase', hasUppercase);
+            updateRequirementIcon('reqLowercase', hasLowercase);
+            updateRequirementIcon('reqNumber', hasNumber);
+            updateRequirementIcon('reqSpecial', hasSpecial);
+        }
+
+        function updateRequirementIcon(elementId, isValid) {
+            const element = document.getElementById(elementId);
+            const icon = element.querySelector('i');
+            
+            if (isValid) {
+                icon.className = 'fas fa-check-circle';
+                element.classList.add('valid');
+                element.classList.remove('invalid');
+            } else {
+                icon.className = 'far fa-circle';
+                element.classList.add('invalid');
+                element.classList.remove('valid');
+            }
+        }
+
+        function calculatePasswordStrength(password) {
+            let score = 0;
+            
+            if (!password) {
+                return { level: 0 };
+            }
+            
+            // Length check
+            if (password.length >= 8) score++;
+            if (password.length >= 12) score++;
+            
+            // Character variety checks
+            if (/[A-Z]/.test(password)) score++; // Has uppercase
+            if (/[a-z]/.test(password)) score++; // Has lowercase
+            if (/\d/.test(password)) score++; // Has numbers
+            if (/[@$!%*?&]/.test(password)) score++; // Has special characters
+            
+            // Determine level (0-3)
+            let level = 0;
+            if (score >= 6) level = 3; // Strong
+            else if (score >= 4) level = 2; // Good
+            else if (score >= 2) level = 1; // Fair
+            else level = 0; // Weak
+            
+            return { level: level };
+        }
+
+        function setupPasswordToggle(toggleId, inputId) {
+            const toggle = document.getElementById(toggleId);
+            const input = document.getElementById(inputId);
+            
+            if (toggle && input) {
+                toggle.addEventListener('click', function() {
+                    const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                    input.setAttribute('type', type);
+                    this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+                });
+            }
+        }
+
+        function setupFormValidation() {
+            // Real-time validation for inputs
+            const firstNameInput = document.getElementById('firstName');
+            const lastNameInput = document.getElementById('lastName');
+            const emailInput = document.getElementById('email');
+            const phoneInput = document.getElementById('phone');
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            
+            // First Name validation
+            firstNameInput.addEventListener('blur', function() {
+                validateName(this.value, 'firstNameError');
+            });
+            
+            // Last Name validation
+            lastNameInput.addEventListener('blur', function() {
+                validateName(this.value, 'lastNameError');
+            });
+            
+            // Email validation
+            emailInput.addEventListener('blur', function() {
+                validateEmail(this.value);
+            });
+            
+            // Phone validation (optional, only validate if not empty)
+            phoneInput.addEventListener('blur', function() {
+                const phoneValue = this.value.trim();
+                if (phoneValue) {
+                    validatePhone(phoneValue);
+                } else {
+                    // Clear error if phone is empty (optional field)
+                    document.getElementById('phoneError').classList.remove('active');
+                }
+            });
+            
+            // Password validation
+            passwordInput.addEventListener('blur', function() {
+                validatePassword(this.value);
+            });
+            
+            // Confirm Password validation
+            confirmPasswordInput.addEventListener('blur', function() {
+                validateConfirmPassword();
+            });
+            
+            // Terms checkbox validation
+            document.getElementById('terms').addEventListener('change', function() {
+                validateTerms();
+            });
+        }
+
+        function validateName(name, errorId) {
+            const errorElement = document.getElementById(errorId);
+            const nameRegex = /^[A-Za-z\s]{2,}$/;
+            
+            if (!nameRegex.test(name.trim())) {
+                errorElement.textContent = 'Please enter a valid name (letters only, minimum 2 characters)';
+                errorElement.classList.add('active');
+                return false;
+            } else {
+                errorElement.classList.remove('active');
+                return true;
+            }
+        }
+
+        function validateEmail(email) {
+            const errorElement = document.getElementById('emailError');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (!emailRegex.test(email.trim())) {
+                errorElement.textContent = 'Please enter a valid email address';
+                errorElement.classList.add('active');
+                return false;
+            } else {
+                errorElement.classList.remove('active');
+                return true;
+            }
+        }
+
+        function validatePhone(phone) {
+            const errorElement = document.getElementById('phoneError');
+            // Ethiopian phone number format: +251 followed by 9 digits
+            const phoneRegex = /^\+251\s?\d{9}$/;
+            
+            if (!phoneRegex.test(phone.trim())) {
+                errorElement.textContent = 'Please enter a valid Ethiopian phone number (+251 format, 9 digits)';
+                errorElement.classList.add('active');
+                return false;
+            } else {
+                errorElement.classList.remove('active');
+                return true;
+            }
+        }
+
+        function validatePassword(password) {
+            const errorElement = document.getElementById('passwordError');
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            
+            if (!passwordRegex.test(password)) {
+                errorElement.textContent = 'Password must meet all requirements above';
+                errorElement.classList.add('active');
+                return false;
+            } else {
+                errorElement.classList.remove('active');
+                return true;
+            }
+        }
+
+        function validateConfirmPassword() {
+            const errorElement = document.getElementById('confirmPasswordError');
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                errorElement.textContent = 'Passwords do not match';
+                errorElement.classList.add('active');
+                return false;
+            } else {
+                errorElement.classList.remove('active');
+                return true;
+            }
+        }
+
+        function validateTerms() {
+            const errorElement = document.getElementById('termsError');
+            const termsChecked = document.getElementById('terms').checked;
+            
+            if (!termsChecked) {
+                errorElement.classList.add('active');
+                return false;
+            } else {
+                errorElement.classList.remove('active');
+                return true;
+            }
+        }
+
+        function validateForm() {
+            const firstNameValid = validateName(document.getElementById('firstName').value, 'firstNameError');
+            const lastNameValid = validateName(document.getElementById('lastName').value, 'lastNameError');
+            const emailValid = validateEmail(document.getElementById('email').value);
+            const phoneValid = true; // Phone is optional
+            const passwordValid = validatePassword(document.getElementById('password').value);
+            const confirmPasswordValid = validateConfirmPassword();
+            const termsValid = validateTerms();
+            
+            return firstNameValid && lastNameValid && emailValid && phoneValid && passwordValid && confirmPasswordValid && termsValid;
+        }
+
+        async function handleSignup() {
+            // Validate form
+            if (!validateForm()) {
+                showMessage('Please fix all validation errors before submitting', 'error');
+                return;
+            }
+            
+            // Get form values
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value;
+            
+            // Show loading
+            const signupBtn = document.getElementById('signupBtn');
+            const originalText = signupBtn.textContent;
+            signupBtn.innerHTML = '<span class="loading"></span> Creating Account...';
+            signupBtn.disabled = true;
+            
+            // Hide any existing messages
+            hideMessages();
+            
+            try {
+                // Call backend API for registration
+                const response = await swiftBusAPI.register({
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email,
+                    phone: phone || undefined,
+                    password: password
+                });
+                
+                if (response.success) {
+                    const userData = response.data;
+                    
+                    // Show success message with role info
+                    const roleMessage = userData.role === 'admin' ? 'Admin' : 'User';
+                    showMessage(`${roleMessage} account created successfully! Welcome ${userData.firstName}!`, 'success');
+                    
+                    // Redirect after delay with role-based redirection
+                    setTimeout(() => {
+                        if (userData.role === 'admin') {
+                            window.location.href = 'admin-dashboard.html';
+                        } else {
+                            window.location.href = 'index.html';
+                        }
+                    }, 2000);
+                    
+                } else {
+                    // Registration failed - show specific error message from backend
+                    showMessage(response.message || 'Registration failed. Please try again.', 'error');
+                    resetSignupButton(signupBtn, originalText);
+                }
+                
+            } catch (error) {
+                // This should rarely happen now with the updated API
+                console.error('Registration error:', error);
+                showMessage(error.message || 'Registration failed. Please check your connection and try again.', 'error');
+                resetSignupButton(signupBtn, originalText);
+            }
+        }
+
+        function showMessage(message, type) {
+            hideMessages();
+            
+            if (type === 'error') {
+                const errorDiv = document.getElementById('errorMessage');
+                const errorText = document.getElementById('errorText');
+                errorText.textContent = message;
+                errorDiv.classList.add('active');
+                
+                // Scroll to error message
+                errorDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else if (type === 'success') {
+                const successDiv = document.getElementById('successMessage');
+                const successText = document.getElementById('successText');
+                successText.textContent = message;
+                successDiv.classList.add('active');
+                
+                // Scroll to success message
+                successDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function hideMessages() {
+            document.getElementById('errorMessage').classList.remove('active');
+            document.getElementById('successMessage').classList.remove('active');
+        }
+
+        function resetSignupButton(button, originalText) {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Complete Booking Flow - SwiftBus</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .error { color: red; }
+        .success { color: green; }
+        .info { color: blue; }
+        .warning { color: orange; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        input, select { padding: 8px; margin: 5px; width: 200px; }
+        .form-group { margin: 10px 0; }
+        .test-result { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .test-result.success { background: #d4edda; border: 1px solid #c3e6cb; }
+        .test-result.error { background: #f8d7da; border: 1px solid #f5c6cb; }
+        .test-result.info { background: #d1ecf1; border: 1px solid #bee5eb; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Test Complete Booking Flow</h1>
+    
+    <div class="test-section">
+        <h2>Step 1: Test Variables and Functions</h2>
+        <button onclick="testVariables()">Test Variables</button>
+        <button onclick="testCalculateTotal()">Test Calculate Total</button>
+        <button onclick="testFormElements()">Test Form Elements</button>
+        <div id="step1Results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Step 2: Test Booking Data Creation</h2>
+        <button onclick="fillSampleData()">Fill Sample Data</button>
+        <button onclick="testBookingDataCreation()">Test Booking Data Creation</button>
+        <div id="step2Results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Step 3: Test Payment Data Storage</h2>
+        <button onclick="testPaymentDataStorage()">Test Payment Data Storage</button>
+        <button onclick="testPaymentDataRetrieval()">Test Payment Data Retrieval</button>
+        <button onclick="clearLocalStorage()">Clear LocalStorage</button>
+        <div id="step3Results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Step 4: Test Complete Flow</h2>
+        <button onclick="testCompleteFlow()">Test Complete Flow</button>
+        <div id="step4Results"></div>
+    </div>
+    
+    <!-- Hidden form elements for testing -->
+    <div style="display: none;">
+        <select id="busType">
+            <option value="">Select Bus Type</option>
+            <option value="premium-ac">Premium AC Bus</option>
+            <option value="standard-ac">Standard AC Bus</option>
+            <option value="luxury">Luxury Bus</option>
+            <option value="standard">Standard Bus</option>
+            <option value="economy">Economy Bus</option>
+        </select>
+        
+        <select id="fromCity">
+            <option value="">Select From City</option>
+            <option value="addis-ababa">Addis Ababa</option>
+            <option value="kombolcha">Kombolcha</option>
+            <option value="bahirdar">Bahirdar</option>
+        </select>
+        
+        <select id="toCity">
+            <option value="">Select To City</option>
+            <option value="addis-ababa">Addis Ababa</option>
+            <option value="kombolcha">Kombolcha</option>
+            <option value="bahirdar">Bahirdar</option>
+        </select>
+        
+        <input type="date" id="departureDate">
+        <select id="departureTime">
+            <option value="">Select Time</option>
+            <option value="06:00">06:00 AM</option>
+            <option value="08:00">08:00 AM</option>
+            <option value="10:00">10:00 AM</option>
+        </select>
+        
+        <select id="busCompany">
+            <option value="">Select Company</option>
+            <option value="selam-bus">Selam Bus</option>
+            <option value="abay-bus">Abay Bus</option>
+        </select>
+        
+        <input type="number" id="passengerCount" value="1" min="1" max="4">
+        <input type="text" id="fullName" placeholder="Full Name">
+        <input type="email" id="email" placeholder="Email">
+        <input type="tel" id="phone" placeholder="Phone">
+        <input type="text" id="nationality" placeholder="Nationality">
+        <input type="text" id="idNumber" placeholder="ID Number">
+        <select id="ageGroup">
+            <option value="">Select Age Group</option>
+            <option value="adult">Adult</option>
+            <option value="child">Child</option>
+            <option value="senior">Senior</option>
+        </select>
+        <textarea id="specialRequirements" placeholder="Special Requirements"></textarea>
+    </div>
+    
+    <script>
+        // Copy the variables and functions from book-ticket.html
+        let selectedSeats = ['A1', 'A2']; // Sample selected seats
+        
+        const seatPrices = {
+            'premium-ac': 450,
+            'standard-ac': 350,
+            'luxury': 400,
+            'standard': 300,
+            'economy': 250
+        };
+        const serviceFee = 25;
+        const taxRate = 0.1; // 10%
+        
+        // Copy the enhanced calculateTotal function
+        function calculateTotal() {
+            try {
+                console.log('🧮 calculateTotal() called');
+                
+                // Check if required variables are defined
+                if (typeof seatPrices === 'undefined') {
+                    console.error('❌ seatPrices is undefined');
+                    throw new Error('seatPrices is not defined');
+                }
+                if (typeof serviceFee === 'undefined') {
+                    console.error('❌ serviceFee is undefined');
+                    throw new Error('serviceFee is not defined');
+                }
+                if (typeof taxRate === 'undefined') {
+                    console.error('❌ taxRate is undefined');
+                    throw new Error('taxRate is not defined');
+                }
+                
+                const busTypeElement = document.getElementById('busType');
+                if (!busTypeElement) {
+                    console.error('❌ busType element not found');
+                    throw new Error('Bus type element not found');
+                }
+                
+                const busType = busTypeElement.value;
+                console.log('🚌 Bus type:', busType);
+                
+                if (!busType) {
+                    console.error('❌ Bus type not selected');
+                    throw new Error('Bus type is required');
+                }
+                
+                const pricePerSeat = seatPrices[busType] || 350;
+                console.log('💰 Price per seat:', pricePerSeat);
+                
+                // Ensure selectedSeats is always an array
+                if (!selectedSeats || !Array.isArray(selectedSeats)) {
+                    console.warn('⚠️ selectedSeats not properly defined, using default');
+                    selectedSeats = ['A1']; // Default to one seat
+                }
+                console.log('🪑 Selected seats:', selectedSeats);
+                
+                const seatCount = selectedSeats.length || 1;
+                console.log('🔢 Seat count:', seatCount);
+                
+                const baseFare = seatCount * pricePerSeat;
+                console.log('💵 Base fare:', baseFare);
+                
+                const tax = baseFare * taxRate;
+                console.log('🏛️ Tax:', tax);
+                
+                const total = Math.round(baseFare + serviceFee + tax);
+                console.log('💳 Total calculated:', total);
+                
+                if (isNaN(total)) {
+                    console.error('❌ Total calculation resulted in NaN');
+                    throw new Error('Total calculation resulted in NaN');
+                }
+                
+                return total;
+                
+            } catch (error) {
+                console.error('❌ Error in calculateTotal():', error);
+                console.error('❌ Error stack:', error.stack);
+                throw error;
+            }
+        }
+        
+        // Test functions
+        function testVariables() {
+            const results = document.getElementById('step1Results');
+            let html = '<h3>Variable Tests:</h3>';
+            
+            try {
+                html += `<div class="test-result success">✅ seatPrices defined: ${JSON.stringify(seatPrices)}</div>`;
+            } catch (e) {
+                html += `<div class="test-result error">❌ seatPrices error: ${e.message}</div>`;
+            }
+            
+            try {
+                html += `<div class="test-result success">✅ serviceFee defined: ${serviceFee}</div>`;
+            } catch (e) {
+                html += `<div class="test-result error">❌ serviceFee error: ${e.message}</div>`;
+            }
+            
+            try {
+                html += `<div class="test-result success">✅ taxRate defined: ${taxRate}</div>`;
+            } catch (e) {
+                html += `<div class="test-result error">❌ taxRate error: ${e.message}</div>`;
+            }
+            
+            try {
+                html += `<div class="test-result success">✅ selectedSeats defined: ${JSON.stringify(selectedSeats)}</div>`;
+            } catch (e) {
+                html += `<div class="test-result error">❌ selectedSeats error: ${e.message}</div>`;
+            }
+            
+            results.innerHTML = html;
+        }
+        
+        function testCalculateTotal() {
+            const results = document.getElementById('step1Results');
+            let html = results.innerHTML + '<h3>Calculate Total Tests:</h3>';
+            
+            // Test without bus type
+            try {
+                const total = calculateTotal();
+                html += `<div class="test-result error">❌ Should have failed without bus type, but got: ${total}</div>`;
+            } catch (e) {
+                html += `<div class="test-result success">✅ Correctly failed without bus type: ${e.message}</div>`;
+            }
+            
+            // Test with bus type
+            document.getElementById('busType').value = 'standard-ac';
+            try {
+                const total = calculateTotal();
+                html += `<div class="test-result success">✅ Calculate total with bus type: ${total}</div>`;
+            } catch (e) {
+                html += `<div class="test-result error">❌ Failed with bus type: ${e.message}</div>`;
+            }
+            
+            results.innerHTML = html;
+        }
+        
+        function testFormElements() {
+            const results = document.getElementById('step1Results');
+            let html = results.innerHTML + '<h3>Form Element Tests:</h3>';
+            
+            const requiredElements = ['busType', 'fromCity', 'toCity', 'departureDate', 'departureTime', 'busCompany', 'passengerCount', 'fullName', 'email', 'phone', 'nationality', 'idNumber', 'ageGroup'];
+            
+            requiredElements.forEach(elementId => {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    html += `<div class="test-result success">✅ Element found: ${elementId}</div>`;
+                } else {
+                    html += `<div class="test-result error">❌ Element missing: ${elementId}</div>`;
+                }
+            });
+            
+            results.innerHTML = html;
+        }
+        
+        function fillSampleData() {
+            document.getElementById('busType').value = 'standard-ac';
+            document.getElementById('fromCity').value = 'addis-ababa';
+            document.getElementById('toCity').value = 'kombolcha';
+            document.getElementById('departureDate').value = '2025-01-15';
+            document.getElementById('departureTime').value = '08:00';
+            document.getElementById('busCompany').value = 'selam-bus';
+            document.getElementById('passengerCount').value = '2';
+            document.getElementById('fullName').value = 'John Doe';
+            document.getElementById('email').value = 'john@example.com';
+            document.getElementById('phone').value = '+251912345678';
+            document.getElementById('nationality').value = 'Ethiopian';
+            document.getElementById('idNumber').value = 'ID123456789';
+            document.getElementById('ageGroup').value = 'adult';
+            document.getElementById('specialRequirements').value = 'Window seat preferred';
+            
+            const results = document.getElementById('step2Results');
+            results.innerHTML = '<div class="test-result info">📝 Sample data filled in all form fields</div>';
+        }
+        
+        function testBookingDataCreation() {
+            const results = document.getElementById('step2Results');
+            let html = results.innerHTML + '<h3>Booking Data Creation Test:</h3>';
+            
+            try {
+                // Test the same logic as in createBookingInDatabase
+                const totalAmount = calculateTotal();
+                
+                const bookingData = {
+                    from_city: document.getElementById('fromCity').value.trim(),
+                    to_city: document.getElementById('toCity').value.trim(),
+                    departure_date: document.getElementById('departureDate').value.trim(),
+                    departure_time: document.getElementById('departureTime').value.trim(),
+                    bus_company: document.getElementById('busCompany').value.trim(),
+                    bus_type: document.getElementById('busType').value.trim(),
+                    passenger_count: parseInt(document.getElementById('passengerCount').value),
+                    selected_seats: selectedSeats,
+                    passenger_details: {
+                        fullName: document.getElementById('fullName').value.trim(),
+                        email: document.getElementById('email').value.trim(),
+                        phone: document.getElementById('phone').value.trim(),
+                        nationality: document.getElementById('nationality').value.trim(),
+                        idNumber: document.getElementById('idNumber').value.trim(),
+                        ageGroup: document.getElementById('ageGroup').value.trim(),
+                        specialRequirements: document.getElementById('specialRequirements').value.trim()
+                    },
+                    total_amount: totalAmount,
+                    payment_method: 'telebirr'
+                };
+                
+                html += `<div class="test-result success">✅ Booking data created successfully</div>`;
+                html += `<pre>${JSON.stringify(bookingData, null, 2)}</pre>`;
+                
+            } catch (error) {
+                html += `<div class="test-result error">❌ Booking data creation failed: ${error.message}</div>`;
+                console.error('Error details:', error);
+            }
+            
+            results.innerHTML = html;
+        }
+        
+        function testPaymentDataStorage() {
+            const results = document.getElementById('step3Results');
+            let html = '<h3>Payment Data Storage Test:</h3>';
+            
+            try {
+                const totalAmount = calculateTotal();
+                const tempBookingId = 'TEMP-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+                
+                const paymentData = {
+                    booking_id: tempBookingId,
+                    total_amount: totalAmount,
+                    payment_method: 'telebirr',
+                    from_city: document.getElementById('fromCity').value.trim(),
+                    to_city: document.getElementById('toCity').value.trim(),
+                    departure_date: document.getElementById('departureDate').value.trim(),
+                    departure_time: document.getElementById('departureTime').value.trim(),
+                    bus_company: document.getElementById('busCompany').value.trim(),
+                    bus_type: document.getElementById('busType').value.trim(),
+                    passenger_count: parseInt(document.getElementById('passengerCount').value),
+                    selected_seats: selectedSeats,
+                    passenger_details: {
+                        fullName: document.getElementById('fullName').value.trim(),
+                        email: document.getElementById('email').value.trim(),
+                        phone: document.getElementById('phone').value.trim(),
+                        nationality: document.getElementById('nationality').value.trim(),
+                        idNumber: document.getElementById('idNumber').value.trim(),
+                        ageGroup: document.getElementById('ageGroup').value.trim(),
+                        specialRequirements: document.getElementById('specialRequirements').value.trim()
+                    }
+                };
+                
+                localStorage.setItem('swiftbus_payment_data', JSON.stringify(paymentData));
+                
+                html += `<div class="test-result success">✅ Payment data stored in localStorage</div>`;
+                html += `<pre>${JSON.stringify(paymentData, null, 2)}</pre>`;
+                
+            } catch (error) {
+                html += `<div class="test-result error">❌ Payment data storage failed: ${error.message}</div>`;
+                console.error('Error details:', error);
+            }
+            
+            results.innerHTML = html;
+        }
+        
+        function testPaymentDataRetrieval() {
+            const results = document.getElementById('step3Results');
+            let html = results.innerHTML + '<h3>Payment Data Retrieval Test:</h3>';
+            
+            try {
+                const paymentData = JSON.parse(localStorage.getItem('swiftbus_payment_data')) || {};
+                
+                if (Object.keys(paymentData).length > 0) {
+                    html += `<div class="test-result success">✅ Payment data retrieved from localStorage</div>`;
+                    html += `<pre>${JSON.stringify(paymentData, null, 2)}</pre>`;
+                } else {
+                    html += `<div class="test-result error">❌ No payment data found in localStorage</div>`;
+                }
+                
+            } catch (error) {
+                html += `<div class="test-result error">❌ Payment data retrieval failed: ${error.message}</div>`;
+                console.error('Error details:', error);
+            }
+            
+            results.innerHTML = html;
+        }
+        
+        function clearLocalStorage() {
+            localStorage.removeItem('swiftbus_payment_data');
+            const results = document.getElementById('step3Results');
+            results.innerHTML += '<div class="test-result info">🧹 LocalStorage cleared</div>';
+        }
+        
+        function testCompleteFlow() {
+            const results = document.getElementById('step4Results');
+            let html = '<h3>Complete Flow Test:</h3>';
+            
+            try {
+                // Step 1: Fill sample data
+                fillSampleData();
+                html += `<div class="test-result success">✅ Step 1: Sample data filled</div>`;
+                
+                // Step 2: Calculate total
+                const totalAmount = calculateTotal();
+                html += `<div class="test-result success">✅ Step 2: Total calculated: ${totalAmount}</div>`;
+                
+                // Step 3: Create booking data
+                const bookingData = {
+                    from_city: document.getElementById('fromCity').value.trim(),
+                    to_city: document.getElementById('toCity').value.trim(),
+                    departure_date: document.getElementById('departureDate').value.trim(),
+                    departure_time: document.getElementById('departureTime').value.trim(),
+                    bus_company: document.getElementById('busCompany').value.trim(),
+                    bus_type: document.getElementById('busType').value.trim(),
+                    passenger_count: parseInt(document.getElementById('passengerCount').value),
+                    selected_seats: selectedSeats,
+                    passenger_details: {
+                        fullName: document.getElementById('fullName').value.trim(),
+                        email: document.getElementById('email').value.trim(),
+                        phone: document.getElementById('phone').value.trim(),
+                        nationality: document.getElementById('nationality').value.trim(),
+                        idNumber: document.getElementById('idNumber').value.trim(),
+                        ageGroup: document.getElementById('ageGroup').value.trim(),
+                        specialRequirements: document.getElementById('specialRequirements').value.trim()
+                    },
+                    total_amount: totalAmount,
+                    payment_method: 'telebirr'
+                };
+                html += `<div class="test-result success">✅ Step 3: Booking data created</div>`;
+                
+                // Step 4: Store payment data
+                const tempBookingId = 'TEMP-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+                const paymentData = {
+                    booking_id: tempBookingId,
+                    ...bookingData
+                };
+                
+                localStorage.setItem('swiftbus_payment_data', JSON.stringify(paymentData));
+                html += `<div class="test-result success">✅ Step 4: Payment data stored</div>`;
+                
+                // Step 5: Simulate redirect to payment page
+                const paymentUrl = `payment.html?method=telebirr&booking_id=${tempBookingId}`;
+                html += `<div class="test-result success">✅ Step 5: Ready to redirect to: ${paymentUrl}</div>`;
+                
+                html += `<div class="test-result success">🎉 Complete flow test PASSED!</div>`;
+                
+            } catch (error) {
+                html += `<div class="test-result error">❌ Complete flow test FAILED: ${error.message}</div>`;
+                console.error('Error details:', error);
+            }
+            
+            results.innerHTML = html;
+        }
+        
+        // Test on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Test page loaded');
+        });
+    </script>
+</body>
+</html>

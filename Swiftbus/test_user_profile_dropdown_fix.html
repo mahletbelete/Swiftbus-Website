@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile Dropdown Position Fix Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --secondary: #ff6d00;
+            --dark: #222;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --accent: #00c6ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+
+        /* Header Styles - FIXED */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            transition: all 0.4s ease;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            overflow: visible; /* FIXED: Allows dropdown to show */
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            position: relative; /* FIXED: Proper positioning context */
+            overflow: visible; /* FIXED: Allows dropdown to show */
+        }
+
+        .logo h1 {
+            color: var(--primary);
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .logo span {
+            color: var(--secondary);
+        }
+
+        .user-nav {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            position: relative; /* FIXED: Proper positioning context */
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+        }
+
+        .user-greeting {
+            font-weight: 500;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-profile-btn {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-profile-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Dropdown Menu - FIXED */
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            min-width: 250px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+            border-radius: 12px;
+            z-index: 1001;
+            margin-top: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.1);
+            transform-origin: top right; /* FIXED: Better animation origin */
+        }
+
+        .dropdown-menu.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-info-header {
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary), #0d47a1);
+            color: white;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar-small {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .user-avatar-small img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .user-role {
+            font-size: 13px;
+            opacity: 0.9;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+        }
+
+        .dropdown-links {
+            padding: 10px 0;
+        }
+
+        .dropdown-links a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: var(--dark);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .dropdown-links a:hover {
+            background: var(--light);
+            border-left-color: var(--primary);
+            padding-left: 25px;
+        }
+
+        .dropdown-links a.active {
+            background: var(--light);
+            border-left-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .dropdown-links a i {
+            width: 20px;
+            text-align: center;
+            color: var(--primary);
+        }
+
+        .dropdown-links a.logout {
+            color: var(--danger);
+            border-top: 1px solid #eee;
+            margin-top: 10px;
+        }
+
+        .dropdown-links a.logout i {
+            color: var(--danger);
+        }
+
+        .test-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+
+        .test-section h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        /* Mobile responsive styles - FIXED */
+        @media (max-width: 480px) {
+            .dropdown-menu {
+                position: fixed;
+                top: auto;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                max-width: 100%;
+                margin: 0;
+                border-radius: 20px 20px 0 0;
+                max-height: 70vh;
+                overflow-y: auto;
+                z-index: 1002; /* FIXED: Higher z-index for mobile */
+                transform-origin: bottom center; /* FIXED: Better animation origin */
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .dropdown-menu {
+                position: absolute;
+                top: 100%;
+                right: 0;
+                left: auto;
+                bottom: auto;
+                width: auto;
+                min-width: 250px;
+                max-width: 300px;
+                margin-top: 10px;
+                border-radius: 12px;
+                max-height: none;
+                z-index: 1001; /* FIXED: Proper z-index for tablet */
+                transform-origin: top right; /* FIXED: Better animation origin */
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-top {
+                padding: 12px 15px;
+            }
+
+            .user-greeting {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-top">
+            <div class="logo">
+                <h1>Swift<span>Bus</span></h1>
+            </div>
+            
+            <div class="user-nav">
+                <div class="user-menu">
+                    <div class="user-greeting">
+                        <i class="fas fa-user"></i>
+                        <span>Welcome back, John!</span>
+                    </div>
+                    <div style="position: relative;">
+                        <button class="user-profile-btn" id="profileDropdown">
+                            <i class="fas fa-user-circle"></i>
+                            <span>John Doe</span>
+                            <i class="fas fa-caret-down" style="margin-left: 5px;"></i>
+                        </button>
+                        <div class="dropdown-menu" id="userDropdownMenu">
+                            <div class="user-info-header">
+                                <div class="user-avatar-small">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="user-details">
+                                    <div class="user-name">
+                                        <span>John Doe</span>
+                                    </div>
+                                    <div class="user-role user">
+                                        <i class="fas fa-user"></i>
+                                        Regular User
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dropdown-links">
+                                <a href="#">
+                                    <i class="fas fa-home"></i>
+                                    <span>Home</span>
+                                </a>
+                                <a href="#">
+                                    <i class="fas fa-search"></i>
+                                    <span>Book Ticket</span>
+                                </a>
+                                <a href="#" class="active">
+                                    <i class="fas fa-user-circle"></i>
+                                    <span>My Profile</span>
+                                </a>
+                                <a href="#">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <span>Dashboard</span>
+                                </a>
+                                <a href="#">
+                                    <i class="fas fa-ticket-alt"></i>
+                                    <span>My Tickets</span>
+                                </a>
+                                <a href="#" class="logout">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Logout</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="test-container">
+        <div class="test-section">
+            <h3>✅ User Profile Dropdown Position - FIXED</h3>
+            <div class="status success">
+                <strong>FIXED:</strong> Dropdown menu now appears in the correct position next to the profile button
+            </div>
+            
+            <p><strong>Test the dropdown:</strong> Click the profile button in the header above to test the dropdown positioning.</p>
+            
+            <div class="status info">
+                <strong>Fixes Applied:</strong><br>
+                • Added <code>overflow: visible</code> to header and header-top<br>
+                • Added <code>position: relative</code> to user-nav container<br>
+                • Added <code>transform-origin</code> for better animations<br>
+                • Improved z-index values for mobile and tablet<br>
+                • Enhanced mobile responsive positioning
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📱 Mobile Responsive Testing</h3>
+            <div class="status info">
+                <strong>Responsive Behavior:</strong><br>
+                • <strong>Desktop (>768px):</strong> Dropdown appears positioned relative to button<br>
+                • <strong>Tablet (481px-768px):</strong> Compact dropdown with proper positioning<br>
+                • <strong>Mobile (≤480px):</strong> Full-width bottom sheet with rounded top corners
+            </div>
+            
+            <p><strong>How to test:</strong></p>
+            <ol>
+                <li>Click the profile button on desktop - dropdown should appear next to button</li>
+                <li>Resize browser to tablet width and test positioning</li>
+                <li>Resize to mobile width - dropdown should slide up from bottom</li>
+                <li>Test on actual mobile device for best results</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Technical Details</h3>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 14px;">
+                <strong>Key CSS Changes:</strong><br><br>
+                <code>header { overflow: visible; }</code><br>
+                <code>.header-top { position: relative; overflow: visible; }</code><br>
+                <code>.user-nav { position: relative; }</code><br>
+                <code>.dropdown-menu { transform-origin: top right; }</code><br>
+                <code>@media mobile { z-index: 1002; transform-origin: bottom center; }</code>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dropdown functionality
+        const profileDropdown = document.getElementById('profileDropdown');
+        const dropdownMenu = document.getElementById('userDropdownMenu');
+
+        profileDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('show');
+            console.log('Dropdown toggled:', dropdownMenu.classList.contains('show'));
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.user-menu')) {
+                dropdownMenu.classList.remove('show');
+            }
+        });
+
+        // Log screen size changes
+        function logScreenSize() {
+            const width = window.innerWidth;
+            let mode = '';
+            if (width <= 480) {
+                mode = 'Mobile (≤480px) - Bottom sheet dropdown';
+            } else if (width <= 768) {
+                mode = 'Tablet (≤768px) - Positioned dropdown';
+            } else {
+                mode = 'Desktop (>768px) - Standard dropdown';
+            }
+            console.log(`Screen: ${width}px - ${mode}`);
+        }
+
+        window.addEventListener('resize', logScreenSize);
+        logScreenSize();
+    </script>
+</body>
+</html>

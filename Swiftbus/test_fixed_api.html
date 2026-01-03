@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Fixed API - SwiftBus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border-color: #bee5eb; }
+        .warning { background: #fff3cd; color: #856404; border-color: #ffeaa7; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; font-size: 12px; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .ticket-card { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #007bff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Test Fixed API</h1>
+        <p>Testing the fixed booking API to ensure tickets display properly.</p>
+
+        <!-- Test 1: Authentication -->
+        <div class="section">
+            <h3>🔐 Step 1: Authentication Test</h3>
+            <button onclick="testAuth()">Test Authentication</button>
+            <div id="authResult"></div>
+        </div>
+
+        <!-- Test 2: Original API -->
+        <div class="section">
+            <h3>📡 Step 2: Test Fixed API</h3>
+            <button onclick="testFixedAPI()">Test Fixed getUserBookings API</button>
+            <div id="apiResult"></div>
+        </div>
+
+        <!-- Test 3: Minimal API -->
+        <div class="section">
+            <h3>🧪 Step 3: Test Minimal API</h3>
+            <button onclick="testMinimalAPI()">Test Minimal API</button>
+            <div id="minimalResult"></div>
+        </div>
+
+        <!-- Test 4: My Tickets Simulation -->
+        <div class="section">
+            <h3>🎫 Step 4: My Tickets Simulation</h3>
+            <button onclick="simulateMyTickets()">Simulate My Tickets Loading</button>
+            <div id="ticketsResult"></div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        // Test 1: Authentication
+        async function testAuth() {
+            const resultDiv = document.getElementById('authResult');
+            resultDiv.innerHTML = '<div class="info">Testing authentication...</div>';
+            
+            try {
+                const response = await swiftBusAPI.checkSession();
+                
+                if (response && response.success && response.data) {
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Authentication successful!
+User: ${response.data.name || response.data.full_name}
+Email: ${response.data.email}
+User ID: ${response.data.user_id}</div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">❌ Authentication failed!
+Please <a href="login.html">login</a> first.</div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">❌ Authentication error: ${error.message}</div>
+                `;
+            }
+        }
+
+        // Test 2: Fixed API
+        async function testFixedAPI() {
+            const resultDiv = document.getElementById('apiResult');
+            resultDiv.innerHTML = '<div class="info">Testing fixed API...</div>';
+            
+            try {
+                const response = await swiftBusAPI.getUserBookings();
+                console.log('Fixed API response:', response);
+                
+                if (response && response.success) {
+                    const bookings = response.data?.bookings || [];
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Fixed API working!
+Found ${bookings.length} bookings
+
+Response structure:
+${JSON.stringify(response, null, 2)}</div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">❌ Fixed API failed!
+Response: ${JSON.stringify(response, null, 2)}</div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">❌ Fixed API error: ${error.message}
+Stack: ${error.stack}</div>
+                `;
+            }
+        }
+
+        // Test 3: Minimal API
+        async function testMinimalAPI() {
+            const resultDiv = document.getElementById('minimalResult');
+            resultDiv.innerHTML = '<div class="info">Testing minimal API...</div>';
+            
+            try {
+                const response = await fetch('test_booking_api_minimal.php?action=get_user_bookings', {
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Minimal API working!
+Response: ${JSON.stringify(data, null, 2)}</div>
+                    `;
+                } else {
+                    const errorText = await response.text();
+                    resultDiv.innerHTML = `
+                        <div class="error">❌ Minimal API failed (${response.status})!
+Response: ${errorText}</div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">❌ Minimal API error: ${error.message}</div>
+                `;
+            }
+        }
+
+        // Test 4: My Tickets Simulation
+        async function simulateMyTickets() {
+            const resultDiv = document.getElementById('ticketsResult');
+            resultDiv.innerHTML = '<div class="info">Simulating my-tickets.html loading...</div>';
+            
+            try {
+                // Step 1: Check auth (same as my-tickets.html)
+                console.log('🔐 Checking authentication...');
+                const authResponse = await swiftBusAPI.checkSession();
+                
+                if (!authResponse || !authResponse.success || !authResponse.data) {
+                    resultDiv.innerHTML = '<div class="error">❌ Authentication failed</div>';
+                    return;
+                }
+                
+                console.log('✅ Authentication successful');
+                
+                // Step 2: Load tickets (same as my-tickets.html)
+                console.log('📡 Loading tickets...');
+                const response = await swiftBusAPI.getUserBookings();
+                console.log('📡 Response:', response);
+                
+                if (response && response.success && response.data && response.data.bookings) {
+                    const bookings = response.data.bookings;
+                    console.log('📊 Raw bookings:', bookings);
+                    
+                    // Step 3: Process tickets (same as my-tickets.html)
+                    const processedTickets = bookings.map(booking => {
+                        return createTicketFromAPIBooking(booking);
+                    });
+                    
+                    console.log('✅ Processed tickets:', processedTickets);
+                    
+                    // Display results
+                    let html = `<div class="success">✅ My Tickets simulation successful!
+Found ${processedTickets.length} tickets</div>`;
+                    
+                    processedTickets.forEach((ticket, index) => {
+                        html += `
+                            <div class="ticket-card">
+                                <h4>Ticket ${index + 1}: ${ticket.bookingId}</h4>
+                                <p><strong>Route:</strong> ${ticket.fromCity} → ${ticket.toCity}</p>
+                                <p><strong>Date:</strong> ${ticket.departureDate} at ${ticket.departureTime}</p>
+                                <p><strong>Status:</strong> ${ticket.status} / ${ticket.paymentStatus}</p>
+                                <p><strong>Amount:</strong> ETB ${ticket.totalAmount}</p>
+                                <p><strong>Passenger:</strong> ${ticket.passengerName}</p>
+                            </div>
+                        `;
+                    });
+                    
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="warning">⚠️ No tickets found
+Response: ${JSON.stringify(response, null, 2)}</div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">❌ Simulation error: ${error.message}
+Stack: ${error.stack}</div>
+                `;
+            }
+        }
+
+        // Copy the createTicketFromAPIBooking function from my-tickets.html
+        function createTicketFromAPIBooking(booking) {
+            const today = new Date();
+            const departureDate = new Date(booking.departure_date || booking.travel_date);
+            let status = booking.booking_status || 'confirmed';
+            
+            // Auto-determine status based on date if not set
+            if (status === 'confirmed' && departureDate < today) {
+                status = 'completed';
+            }
+            
+            // Handle passenger details
+            let passengerDetails = {};
+            if (booking.passenger_details) {
+                if (typeof booking.passenger_details === 'string') {
+                    try {
+                        passengerDetails = JSON.parse(booking.passenger_details);
+                    } catch (e) {
+                        passengerDetails = {};
+                    }
+                } else {
+                    passengerDetails = booking.passenger_details;
+                }
+            }
+            
+            // Handle selected seats
+            let selectedSeats = [];
+            if (booking.selected_seats) {
+                if (typeof booking.selected_seats === 'string') {
+                    try {
+                        selectedSeats = JSON.parse(booking.selected_seats);
+                    } catch (e) {
+                        selectedSeats = ['N/A'];
+                    }
+                } else if (Array.isArray(booking.selected_seats)) {
+                    selectedSeats = booking.selected_seats;
+                } else {
+                    selectedSeats = ['N/A'];
+                }
+            } else {
+                selectedSeats = ['N/A'];
+            }
+            
+            return {
+                id: booking.booking_id,
+                bookingId: booking.booking_id,
+                fromCity: booking.from_city_display || booking.from_city,
+                toCity: booking.to_city_display || booking.to_city,
+                departureDate: booking.departure_date || booking.travel_date,
+                departureTime: booking.departure_time,
+                busCompany: booking.company_name || booking.bus_company_display || booking.bus_company,
+                busType: booking.bus_type_display || booking.bus_type || 'Standard Bus',
+                passengerCount: booking.passenger_count || 1,
+                seats: selectedSeats,
+                totalAmount: parseFloat(booking.total_amount) || 0,
+                paymentMethod: booking.payment_method || 'Unknown',
+                bookingDate: booking.booking_date || booking.created_at,
+                status: status,
+                paymentStatus: booking.payment_status || 'pending',
+                passengerName: passengerDetails.fullName || 'Passenger',
+                passengerEmail: passengerDetails.email || 'N/A',
+                passengerPhone: passengerDetails.phone || 'N/A',
+                passengerIdNumber: passengerDetails.idNumber || 'N/A',
+                qrCode: booking.qr_code || `SwiftBus-${booking.booking_id}`,
+                specialRequirements: booking.special_requirements || 'None'
+            };
+        }
+
+        // Auto-run authentication test
+        document.addEventListener('DOMContentLoaded', function() {
+            testAuth();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin User Profile Fix - SwiftBus</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0d47a1;
+        }
+        .sidebar-demo {
+            background: #1a73e8;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        #sidebarAdminName {
+            font-weight: bold;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Admin User Profile Display Fix Test</h1>
+    
+    <div class="test-section">
+        <h2>📋 Test Overview</h2>
+        <p>This page tests the admin user profile display fix to ensure that admin names and emails are properly shown from login session data.</p>
+        
+        <div class="info test-result">
+            <strong>Issue:</strong> Admin pages were not displaying the correct admin name and email from login session.
+        </div>
+        
+        <div class="success test-result">
+            <strong>Fix Applied:</strong> Updated admin pages with proper currentUser assignment and updateUserProfile() function.
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎯 Test Scenarios</h2>
+        
+        <h3>Scenario 1: Test with Sample Admin Data</h3>
+        <button onclick="testWithSampleData()">Test Sample Admin Data</button>
+        
+        <h3>Scenario 2: Test with Different Name Formats</h3>
+        <button onclick="testWithDifferentNameFormats()">Test Name Variations</button>
+        
+        <h3>Scenario 3: Test Profile Update Function</h3>
+        <button onclick="testProfileUpdateFunction()">Test Profile Update</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 Test Results</h2>
+        <div id="testResults"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🖼️ Visual Demo</h2>
+        <p>This simulates how the admin sidebar should look:</p>
+        
+        <div class="sidebar-demo">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <i>👤</i>
+                </div>
+                <div>
+                    <div id="sidebarAdminName">Loading...</div>
+                    <div style="font-size: 12px; opacity: 0.9;">Administrator</div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 15px;">
+            <strong>Admin Email:</strong> <span id="adminEmail">Loading...</span>
+        </div>
+    </div>
+
+    <script>
+        // Simulate the fixed updateUserProfile function
+        let currentUser = null;
+
+        function updateUserProfile() {
+            if (currentUser) {
+                // Extract name information properly - handle all possible field variations
+                const firstName = currentUser.firstName || 
+                                currentUser.name?.split(' ')[0] || 
+                                currentUser.full_name?.split(' ')[0] || 
+                                'Admin';
+                                
+                const fullName = currentUser.name || 
+                               currentUser.full_name || 
+                               `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() || 
+                               'Admin User';
+                               
+                const email = currentUser.email || 'admin@swiftbus.com';
+                
+                console.log('Updating admin profile with:', { 
+                    firstName, 
+                    fullName, 
+                    email, 
+                    originalData: currentUser 
+                });
+                
+                // Update sidebar admin name
+                const adminNameElement = document.getElementById('sidebarAdminName');
+                if (adminNameElement) {
+                    adminNameElement.textContent = fullName;
+                }
+                
+                // Update email elements
+                const emailElements = document.querySelectorAll('#adminEmail');
+                emailElements.forEach(element => {
+                    if (element) {
+                        element.textContent = email;
+                    }
+                });
+                
+                return { firstName, fullName, email };
+            }
+            return null;
+        }
+
+        function addTestResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('testResults');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${type}`;
+            resultDiv.innerHTML = message;
+            resultsDiv.appendChild(resultDiv);
+        }
+
+        function testWithSampleData() {
+            addTestResult('🧪 Testing with sample admin data...', 'info');
+            
+            // Simulate typical admin login response
+            currentUser = {
+                id: 1,
+                name: 'John Smith',
+                email: 'john.smith@swiftbus.com',
+                role: 'admin',
+                phone: '+251911234567'
+            };
+            
+            const result = updateUserProfile();
+            
+            if (result) {
+                addTestResult(`✅ SUCCESS: Admin name updated to "${result.fullName}" and email to "${result.email}"`, 'success');
+            } else {
+                addTestResult('❌ FAILED: Could not update admin profile', 'error');
+            }
+        }
+
+        function testWithDifferentNameFormats() {
+            addTestResult('🧪 Testing with different name formats...', 'info');
+            
+            const testCases = [
+                {
+                    name: 'Test with full_name field',
+                    data: { full_name: 'Alice Johnson', email: 'alice@swiftbus.com', role: 'admin' }
+                },
+                {
+                    name: 'Test with firstName/lastName fields',
+                    data: { firstName: 'Bob', lastName: 'Wilson', email: 'bob@swiftbus.com', role: 'admin' }
+                },
+                {
+                    name: 'Test with name field',
+                    data: { name: 'Carol Davis', email: 'carol@swiftbus.com', role: 'admin' }
+                }
+            ];
+            
+            testCases.forEach(testCase => {
+                currentUser = testCase.data;
+                const result = updateUserProfile();
+                
+                if (result && result.fullName !== 'Admin User') {
+                    addTestResult(`✅ ${testCase.name}: "${result.fullName}" - ${result.email}`, 'success');
+                } else {
+                    addTestResult(`❌ ${testCase.name}: Failed to extract name properly`, 'error');
+                }
+            });
+        }
+
+        function testProfileUpdateFunction() {
+            addTestResult('🧪 Testing profile update function behavior...', 'info');
+            
+            // Test with null currentUser
+            currentUser = null;
+            let result = updateUserProfile();
+            
+            if (!result) {
+                addTestResult('✅ Correctly handles null currentUser', 'success');
+            } else {
+                addTestResult('❌ Should return null for null currentUser', 'error');
+            }
+            
+            // Test with minimal data
+            currentUser = { role: 'admin' };
+            result = updateUserProfile();
+            
+            if (result && result.fullName === 'Admin User' && result.email === 'admin@swiftbus.com') {
+                addTestResult('✅ Correctly provides fallback values for missing data', 'success');
+            } else {
+                addTestResult('❌ Failed to provide proper fallback values', 'error');
+            }
+            
+            // Test with complete data
+            currentUser = {
+                name: 'Test Admin',
+                email: 'test@swiftbus.com',
+                role: 'admin',
+                phone: '+251911111111'
+            };
+            result = updateUserProfile();
+            
+            if (result && result.fullName === 'Test Admin' && result.email === 'test@swiftbus.com') {
+                addTestResult('✅ Correctly processes complete admin data', 'success');
+            } else {
+                addTestResult('❌ Failed to process complete admin data correctly', 'error');
+            }
+        }
+
+        // Initialize with sample data
+        document.addEventListener('DOMContentLoaded', function() {
+            addTestResult('🚀 Admin User Profile Fix Test initialized', 'info');
+            addTestResult('Click the test buttons above to verify the fix works correctly', 'info');
+            
+            // Show initial demo
+            testWithSampleData();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Payment Flow</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .result {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #007cba;
+            background: #f0f8ff;
+        }
+        .success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .warning {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debug Payment Flow</h1>
+    <p>This will help identify why you're getting "ID Number" validation error on payment page.</p>
+    
+    <button onclick="checkCurrentState()">Check Current State</button>
+    <button onclick="checkLocalStorage()">Check localStorage</button>
+    <button onclick="checkURLParams()">Check URL Parameters</button>
+    <button onclick="simulateCorrectFlow()">Simulate Correct Flow</button>
+    
+    <div id="results"></div>
+
+    <script>
+        function addResult(title, message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = `<strong>${title}:</strong><br>${message}`;
+            results.appendChild(div);
+        }
+        
+        function checkCurrentState() {
+            document.getElementById('results').innerHTML = '';
+            
+            addResult('Current Page Info', `
+                URL: ${window.location.href}<br>
+                Page: ${window.location.pathname}<br>
+                Search: ${window.location.search}
+            `);
+            
+            // Check if we're on the right page
+            if (window.location.pathname.includes('payment.html')) {
+                addResult('✅ On Payment Page', 'You are on the payment page', 'success');
+            } else if (window.location.pathname.includes('book-ticket.html')) {
+                addResult('ℹ️ On Booking Page', 'You are on the booking page', 'info');
+            } else {
+                addResult('⚠️ Unknown Page', 'You are on an unknown page', 'warning');
+            }
+        }
+        
+        function checkLocalStorage() {
+            addResult('localStorage Check', 'Checking for booking data...', 'info');
+            
+            // Check all possible localStorage keys
+            const keys = [
+                'swiftbus_payment_data',
+                'swiftbus_search_data',
+                'swiftbus_current_booking',
+                'swiftbus_seat_reservations'
+            ];
+            
+            keys.forEach(key => {
+                const data = localStorage.getItem(key);
+                if (data) {
+                    try {
+                        const parsed = JSON.parse(data);
+                        addResult(`✅ Found: ${key}`, `<pre>${JSON.stringify(parsed, null, 2)}</pre>`, 'success');
+                    } catch (e) {
+                        addResult(`⚠️ Found: ${key}`, `Raw data: ${data.substring(0, 200)}...`, 'warning');
+                    }
+                } else {
+                    addResult(`❌ Missing: ${key}`, 'No data found', 'error');
+                }
+            });
+            
+            // Check if payment data has booking_id
+            const paymentData = localStorage.getItem('swiftbus_payment_data');
+            if (paymentData) {
+                try {
+                    const parsed = JSON.parse(paymentData);
+                    if (parsed.booking_id) {
+                        addResult('✅ Booking ID Found', `Booking ID: ${parsed.booking_id}`, 'success');
+                    } else {
+                        addResult('❌ No Booking ID', 'Payment data exists but no booking_id found', 'error');
+                    }
+                } catch (e) {
+                    addResult('❌ Invalid Payment Data', 'Cannot parse payment data', 'error');
+                }
+            }
+        }
+        
+        function checkURLParams() {
+            addResult('URL Parameters Check', 'Checking URL parameters...', 'info');
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const method = urlParams.get('method');
+            const bookingId = urlParams.get('booking_id');
+            
+            if (method) {
+                addResult('✅ Payment Method', `Method: ${method}`, 'success');
+            } else {
+                addResult('❌ No Payment Method', 'No payment method in URL', 'error');
+            }
+            
+            if (bookingId) {
+                addResult('✅ Booking ID in URL', `Booking ID: ${bookingId}`, 'success');
+            } else {
+                addResult('❌ No Booking ID in URL', 'No booking_id parameter in URL', 'error');
+            }
+            
+            // Show all URL parameters
+            const allParams = {};
+            for (const [key, value] of urlParams) {
+                allParams[key] = value;
+            }
+            
+            if (Object.keys(allParams).length > 0) {
+                addResult('All URL Parameters', `<pre>${JSON.stringify(allParams, null, 2)}</pre>`, 'info');
+            } else {
+                addResult('No URL Parameters', 'No parameters found in URL', 'warning');
+            }
+        }
+        
+        function simulateCorrectFlow() {
+            addResult('Correct Flow Simulation', 'Showing what the correct flow should be...', 'info');
+            
+            addResult('Step 1: Booking Page', `
+                1. User fills form on book-ticket.html<br>
+                2. User selects seats<br>
+                3. User clicks "Pay with [Method]"<br>
+                4. createBookingInDatabase() is called<br>
+                5. Booking is created in database<br>
+                6. Data is stored in localStorage<br>
+                7. User is redirected to payment.html
+            `, 'info');
+            
+            addResult('Step 2: Payment Page', `
+                1. payment.html loads<br>
+                2. Gets data from localStorage<br>
+                3. Shows booking summary<br>
+                4. User fills payment details<br>
+                5. User clicks "Confirm Payment"<br>
+                6. Payment is processed<br>
+                7. Database is updated
+            `, 'info');
+            
+            addResult('Problem Diagnosis', `
+                If you're getting "ID Number" error on payment page, it means:<br>
+                <br>
+                <strong>Possible Causes:</strong><br>
+                1. You went directly to payment.html without completing booking<br>
+                2. The booking creation failed but you were still redirected<br>
+                3. localStorage data is missing or corrupted<br>
+                4. There's a JavaScript error preventing proper flow<br>
+                <br>
+                <strong>Solution:</strong><br>
+                1. Go back to book-ticket.html<br>
+                2. Fill ALL required fields (including ID Number)<br>
+                3. Select seats<br>
+                4. Click payment method button<br>
+                5. Wait for successful redirect to payment.html
+            `, 'warning');
+            
+            // Create test links
+            addResult('Quick Links', `
+                <a href="book-ticket.html">Go to Booking Page</a><br>
+                <a href="login.html">Go to Login Page</a><br>
+                <a href="test_api_fixed.html">Test API</a>
+            `, 'info');
+        }
+        
+        // Auto-run checks
+        document.addEventListener('DOMContentLoaded', function() {
+            checkCurrentState();
+            checkLocalStorage();
+            checkURLParams();
+        });
+    </script>
+</body>
+</html>

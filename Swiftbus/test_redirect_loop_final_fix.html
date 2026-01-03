@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Redirect Loop Final Fix Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .step { background: white; padding: 20px; margin: 15px 0; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .success { background: #d4edda; color: #155724; border-left: 4px solid #28a745; }
+        .error { background: #f8d7da; color: #721c24; border-left: 4px solid #dc3545; }
+        .warning { background: #fff3cd; color: #856404; border-left: 4px solid #ffc107; }
+        .info { background: #d1ecf1; color: #0c5460; border-left: 4px solid #17a2b8; }
+        button { padding: 12px 24px; margin: 8px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        h1 { color: #333; text-align: center; }
+        h3 { color: #495057; margin-bottom: 15px; }
+        .test-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .result-box { min-height: 100px; padding: 15px; border-radius: 5px; background: #f8f9fa; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; font-size: 12px; }
+        .status-indicator { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
+        .status-success { background: #28a745; }
+        .status-error { background: #dc3545; }
+        .status-warning { background: #ffc107; }
+        .status-info { background: #17a2b8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Admin Redirect Loop - Final Fix Test</h1>
+        
+        <div class="step info">
+            <h3>🎯 Problem Analysis</h3>
+            <p><strong>Root Cause:</strong> Mixed authentication systems causing redirect loops</p>
+            <ul>
+                <li>✅ Login: API-based authentication with sessions</li>
+                <li>✅ Page Load: authManager.requireAdmin() (API-based)</li>
+                <li>❌ Logout: Was using localStorage-based logout (FIXED)</li>
+            </ul>
+            <p><strong>Solution:</strong> Unified all admin pages to use API-based logout with proper session clearing</p>
+        </div>
+
+        <div class="test-grid">
+            <div class="step">
+                <h3>🧪 Test 1: Authentication Flow</h3>
+                <button class="btn-primary" onclick="testAuthFlow()">Test Complete Auth Flow</button>
+                <div id="authFlowResult" class="result-box"></div>
+            </div>
+
+            <div class="step">
+                <h3>🔄 Test 2: Logout Consistency</h3>
+                <button class="btn-warning" onclick="testLogoutConsistency()">Test Logout API</button>
+                <div id="logoutResult" class="result-box"></div>
+            </div>
+
+            <div class="step">
+                <h3>🎭 Test 3: Admin Page Simulation</h3>
+                <button class="btn-success" onclick="simulateAdminPageLoad()">Simulate Admin Pages</button>
+                <div id="adminSimResult" class="result-box"></div>
+            </div>
+
+            <div class="step">
+                <h3>🔗 Test 4: Navigation Flow</h3>
+                <button class="btn-primary" onclick="testNavigationFlow()">Test Page Navigation</button>
+                <div id="navFlowResult" class="result-box"></div>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>🚀 Final Integration Test</h3>
+            <button class="btn-success" onclick="runFullIntegrationTest()">Run Complete Integration Test</button>
+            <div id="integrationResult" class="result-box"></div>
+        </div>
+
+        <div class="step">
+            <h3>🔗 Live Admin Page Tests</h3>
+            <p>After running the tests above, try these live admin pages:</p>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <a href="admin-dashboard.html" target="_blank" class="btn-primary">Dashboard</a>
+                <a href="admin-profile.html" target="_blank" class="btn-primary">Profile</a>
+                <a href="admin-settings.html" target="_blank" class="btn-primary">Settings</a>
+                <a href="admin-buses-list.html" target="_blank" class="btn-primary">Buses</a>
+                <a href="admin-routes-list.html" target="_blank" class="btn-primary">Routes</a>
+            </div>
+            <p><small>⚠️ Make sure to login first using the test above, then try navigating between these pages</small></p>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let testResults = {
+            authFlow: false,
+            logout: false,
+            adminSim: false,
+            navigation: false
+        };
+
+        async function testAuthFlow() {
+            const container = document.getElementById('authFlowResult');
+            container.innerHTML = '<div class="warning">🔄 Testing complete authentication flow...</div>';
+            
+            try {
+                // Step 1: Clear everything
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                // Step 2: Login with admin credentials
+                const loginResponse = await swiftBusAPI.login({
+                    email: 'mubarekali974@gmail.com',
+                    password: 'Admin@123'
+                });
+                
+                if (!loginResponse.success) {
+                    throw new Error(`Login failed: ${loginResponse.message}`);
+                }
+                
+                // Step 3: Verify session immediately
+                const sessionResponse = await swiftBusAPI.checkSession();
+                
+                if (!sessionResponse.success || sessionResponse.data.role !== 'admin') {
+                    throw new Error(`Session check failed: ${sessionResponse.message}`);
+                }
+                
+                // Step 4: Test authManager
+                const adminUser = await authManager.checkAuth();
+                
+                if (!adminUser || adminUser.role !== 'admin') {
+                    throw new Error('authManager check failed');
+                }
+                
+                testResults.authFlow = true;
+                container.innerHTML = `
+                    <div class="success">
+                        <span class="status-indicator status-success"></span>
+                        <strong>✅ Authentication Flow: SUCCESS</strong><br>
+                        User: ${adminUser.name}<br>
+                        Role: ${adminUser.role}<br>
+                        Email: ${adminUser.email}<br>
+                        <small>Login → Session → AuthManager all working</small>
+                    </div>
+                `;
+                
+            } catch (error) {
+                testResults.authFlow = false;
+                container.innerHTML = `
+                    <div class="error">
+                        <span class="status-indicator status-error"></span>
+                        <strong>❌ Authentication Flow: FAILED</strong><br>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function testLogoutConsistency() {
+            const container = document.getElementById('logoutResult');
+            container.innerHTML = '<div class="warning">🔄 Testing logout API consistency...</div>';
+            
+            try {
+                // First ensure we're logged in
+                const sessionCheck = await swiftBusAPI.checkSession();
+                if (!sessionCheck.success) {
+                    throw new Error('Must be logged in first - run Auth Flow test');
+                }
+                
+                // Test logout API
+                const logoutResponse = await swiftBusAPI.logout();
+                
+                if (!logoutResponse.success) {
+                    throw new Error(`Logout API failed: ${logoutResponse.message}`);
+                }
+                
+                // Verify session is cleared
+                const sessionAfterLogout = await swiftBusAPI.checkSession();
+                
+                if (sessionAfterLogout.success) {
+                    throw new Error('Session still exists after logout - this would cause redirect loops!');
+                }
+                
+                testResults.logout = true;
+                container.innerHTML = `
+                    <div class="success">
+                        <span class="status-indicator status-success"></span>
+                        <strong>✅ Logout Consistency: SUCCESS</strong><br>
+                        API logout properly clears server session<br>
+                        <small>No more mixed authentication systems</small>
+                    </div>
+                `;
+                
+            } catch (error) {
+                testResults.logout = false;
+                container.innerHTML = `
+                    <div class="error">
+                        <span class="status-indicator status-error"></span>
+                        <strong>❌ Logout Consistency: FAILED</strong><br>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function simulateAdminPageLoad() {
+            const container = document.getElementById('adminSimResult');
+            container.innerHTML = '<div class="warning">🔄 Simulating admin page loads...</div>';
+            
+            try {
+                // First login again (since logout test cleared session)
+                await swiftBusAPI.login({
+                    email: 'mubarekali974@gmail.com',
+                    password: 'Admin@123'
+                });
+                
+                // Simulate what happens when admin pages load
+                const adminPages = [
+                    'admin-dashboard.html',
+                    'admin-profile.html', 
+                    'admin-settings.html',
+                    'admin-buses-list.html',
+                    'admin-routes-list.html'
+                ];
+                
+                let results = [];
+                
+                for (let page of adminPages) {
+                    // This simulates the exact code in admin pages
+                    const user = await authManager.requireAdmin();
+                    
+                    if (user && user.role === 'admin') {
+                        results.push(`✅ ${page}: Would load successfully`);
+                    } else {
+                        results.push(`❌ ${page}: Would redirect to login`);
+                    }
+                }
+                
+                const allSuccess = results.every(r => r.includes('✅'));
+                testResults.adminSim = allSuccess;
+                
+                container.innerHTML = `
+                    <div class="${allSuccess ? 'success' : 'error'}">
+                        <span class="status-indicator status-${allSuccess ? 'success' : 'error'}"></span>
+                        <strong>${allSuccess ? '✅' : '❌'} Admin Page Simulation: ${allSuccess ? 'SUCCESS' : 'FAILED'}</strong><br>
+                        <pre>${results.join('\n')}</pre>
+                    </div>
+                `;
+                
+            } catch (error) {
+                testResults.adminSim = false;
+                container.innerHTML = `
+                    <div class="error">
+                        <span class="status-indicator status-error"></span>
+                        <strong>❌ Admin Page Simulation: FAILED</strong><br>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function testNavigationFlow() {
+            const container = document.getElementById('navFlowResult');
+            container.innerHTML = '<div class="warning">🔄 Testing navigation flow...</div>';
+            
+            try {
+                // Simulate navigation between admin pages
+                const navigationSteps = [
+                    'Login → Dashboard',
+                    'Dashboard → Profile', 
+                    'Profile → Settings',
+                    'Settings → Dashboard'
+                ];
+                
+                let results = [];
+                
+                // Each step simulates page load authentication
+                for (let step of navigationSteps) {
+                    const user = await authManager.checkAuth();
+                    
+                    if (user && user.role === 'admin') {
+                        results.push(`✅ ${step}: Navigation successful`);
+                    } else {
+                        results.push(`❌ ${step}: Would cause redirect loop`);
+                    }
+                    
+                    // Small delay to simulate real navigation
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                
+                const allSuccess = results.every(r => r.includes('✅'));
+                testResults.navigation = allSuccess;
+                
+                container.innerHTML = `
+                    <div class="${allSuccess ? 'success' : 'error'}">
+                        <span class="status-indicator status-${allSuccess ? 'success' : 'error'}"></span>
+                        <strong>${allSuccess ? '✅' : '❌'} Navigation Flow: ${allSuccess ? 'SUCCESS' : 'FAILED'}</strong><br>
+                        <pre>${results.join('\n')}</pre>
+                        ${allSuccess ? '<small>No redirect loops detected!</small>' : '<small>Redirect loops would occur</small>'}
+                    </div>
+                `;
+                
+            } catch (error) {
+                testResults.navigation = false;
+                container.innerHTML = `
+                    <div class="error">
+                        <span class="status-indicator status-error"></span>
+                        <strong>❌ Navigation Flow: FAILED</strong><br>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function runFullIntegrationTest() {
+            const container = document.getElementById('integrationResult');
+            container.innerHTML = '<div class="warning">🔄 Running complete integration test...</div>';
+            
+            try {
+                // Run all tests in sequence
+                await testAuthFlow();
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                await testLogoutConsistency();
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                await simulateAdminPageLoad();
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                await testNavigationFlow();
+                
+                // Check overall results
+                const allTestsPassed = Object.values(testResults).every(result => result === true);
+                const passedCount = Object.values(testResults).filter(result => result === true).length;
+                const totalTests = Object.keys(testResults).length;
+                
+                container.innerHTML = `
+                    <div class="${allTestsPassed ? 'success' : 'error'}">
+                        <span class="status-indicator status-${allTestsPassed ? 'success' : 'error'}"></span>
+                        <strong>${allTestsPassed ? '🎉 INTEGRATION TEST: SUCCESS' : '⚠️ INTEGRATION TEST: PARTIAL'}</strong><br>
+                        Tests Passed: ${passedCount}/${totalTests}<br>
+                        <br>
+                        <strong>Test Results:</strong><br>
+                        ${testResults.authFlow ? '✅' : '❌'} Authentication Flow<br>
+                        ${testResults.logout ? '✅' : '❌'} Logout Consistency<br>
+                        ${testResults.adminSim ? '✅' : '❌'} Admin Page Simulation<br>
+                        ${testResults.navigation ? '✅' : '❌'} Navigation Flow<br>
+                        <br>
+                        ${allTestsPassed ? 
+                            '<strong style="color: #28a745;">🎯 REDIRECT LOOP ISSUE FIXED!</strong><br>All admin pages should now work without redirect loops.' :
+                            '<strong style="color: #dc3545;">⚠️ Some issues remain - check individual test results above</strong>'
+                        }
+                    </div>
+                `;
+                
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="error">
+                        <span class="status-indicator status-error"></span>
+                        <strong>❌ Integration Test: FAILED</strong><br>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-start with auth flow test
+        setTimeout(() => {
+            testAuthFlow();
+        }, 1000);
+    </script>
+</body>
+</html>

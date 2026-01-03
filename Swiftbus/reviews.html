@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Reviews - SwiftBus | Premium Ethiopian Bus Travel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --secondary: #ff6d00;
+            --dark: #222;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --chat-user: #e3f2fd;
+            --chat-bot: #f5f5f5;
+            --accent: #00c6ff;
+            --ethiopia-green: #078930;
+            --ethiopia-yellow: #fcdd09;
+            --ethiopia-red: #da121a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Back Button */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateX(-5px);
+            box-shadow: 0 6px 20px rgba(26, 115, 232, 0.3);
+        }
+
+        /* Page Hero */
+        .page-hero {
+            background: linear-gradient(135deg, 
+                rgba(26, 115, 232, 0.85) 0%, 
+                rgba(7, 137, 48, 0.8) 50%, 
+                rgba(255, 109, 0, 0.85) 100%);
+            color: white;
+            padding: 120px 0 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 1s ease;
+        }
+
+        .page-hero p {
+            font-size: 1.3rem;
+            max-width: 700px;
+            margin: 0 auto 40px;
+            opacity: 0.9;
+            animation: fadeInUp 1s ease 0.2s forwards;
+            opacity: 0;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Reviews Content */
+        .reviews-content {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-title h2 {
+            font-size: 36px;
+            color: var(--dark);
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--secondary);
+            border-radius: 2px;
+        }
+
+        .section-title p {
+            color: var(--gray);
+            max-width: 600px;
+            margin: 0 auto;
+            font-size: 18px;
+        }
+
+        /* Overall Rating */
+        .overall-rating {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .rating-number {
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .rating-stars {
+            color: var(--warning);
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .rating-count {
+            color: var(--gray);
+            font-size: 16px;
+        }
+
+        /* Reviews Filter */
+        .reviews-filter {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: var(--light);
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 12px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .filter-btn:hover:not(.active) {
+            background: rgba(26, 115, 232, 0.1);
+        }
+
+        /* Reviews Grid */
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .review-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .review-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .reviewer-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .reviewer-avatar {
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .reviewer-details h4 {
+            font-size: 18px;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+
+        .reviewer-details p {
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .review-rating {
+            color: var(--warning);
+            font-size: 18px;
+        }
+
+        .review-content {
+            margin-bottom: 20px;
+        }
+
+        .review-content p {
+            color: var(--gray);
+            line-height: 1.6;
+        }
+
+        .review-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--gray);
+            font-size: 14px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .review-route {
+            background: var(--light);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+
+        /* Review Form */
+        .review-form-section {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 80px 0;
+        }
+
+        .review-form {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .rating-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .rating-input .star-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #ddd;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 5px;
+        }
+
+        .rating-input .star-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .rating-input .star-btn.active {
+            color: var(--warning);
+        }
+
+        /* Statistics Section */
+        .stats-section {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 30px;
+            background: var(--light);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-10px);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: block;
+            margin-bottom: 10px;
+            transition: color 0.3s ease;
+        }
+
+        .stat-card:hover .stat-number {
+            color: white;
+        }
+
+        /* Navigation Footer */
+        .nav-footer {
+            background: var(--dark);
+            color: white;
+            padding: 40px 0 20px;
+            margin-top: 60px;
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+
+        .nav-column h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .nav-column h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--secondary);
+            border-radius: 2px;
+        }
+
+        .nav-links {
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-bottom: 12px;
+        }
+
+        .nav-links a {
+            color: #bbb;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: block;
+            padding: 5px 0;
+        }
+
+        .nav-links a:hover {
+            color: white;
+            padding-left: 5px;
+        }
+
+        .nav-links a.active {
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #bbb;
+            font-size: 14px;
+        }
+
+        /* Button Styles */
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        .btn-primary:hover {
+            background: #0d47a1;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(26, 115, 232, 0.3);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .page-hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .page-hero p {
+                font-size: 1.1rem;
+            }
+            
+            .section-title h2 {
+                font-size: 28px;
+            }
+            
+            .reviews-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .review-form {
+                padding: 30px;
+            }
+            
+            .review-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .nav-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 30px;
+            }
+            
+            .back-btn {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-hero h1 {
+                font-size: 2rem;
+            }
+            
+            .page-hero {
+                padding: 100px 0 40px;
+            }
+            
+            .review-card {
+                padding: 25px;
+            }
+            
+            .reviewer-avatar {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+            
+            .nav-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Back Button -->
+    <div class="back-button">
+        <a href="index.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Back to Home
+        </a>
+    </div>
+
+    <!-- Page Hero -->
+    <section class="page-hero">
+        <div class="container">
+            <h1>Customer Reviews</h1>
+            <p>See what our passengers have to say about their SwiftBus experience</p>
+        </div>
+    </section>
+
+    <!-- Reviews Content -->
+    <section class="reviews-content">
+        <div class="container">
+            <div class="section-title">
+                <h2>Real Stories from Real Travelers</h2>
+                <p>Join thousands of satisfied customers who trust SwiftBus for their journeys</p>
+            </div>
+            
+            <!-- Overall Rating -->
+            <div class="overall-rating">
+                <div class="rating-number">4.8</div>
+                <div class="rating-stars">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star-half-alt"></i>
+                </div>
+                <div class="rating-count">Based on 2,347 reviews</div>
+            </div>
+            
+            <!-- Reviews Filter -->
+            <div class="reviews-filter">
+                <button class="filter-btn active" data-filter="all">All Reviews</button>
+                <button class="filter-btn" data-filter="5">5 Stars</button>
+                <button class="filter-btn" data-filter="4">4 Stars</button>
+                <button class="filter-btn" data-filter="3">3 Stars</button>
+                <button class="filter-btn" data-filter="2">2 Stars</button>
+                <button class="filter-btn" data-filter="1">1 Star</button>
+            </div>
+            
+            <!-- Reviews Grid -->
+            <div class="reviews-grid" id="reviewsContainer">
+                <!-- Reviews will be populated by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Review Form Section -->
+    <section class="review-form-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Share Your Experience</h2>
+                <p>Help other travelers by sharing your SwiftBus journey</p>
+            </div>
+            
+            <div class="review-form">
+                <form id="submitReviewForm">
+                    <div class="form-group">
+                        <label class="form-label" for="reviewerName">Your Name</label>
+                        <input type="text" id="reviewerName" class="form-control" placeholder="Enter your name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="reviewRoute">Route Traveled</label>
+                        <input type="text" id="reviewRoute" class="form-control" placeholder="e.g., Addis Ababa to Hawassa">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="reviewDate">Travel Date</label>
+                        <input type="date" id="reviewDate" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Your Rating</label>
+                        <div class="rating-input" id="reviewRating">
+                            <button type="button" class="star-btn" data-rating="1">
+                                <i class="far fa-star"></i>
+                            </button>
+                            <button type="button" class="star-btn" data-rating="2">
+                                <i class="far fa-star"></i>
+                            </button>
+                            <button type="button" class="star-btn" data-rating="3">
+                                <i class="far fa-star"></i>
+                            </button>
+                            <button type="button" class="star-btn" data-rating="4">
+                                <i class="far fa-star"></i>
+                            </button>
+                            <button type="button" class="star-btn" data-rating="5">
+                                <i class="far fa-star"></i>
+                            </button>
+                        </div>
+                        <input type="hidden" id="rating" name="rating" value="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="reviewTitle">Review Title</label>
+                        <input type="text" id="reviewTitle" class="form-control" placeholder="Brief summary of your experience">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="reviewContent">Your Review</label>
+                        <textarea id="reviewContent" class="form-control" placeholder="Share details about your travel experience..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-paper-plane"></i> Submit Review
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Traveler Statistics</h2>
+                <p>Numbers that tell our story</p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-number">100k+</span>
+                    <h4>Travelers Served</h4>
+                    <p>Since we started our journey</p>
+                </div>
+                
+                <div class="stat-card">
+                    <span class="stat-number">98%</span>
+                    <h4>On-time Departures</h4>
+                    <p>Based on recent data</p>
+                </div>
+                
+                <div class="stat-card">
+                    <span class="stat-number">4.8/5</span>
+                    <h4>Customer Rating</h4>
+                    <p>Average satisfaction score</p>
+                </div>
+                
+                <div class="stat-card">
+                    <span class="stat-number">50+</span>
+                    <h4>Destinations</h4>
+                    <p>Across Ethiopia</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Navigation Footer -->
+    <footer class="nav-footer">
+        <div class="container">
+            <div class="nav-grid">
+                <div class="nav-column">
+                    <h3>SwiftBus Pages</h3>
+                    <ul class="nav-links">
+                        <li><a href="index.html">Home Page</a></li>
+                        <li><a href="about-us.html">About Us</a></li>
+                        <li><a href="reviews.html" class="active">Customer Reviews</a></li>
+                        <li><a href="faq.html">FAQ & Help</a></li>
+                        <li><a href="contact-us.html">Contact Us</a></li>
+                    </ul>
+                </div>
+                
+                <div class="nav-column">
+                    <h3>Support Pages</h3>
+                    <ul class="nav-links">
+                       
+                        <li><a href="feedback.html">Submit Feedback</a></li>
+                        <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                        <li><a href="terms-conditions.html">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+                
+                <div class="nav-column">
+                    <h3>Main Features</h3>
+                    <ul class="nav-links">
+                        <li><a href="index.html#routes">Bus Routes</a></li>
+                        <li><a href="index.html#companies">Bus Companies</a></li>
+                        <li><a href="index.html#tracking">Live Tracking</a></li>
+                        <li><a href="index.html#chatbot">AI Assistant</a></li>
+                    </ul>
+                </div>
+                
+                <div class="nav-column">
+                    <h3>Account</h3>
+                    <ul class="nav-links">
+                        <li><a href="login.html">Login</a></li>
+                        <li><a href="signup.html">Sign Up</a></li>
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="my-tickets.html">My Tickets</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2023 SwiftBus. All rights reserved. | Your trusted bus travel partner in Ethiopia</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Sample Reviews Data
+        const reviewsData = [
+            {
+                id: 1,
+                name: "Samuel Bekele",
+                avatar: "SB",
+                route: "Addis Ababa to Bahir Dar",
+                rating: 5,
+                date: "2023-11-15",
+                content: "Excellent service! The bus was clean, comfortable, and arrived on time. The online booking was seamless and the customer support team was very helpful when I had questions.",
+                verified: true
+            },
+            {
+                id: 2,
+                name: "Meron Tekle",
+                avatar: "MT",
+                route: "Hawassa to Adama",
+                rating: 4,
+                date: "2023-11-10",
+                content: "Good experience overall. The bus was modern and had WiFi, which was great. Only minor issue was a slight delay in departure, but we arrived at the destination on time.",
+                verified: true
+            },
+            {
+                id: 3,
+                name: "Kebede Alemu",
+                avatar: "KA",
+                route: "Mekele to Addis Ababa",
+                rating: 5,
+                date: "2023-11-05",
+                content: "Best bus travel experience I've had in Ethiopia. The seats were comfortable, the driver was professional, and the bus had all amenities promised. Will definitely use SwiftBus again!",
+                verified: true
+            },
+            {
+                id: 4,
+                name: "Hana Solomon",
+                avatar: "HS",
+                route: "Dire Dawa to Harar",
+                rating: 5,
+                date: "2023-10-28",
+                content: "I travel frequently for work and SwiftBus has become my go-to platform. The app makes booking so easy, and I love the real-time tracking feature. Highly recommended!",
+                verified: true
+            },
+            {
+                id: 5,
+                name: "Daniel Tesfaye",
+                avatar: "DT",
+                route: "Jimma to Addis Ababa",
+                rating: 4,
+                date: "2023-10-20",
+                content: "Very satisfied with the service. The bus was clean and comfortable. The only suggestion would be to have more frequent departures on popular routes.",
+                verified: true
+            },
+            {
+                id: 6,
+                name: "Selamawit Assefa",
+                avatar: "SA",
+                route: "Gondar to Bahir Dar",
+                rating: 5,
+                date: "2023-10-15",
+                content: "Perfect from start to finish. Booking was easy, the bus was exactly as described, and the journey was smooth. Thank you SwiftBus for making travel stress-free!",
+                verified: true
+            },
+            {
+                id: 7,
+                name: "Yohannes Girma",
+                avatar: "YG",
+                route: "Adama to Dire Dawa",
+                rating: 3,
+                date: "2023-10-10",
+                content: "Average experience. The bus was okay but could use some maintenance. The WiFi didn't work properly during the journey. Customer service was responsive to my feedback.",
+                verified: true
+            },
+            {
+                id: 8,
+                name: "Tsion Mengistu",
+                avatar: "TM",
+                route: "Arba Minch to Hawassa",
+                rating: 5,
+                date: "2023-10-05",
+                content: "Outstanding service! The bus had comfortable reclining seats, charging ports, and entertainment system. The driver was very professional and safety-conscious. Will travel with SwiftBus again!",
+                verified: true
+            }
+        ];
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeReviews();
+            setupEventListeners();
+        });
+
+        function initializeReviews() {
+            populateReviews('all');
+        }
+
+        function populateReviews(filter) {
+            const container = document.getElementById('reviewsContainer');
+            container.innerHTML = '';
+            
+            const filteredReviews = filter === 'all' 
+                ? reviewsData 
+                : reviewsData.filter(review => review.rating === parseInt(filter));
+            
+            if (filteredReviews.length === 0) {
+                container.innerHTML = `
+                    <div class="no-reviews" style="text-align: center; padding: 40px; grid-column: 1 / -1;">
+                        <i class="fas fa-comments" style="font-size: 48px; color: var(--gray); margin-bottom: 20px;"></i>
+                        <h3 style="color: var(--dark); margin-bottom: 10px;">No reviews found</h3>
+                        <p style="color: var(--gray);">There are no reviews matching your filter criteria.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            filteredReviews.forEach(review => {
+                const reviewCard = document.createElement('div');
+                reviewCard.className = 'review-card';
+                
+                // Create star rating
+                let stars = '';
+                for (let i = 1; i <= 5; i++) {
+                    if (i <= review.rating) {
+                        stars += '<i class="fas fa-star"></i>';
+                    } else {
+                        stars += '<i class="far fa-star"></i>';
+                    }
+                }
+                
+                reviewCard.innerHTML = `
+                    <div class="review-header">
+                        <div class="reviewer-info">
+                            <div class="reviewer-avatar">${review.avatar}</div>
+                            <div class="reviewer-details">
+                                <h4>${review.name}</h4>
+                                <p>${review.verified ? '<i class="fas fa-check-circle" style="color: var(--success); margin-right: 5px;"></i> Verified Traveler' : ''}</p>
+                            </div>
+                        </div>
+                        <div class="review-rating">${stars}</div>
+                    </div>
+                    
+                    <div class="review-content">
+                        <p>${review.content}</p>
+                    </div>
+                    
+                    <div class="review-meta">
+                        <div class="review-route">
+                            <i class="fas fa-route"></i> ${review.route}
+                        </div>
+                        <div class="review-date">
+                            <i class="far fa-calendar"></i> ${formatDate(review.date)}
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(reviewCard);
+            });
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+
+        function setupEventListeners() {
+            // Add active class to current page link
+            const currentPage = window.location.pathname.split('/').pop();
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                if (link.getAttribute('href') === currentPage) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Update active button
+                    document.querySelectorAll('.filter-btn').forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    // Filter reviews
+                    const filter = this.getAttribute('data-filter');
+                    populateReviews(filter);
+                });
+            });
+
+            // Star rating input for review form
+            const starButtons = document.querySelectorAll('#reviewRating .star-btn');
+            const ratingInput = document.getElementById('rating');
+            
+            starButtons.forEach(star => {
+                star.addEventListener('click', function() {
+                    const rating = parseInt(this.getAttribute('data-rating'));
+                    
+                    // Update stars
+                    starButtons.forEach((s, index) => {
+                        if (index < rating) {
+                            s.innerHTML = '<i class="fas fa-star"></i>';
+                            s.classList.add('active');
+                        } else {
+                            s.innerHTML = '<i class="far fa-star"></i>';
+                            s.classList.remove('active');
+                        }
+                    });
+                    
+                    // Update hidden input
+                    ratingInput.value = rating;
+                });
+            });
+
+            // Review form submission
+            document.getElementById('submitReviewForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Get form values
+                const name = document.getElementById('reviewerName').value;
+                const route = document.getElementById('reviewRoute').value;
+                const date = document.getElementById('reviewDate').value;
+                const title = document.getElementById('reviewTitle').value;
+                const content = document.getElementById('reviewContent').value;
+                const rating = ratingInput.value;
+                
+                // Validation
+                if (!name || !route || !date || !title || !content || !rating || rating === '0') {
+                    alert('Please fill in all required fields and provide a rating');
+                    return;
+                }
+                
+                // Show loading state
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+                submitBtn.disabled = true;
+                
+                // Simulate API call
+                setTimeout(() => {
+                    // Show success message
+                    alert('Thank you for your review! It has been submitted and will be visible after moderation.');
+                    
+                    // Reset form
+                    this.reset();
+                    
+                    // Reset rating stars
+                    starButtons.forEach(star => {
+                        star.innerHTML = '<i class="far fa-star"></i>';
+                        star.classList.remove('active');
+                    });
+                    ratingInput.value = '0';
+                    
+                    // Reset button
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }, 1500);
+            });
+
+            // Smooth scroll for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+        }
+    </script>
+
+    <script src="js/api.js"></script>
+    <script>
+        // API Integration for this page
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Check user session (optional)
+            const user = await authManager.checkAuth();
+            updateUIForUser(user);
+
+        });
+
+        // Helper functions for this page
+        function updateUIForUser(user) {
+            if (user) {
+                // Update UI for logged-in user
+                const userElements = document.querySelectorAll('.user-name');
+                userElements.forEach(el => el.textContent = user.name);
+                
+                const loginBtns = document.querySelectorAll('.login-btn');
+                loginBtns.forEach(btn => btn.style.display = 'none');
+                
+                const userMenus = document.querySelectorAll('.user-menu');
+                userMenus.forEach(menu => menu.style.display = 'block');
+            }
+        }
+
+        // Placeholder functions - implement as needed
+        function displayPopularRoutes(routes) {
+            console.log('Popular routes:', routes);
+            // Implement route display logic
+        }
+
+        function populateCityDropdowns(cities) {
+            console.log('Cities:', cities);
+            // Implement city dropdown population
+        }
+
+        function displayUserBookings(bookings) {
+            console.log('User bookings:', bookings);
+            // Implement booking display logic
+        }
+
+        function displayBookingStats(stats) {
+            console.log('Booking stats:', stats);
+            // Implement stats display logic
+        }
+
+        function displayAdminStats(stats) {
+            console.log('Admin stats:', stats);
+            // Implement admin stats display logic
+        }
+
+        function displayAllBookings(bookings) {
+            console.log('All bookings:', bookings);
+            // Implement all bookings display logic
+        }
+
+        function displayBuses(buses) {
+            console.log('Buses:', buses);
+            // Implement buses display logic
+        }
+
+        function displaySchedules(schedules) {
+            console.log('Schedules:', schedules);
+            // Implement schedules display logic
+        }
+    </script>
+</body>
+</html>

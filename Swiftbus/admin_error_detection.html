@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Pages Error Detection - SwiftBus</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
+        .error { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin: 5px 0; }
+        .warning { background: #fff3cd; color: #856404; padding: 10px; border-radius: 5px; margin: 5px 0; }
+        .success { background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin: 5px 0; }
+        .info { background: #d1ecf1; color: #0c5460; padding: 10px; border-radius: 5px; margin: 5px 0; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .btn-danger { background: #dc3545; }
+        .btn-success { background: #28a745; }
+        .btn-warning { background: #ffc107; color: #000; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 5px; overflow-x: auto; font-size: 12px; max-height: 200px; }
+        .page-test { margin: 10px 0; padding: 10px; border-left: 4px solid #007bff; background: #f8f9fa; }
+        .error-count { background: #dc3545; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; }
+        .warning-count { background: #ffc107; color: #000; padding: 2px 8px; border-radius: 12px; font-size: 12px; }
+        .success-count { background: #28a745; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Admin Pages Error Detection</h1>
+        <p>Comprehensive analysis of all admin pages for errors, warnings, and issues.</p>
+
+        <!-- Overall Status -->
+        <div class="test-section">
+            <h3>📊 Overall Status</h3>
+            <div id="overallStatus">
+                <div class="info">Starting comprehensive admin pages analysis...</div>
+            </div>
+        </div>
+
+        <!-- Test Controls -->
+        <div class="test-section">
+            <h3>🎮 Test Controls</h3>
+            <button onclick="runCompleteAnalysis()">Run Complete Analysis</button>
+            <button onclick="testAllAdminPages()" class="btn-success">Test All Admin Pages</button>
+            <button onclick="checkJavaScriptErrors()" class="btn-warning">Check JavaScript Errors</button>
+            <button onclick="validateHTMLStructure()" class="btn-info">Validate HTML Structure</button>
+        </div>
+
+        <!-- Admin Pages Analysis -->
+        <div class="test-section">
+            <h3>📄 Admin Pages Analysis</h3>
+            <div id="pagesAnalysis"></div>
+        </div>
+
+        <!-- JavaScript Errors -->
+        <div class="test-section">
+            <h3>⚠️ JavaScript Errors</h3>
+            <div id="jsErrors"></div>
+        </div>
+
+        <!-- API Connectivity -->
+        <div class="test-section">
+            <h3>🔌 API Connectivity</h3>
+            <div id="apiConnectivity"></div>
+        </div>
+
+        <!-- Authentication Flow -->
+        <div class="test-section">
+            <h3>🔐 Authentication Flow</h3>
+            <div id="authFlow"></div>
+        </div>
+
+        <!-- Database Connectivity -->
+        <div class="test-section">
+            <h3>🗄️ Database Connectivity</h3>
+            <div id="dbConnectivity"></div>
+        </div>
+
+        <!-- Detailed Error Report -->
+        <div class="test-section">
+            <h3>📋 Detailed Error Report</h3>
+            <div id="detailedReport"></div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let errorCount = 0;
+        let warningCount = 0;
+        let successCount = 0;
+        let allErrors = [];
+
+        const adminPages = [
+            'admin-dashboard.html',
+            'admin-profile.html',
+            'admin-settings.html',
+            'admin-buses-list.html',
+            'admin-buses-add.html',
+            'admin-buses-edit.html',
+            'admin-routes-list.html',
+            'admin-routes-add.html',
+            'admin-routes-edit.html',
+            'admin-schedules-list.html',
+            'admin-bookings-all.html'
+        ];
+
+        function addResult(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}:</strong> ${message}`;
+            container.appendChild(div);
+            
+            // Update counters
+            if (type === 'error') {
+                errorCount++;
+                allErrors.push({page: 'General', error: message, type: 'error'});
+            } else if (type === 'warning') {
+                warningCount++;
+                allErrors.push({page: 'General', error: message, type: 'warning'});
+            } else if (type === 'success') {
+                successCount++;
+            }
+            
+            updateOverallStatus();
+        }
+
+        function updateOverallStatus() {
+            const container = document.getElementById('overallStatus');
+            container.innerHTML = `
+                <div class="info">
+                    <strong>Analysis Status:</strong>
+                    <span class="error-count">${errorCount} Errors</span>
+                    <span class="warning-count">${warningCount} Warnings</span>
+                    <span class="success-count">${successCount} Passed</span>
+                </div>
+            `;
+        }
+
+        async function runCompleteAnalysis() {
+            // Reset counters
+            errorCount = 0;
+            warningCount = 0;
+            successCount = 0;
+            allErrors = [];
+            
+            // Clear all containers
+            ['pagesAnalysis', 'jsErrors', 'apiConnectivity', 'authFlow', 'dbConnectivity', 'detailedReport'].forEach(id => {
+                document.getElementById(id).innerHTML = '';
+            });
+            
+            addResult('overallStatus', 'Starting comprehensive analysis...', 'info');
+            
+            // Run all tests
+            await testAllAdminPages();
+            await checkJavaScriptErrors();
+            await testAPIConnectivity();
+            await testAuthenticationFlow();
+            await testDatabaseConnectivity();
+            
+            generateDetailedReport();
+            
+            addResult('overallStatus', 'Analysis complete!', 'success');
+        }
+
+        async function testAllAdminPages() {
+            addResult('pagesAnalysis', 'Testing all admin pages...', 'info');
+            
+            for (const page of adminPages) {
+                await testSinglePage(page);
+            }
+        }
+
+        async function testSinglePage(pageName) {
+            const container = document.getElementById('pagesAnalysis');
+            const pageDiv = document.createElement('div');
+            pageDiv.className = 'page-test';
+            pageDiv.innerHTML = `<h4>📄 Testing: ${pageName}</h4>`;
+            container.appendChild(pageDiv);
+            
+            try {
+                // Test 1: Check if page exists
+                const response = await fetch(pageName, { method: 'HEAD' });
+                
+                if (response.status === 404) {
+                    pageDiv.innerHTML += `<div class="error">❌ Page not found (404)</div>`;
+                    allErrors.push({page: pageName, error: 'Page not found (404)', type: 'error'});
+                    errorCount++;
+                } else if (response.status >= 400) {
+                    pageDiv.innerHTML += `<div class="error">❌ HTTP Error: ${response.status}</div>`;
+                    allErrors.push({page: pageName, error: `HTTP Error: ${response.status}`, type: 'error'});
+                    errorCount++;
+                } else {
+                    pageDiv.innerHTML += `<div class="success">✅ Page accessible</div>`;
+                    successCount++;
+                }
+                
+                // Test 2: Try to load page content
+                try {
+                    const contentResponse = await fetch(pageName);
+                    const content = await contentResponse.text();
+                    
+                    // Check for common issues
+                    const issues = [];
+                    
+                    // Check for missing DOCTYPE
+                    if (!content.includes('<!DOCTYPE html>')) {
+                        issues.push('Missing DOCTYPE declaration');
+                    }
+                    
+                    // Check for missing title
+                    if (!content.includes('<title>')) {
+                        issues.push('Missing page title');
+                    }
+                    
+                    // Check for missing meta viewport
+                    if (!content.includes('viewport')) {
+                        issues.push('Missing viewport meta tag');
+                    }
+                    
+                    // Check for missing API script
+                    if (!content.includes('js/api.js') && pageName.startsWith('admin-')) {
+                        issues.push('Missing API script inclusion');
+                    }
+                    
+                    // Check for authentication function
+                    if (content.includes('checkAdminAccess') || content.includes('swiftBusAPI.checkSession')) {
+                        pageDiv.innerHTML += `<div class="success">✅ Has authentication check</div>`;
+                        successCount++;
+                    } else if (pageName.startsWith('admin-')) {
+                        issues.push('Missing authentication check');
+                    }
+                    
+                    // Check for JavaScript errors in content
+                    const jsErrorPatterns = [
+                        /console\.error/g,
+                        /throw new Error/g,
+                        /undefined is not a function/g,
+                        /Cannot read property/g
+                    ];
+                    
+                    jsErrorPatterns.forEach(pattern => {
+                        const matches = content.match(pattern);
+                        if (matches) {
+                            issues.push(`Potential JS error pattern found: ${pattern.source}`);
+                        }
+                    });
+                    
+                    // Report issues
+                    if (issues.length > 0) {
+                        issues.forEach(issue => {
+                            pageDiv.innerHTML += `<div class="warning">⚠️ ${issue}</div>`;
+                            allErrors.push({page: pageName, error: issue, type: 'warning'});
+                            warningCount++;
+                        });
+                    } else {
+                        pageDiv.innerHTML += `<div class="success">✅ No structural issues found</div>`;
+                        successCount++;
+                    }
+                    
+                } catch (contentError) {
+                    pageDiv.innerHTML += `<div class="error">❌ Failed to load content: ${contentError.message}</div>`;
+                    allErrors.push({page: pageName, error: `Failed to load content: ${contentError.message}`, type: 'error'});
+                    errorCount++;
+                }
+                
+            } catch (error) {
+                pageDiv.innerHTML += `<div class="error">❌ Test failed: ${error.message}</div>`;
+                allErrors.push({page: pageName, error: `Test failed: ${error.message}`, type: 'error'});
+                errorCount++;
+            }
+            
+            updateOverallStatus();
+        }
+
+        async function checkJavaScriptErrors() {
+            addResult('jsErrors', 'Checking for JavaScript errors...', 'info');
+            
+            // Check if API is loaded
+            if (typeof swiftBusAPI === 'undefined') {
+                addResult('jsErrors', '❌ swiftBusAPI not loaded - this will cause errors on admin pages', 'error');
+            } else {
+                addResult('jsErrors', '✅ swiftBusAPI loaded successfully', 'success');
+            }
+            
+            // Check for console errors
+            const originalError = console.error;
+            const errors = [];
+            
+            console.error = function(...args) {
+                errors.push(args.join(' '));
+                originalError.apply(console, args);
+            };
+            
+            // Test API functionality
+            try {
+                await swiftBusAPI.checkSession();
+                addResult('jsErrors', '✅ API checkSession function works', 'success');
+            } catch (error) {
+                addResult('jsErrors', `❌ API checkSession error: ${error.message}`, 'error');
+            }
+            
+            // Restore original console.error
+            console.error = originalError;
+            
+            // Report captured errors
+            if (errors.length > 0) {
+                errors.forEach(error => {
+                    addResult('jsErrors', `❌ Console error: ${error}`, 'error');
+                });
+            } else {
+                addResult('jsErrors', '✅ No JavaScript errors detected', 'success');
+            }
+        }
+
+        async function testAPIConnectivity() {
+            addResult('apiConnectivity', 'Testing API connectivity...', 'info');
+            
+            const apiEndpoints = [
+                'api/auth.php?action=check_session',
+                'api/admin.php?action=get_dashboard_stats',
+                'api/booking_clean.php?action=get_user_bookings',
+                'api/search.php?action=get_cities'
+            ];
+            
+            for (const endpoint of apiEndpoints) {
+                try {
+                    const response = await fetch(endpoint);
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        addResult('apiConnectivity', `✅ ${endpoint} - Working`, 'success');
+                    } else {
+                        addResult('apiConnectivity', `⚠️ ${endpoint} - HTTP ${response.status}`, 'warning');
+                    }
+                } catch (error) {
+                    addResult('apiConnectivity', `❌ ${endpoint} - Error: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        async function testAuthenticationFlow() {
+            addResult('authFlow', 'Testing authentication flow...', 'info');
+            
+            try {
+                // Test session check
+                const sessionResponse = await swiftBusAPI.checkSession();
+                
+                if (sessionResponse.success) {
+                    addResult('authFlow', `✅ User authenticated: ${sessionResponse.data.name} (${sessionResponse.data.role})`, 'success');
+                    
+                    if (sessionResponse.data.role === 'admin') {
+                        addResult('authFlow', '✅ Admin privileges confirmed', 'success');
+                    } else {
+                        addResult('authFlow', '⚠️ User is not admin - admin pages will show access denied', 'warning');
+                    }
+                } else {
+                    addResult('authFlow', '⚠️ No active session - admin pages will redirect to login', 'warning');
+                }
+                
+            } catch (error) {
+                addResult('authFlow', `❌ Authentication test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testDatabaseConnectivity() {
+            addResult('dbConnectivity', 'Testing database connectivity...', 'info');
+            
+            try {
+                // Test database through debug script
+                const response = await fetch('debug_admin_flow.php');
+                
+                if (response.ok) {
+                    addResult('dbConnectivity', '✅ Database debug script accessible', 'success');
+                } else {
+                    addResult('dbConnectivity', '❌ Database debug script not accessible', 'error');
+                }
+                
+                // Test direct API database calls
+                const apiResponse = await fetch('api/auth.php?action=check_session');
+                const apiData = await apiResponse.json();
+                
+                if (apiResponse.ok) {
+                    addResult('dbConnectivity', '✅ Database accessible through API', 'success');
+                } else {
+                    addResult('dbConnectivity', `❌ Database API error: ${apiData.message || 'Unknown error'}`, 'error');
+                }
+                
+            } catch (error) {
+                addResult('dbConnectivity', `❌ Database connectivity test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function generateDetailedReport() {
+            const container = document.getElementById('detailedReport');
+            
+            let report = `
+                <h4>📊 Summary</h4>
+                <div class="info">
+                    <strong>Total Issues Found:</strong> ${allErrors.length}<br>
+                    <strong>Errors:</strong> ${errorCount} | <strong>Warnings:</strong> ${warningCount} | <strong>Passed:</strong> ${successCount}
+                </div>
+            `;
+            
+            if (allErrors.length > 0) {
+                report += `<h4>🔍 Detailed Issues</h4>`;
+                
+                // Group errors by page
+                const errorsByPage = {};
+                allErrors.forEach(error => {
+                    if (!errorsByPage[error.page]) {
+                        errorsByPage[error.page] = [];
+                    }
+                    errorsByPage[error.page].push(error);
+                });
+                
+                Object.keys(errorsByPage).forEach(page => {
+                    report += `<h5>📄 ${page}</h5>`;
+                    errorsByPage[page].forEach(error => {
+                        const className = error.type === 'error' ? 'error' : 'warning';
+                        const icon = error.type === 'error' ? '❌' : '⚠️';
+                        report += `<div class="${className}">${icon} ${error.error}</div>`;
+                    });
+                });
+            } else {
+                report += `<div class="success">🎉 No issues found! All admin pages are working correctly.</div>`;
+            }
+            
+            container.innerHTML = report;
+        }
+
+        // Auto-start analysis
+        setTimeout(() => {
+            runCompleteAnalysis();
+        }, 1000);
+    </script>
+</body>
+</html>

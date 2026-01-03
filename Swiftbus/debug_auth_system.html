@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Authentication System</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .warning { background: #fff3cd; color: #856404; }
+        button { padding: 10px 20px; margin: 5px; background: #1a73e8; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; font-size: 12px; }
+        input { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; width: 200px; }
+        .form-group { margin: 10px 0; }
+        label { display: inline-block; width: 120px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 SwiftBus Authentication Debug System</h1>
+        
+        <div class="test-section">
+            <h3>🌐 Environment Information</h3>
+            <div id="envInfo"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📡 API Connectivity Test</h3>
+            <button onclick="testAPIConnectivity()">Test API Connection</button>
+            <div id="apiConnectivity"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📝 Registration Test</h3>
+            <div class="form-group">
+                <label>First Name:</label>
+                <input type="text" id="regFirstName" value="Debug">
+            </div>
+            <div class="form-group">
+                <label>Last Name:</label>
+                <input type="text" id="regLastName" value="Test">
+            </div>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="regEmail" value="debug.test@example.com">
+            </div>
+            <div class="form-group">
+                <label>Phone:</label>
+                <input type="tel" id="regPhone" value="+251911234567">
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="regPassword" value="TestPass123!">
+            </div>
+            <button onclick="testRegistration()">Test Registration</button>
+            <div id="registrationResult"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔐 Login Test</h3>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="loginEmail" value="user@test.com">
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="loginPassword" value="password123">
+            </div>
+            <button onclick="testLogin()">Test Login</button>
+            <div id="loginResult"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>👤 Session Test</h3>
+            <button onclick="testSession()">Check Session</button>
+            <button onclick="testLogout()">Test Logout</button>
+            <div id="sessionResult"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔧 Network Debug</h3>
+            <button onclick="showNetworkInfo()">Show Network Info</button>
+            <div id="networkInfo"></div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        // Show environment info on load
+        document.addEventListener('DOMContentLoaded', function() {
+            showEnvironmentInfo();
+        });
+        
+        function showEnvironmentInfo() {
+            const envDiv = document.getElementById('envInfo');
+            const info = {
+                'Current URL': window.location.href,
+                'Origin': window.location.origin,
+                'Pathname': window.location.pathname,
+                'Protocol': window.location.protocol,
+                'Host': window.location.host
+            };
+            
+            let html = '<div class="info">';
+            for (const [key, value] of Object.entries(info)) {
+                html += `<strong>${key}:</strong> ${value}<br>`;
+            }
+            
+            if (typeof swiftBusAPI !== 'undefined') {
+                html += `<strong>API Base URL:</strong> ${swiftBusAPI.baseURL}<br>`;
+                html += `<strong>API URL:</strong> ${swiftBusAPI.apiURL}<br>`;
+                html += '<div class="success">✅ SwiftBusAPI loaded successfully</div>';
+            } else {
+                html += '<div class="error">❌ SwiftBusAPI not loaded</div>';
+            }
+            
+            html += '</div>';
+            envDiv.innerHTML = html;
+        }
+        
+        async function testAPIConnectivity() {
+            const resultDiv = document.getElementById('apiConnectivity');
+            resultDiv.innerHTML = '<div class="info">Testing API connectivity...</div>';
+            
+            if (typeof swiftBusAPI === 'undefined') {
+                resultDiv.innerHTML = '<div class="error">❌ SwiftBusAPI not available</div>';
+                return;
+            }
+            
+            try {
+                // Test with the simple test endpoint first
+                const testResponse = await fetch(swiftBusAPI.apiURL + '/test.php');
+                const testData = await testResponse.json();
+                
+                if (testData.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ API endpoint working correctly!</div>
+                        <div class="info"><strong>URL:</strong> ${swiftBusAPI.apiURL}/test.php</div>
+                        <div class="info"><strong>Users in DB:</strong> ${testData.data.users_count}</div>
+                        <div class="info"><strong>Timestamp:</strong> ${testData.data.timestamp}</div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">❌ API test failed</div>
+                        <div class="error"><strong>Error:</strong> ${testData.message}</div>
+                    `;
+                }
+            } catch (error) {
+                // Fallback to original test
+                try {
+                    const response = await fetch(swiftBusAPI.apiURL + '/auth.php?action=test');
+                    const text = await response.text();
+                    
+                    resultDiv.innerHTML = `
+                        <div class="warning">⚠️ API accessible but may have issues</div>
+                        <div class="info"><strong>Status:</strong> ${response.status}</div>
+                        <div class="info"><strong>URL:</strong> ${swiftBusAPI.apiURL}/auth.php</div>
+                        <div class="info"><strong>Response:</strong></div>
+                        <pre>${text.substring(0, 500)}${text.length > 500 ? '...' : ''}</pre>
+                    `;
+                } catch (fallbackError) {
+                    resultDiv.innerHTML = `
+                        <div class="error">❌ API connectivity failed</div>
+                        <div class="error"><strong>Error:</strong> ${fallbackError.message}</div>
+                        <div class="info"><strong>Attempted URL:</strong> ${swiftBusAPI.apiURL}/test.php</div>
+                    `;
+                }
+            }
+        }
+        
+        async function testRegistration() {
+            const resultDiv = document.getElementById('registrationResult');
+            resultDiv.innerHTML = '<div class="info">Testing registration...</div>';
+            
+            const formData = {
+                firstName: document.getElementById('regFirstName').value,
+                lastName: document.getElementById('regLastName').value,
+                email: document.getElementById('regEmail').value,
+                phone: document.getElementById('regPhone').value,
+                password: document.getElementById('regPassword').value
+            };
+            
+            try {
+                console.log('Registration attempt:', formData);
+                const response = await swiftBusAPI.register(formData);
+                console.log('Registration response:', response);
+                
+                if (response.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Registration successful!</div>
+                        <pre>${JSON.stringify(response, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">❌ Registration failed</div>
+                        <div class="error"><strong>Message:</strong> ${response.message}</div>
+                        <pre>${JSON.stringify(response, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                resultDiv.innerHTML = `
+                    <div class="error">❌ Registration error</div>
+                    <div class="error"><strong>Error:</strong> ${error.message}</div>
+                    <div class="info">Check browser console for more details</div>
+                `;
+            }
+        }
+        
+        async function testLogin() {
+            const resultDiv = document.getElementById('loginResult');
+            resultDiv.innerHTML = '<div class="info">Testing login...</div>';
+            
+            const loginData = {
+                email: document.getElementById('loginEmail').value,
+                password: document.getElementById('loginPassword').value
+            };
+            
+            try {
+                console.log('Login attempt:', loginData);
+                const response = await swiftBusAPI.login(loginData);
+                console.log('Login response:', response);
+                
+                if (response.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Login successful!</div>
+                        <pre>${JSON.stringify(response, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">❌ Login failed</div>
+                        <div class="error"><strong>Message:</strong> ${response.message}</div>
+                        <pre>${JSON.stringify(response, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                resultDiv.innerHTML = `
+                    <div class="error">❌ Login error</div>
+                    <div class="error"><strong>Error:</strong> ${error.message}</div>
+                    <div class="info">Check browser console for more details</div>
+                `;
+            }
+        }
+        
+        async function testSession() {
+            const resultDiv = document.getElementById('sessionResult');
+            resultDiv.innerHTML = '<div class="info">Checking session...</div>';
+            
+            try {
+                const response = await swiftBusAPI.checkSession();
+                console.log('Session response:', response);
+                
+                if (response.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Session active!</div>
+                        <pre>${JSON.stringify(response, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="warning">⚠️ No active session</div>
+                        <pre>${JSON.stringify(response, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                console.error('Session error:', error);
+                resultDiv.innerHTML = `
+                    <div class="error">❌ Session check error</div>
+                    <div class="error"><strong>Error:</strong> ${error.message}</div>
+                `;
+            }
+        }
+        
+        async function testLogout() {
+            const resultDiv = document.getElementById('sessionResult');
+            resultDiv.innerHTML = '<div class="info">Testing logout...</div>';
+            
+            try {
+                const response = await swiftBusAPI.logout();
+                console.log('Logout response:', response);
+                
+                if (response.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Logout successful!</div>
+                        <pre>${JSON.stringify(response, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">❌ Logout failed</div>
+                        <pre>${JSON.stringify(response, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+                resultDiv.innerHTML = `
+                    <div class="error">❌ Logout error</div>
+                    <div class="error"><strong>Error:</strong> ${error.message}</div>
+                `;
+            }
+        }
+        
+        function showNetworkInfo() {
+            const resultDiv = document.getElementById('networkInfo');
+            
+            const info = {
+                'User Agent': navigator.userAgent,
+                'Language': navigator.language,
+                'Online': navigator.onLine,
+                'Cookies Enabled': navigator.cookieEnabled,
+                'Local Storage': typeof(Storage) !== "undefined",
+                'Fetch API': typeof(fetch) !== "undefined"
+            };
+            
+            let html = '<div class="info">';
+            for (const [key, value] of Object.entries(info)) {
+                html += `<strong>${key}:</strong> ${value}<br>`;
+            }
+            html += '</div>';
+            
+            resultDiv.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

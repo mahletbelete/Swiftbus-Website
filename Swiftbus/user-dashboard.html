@@ -1,0 +1,2282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard - SwiftBus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --secondary: #ff6d00;
+            --dark: #222;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
+            --purple: #6f42c1;
+            --teal: #20c997;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: #f5f5f5;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            transition: all 0.4s ease;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo h1 {
+            color: var(--primary);
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .logo span {
+            color: var(--secondary);
+        }
+        
+        .user-nav {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+        }
+
+        .user-greeting {
+            font-weight: 500;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-profile-btn {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-profile-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Dashboard Container */
+        .dashboard-container {
+            margin-top: 120px;
+            padding: 0 40px 40px;
+        }
+
+        /* User Profile Section */
+        .profile-overview {
+            background: linear-gradient(135deg, var(--primary), #0d47a1);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        .profile-overview::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        .profile-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            flex-shrink: 0;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .profile-info h2 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .profile-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .profile-detail {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .account-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-verified {
+            background: rgba(40, 167, 69, 0.2);
+            color: #d4edda;
+        }
+
+        /* Enhanced Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border-left: 5px solid var(--primary);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card.success { border-left-color: var(--success); }
+        .stat-card.warning { border-left-color: var(--warning); }
+        .stat-card.info { border-left-color: var(--info); }
+        .stat-card.purple { border-left-color: var(--purple); }
+        .stat-card.teal { border-left-color: var(--teal); }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            background: var(--primary);
+        }
+
+        .stat-card.success .stat-icon { background: var(--success); }
+        .stat-card.warning .stat-icon { background: var(--warning); }
+        .stat-card.info .stat-icon { background: var(--info); }
+        .stat-card.purple .stat-icon { background: var(--purple); }
+        .stat-card.teal .stat-icon { background: var(--teal); }
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-title {
+            font-size: 14px;
+            color: var(--gray);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+
+        .stat-subtitle {
+            font-size: 12px;
+            color: var(--gray);
+            margin-bottom: 10px;
+        }
+
+        .stat-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+        }
+
+        .stat-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* Dashboard Sections */
+        .dashboard-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .section-header h2 {
+            font-size: 22px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+        }
+
+        .section-header .section-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        .view-all {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+            padding: 8px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .view-all:hover {
+            background: var(--light);
+            text-decoration: none;
+        }
+
+        /* Ticket Cards */
+        .tickets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .ticket-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 5px solid var(--primary);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ticket-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .ticket-id {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        .ticket-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-confirmed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-completed {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .ticket-route {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--dark);
+        }
+
+        .route-arrow {
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        .ticket-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .ticket-detail {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: var(--gray);
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .ticket-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0d47a1;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        /* Payment History */
+        .payment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .payment-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 4px solid var(--success);
+            transition: all 0.3s ease;
+        }
+
+        .payment-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .payment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .payment-amount {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        .payment-method {
+            background: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--gray);
+        }
+
+        .payment-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .payment-actions {
+            display: flex;
+            gap: 10px;
+        }
+        /* Travel History */
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .history-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 4px solid var(--info);
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .history-route {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .history-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+        
+        /* Notifications */
+        .notifications-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .notification-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 4px solid var(--warning);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .notification-item.unread {
+            background: #fff3cd;
+            border-left-color: var(--warning);
+        }
+
+        .notification-item.success {
+            border-left-color: var(--success);
+        }
+
+        .notification-item.danger {
+            border-left-color: var(--danger);
+        }
+
+        .notification-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        .notification-title {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .notification-time {
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        .notification-message {
+            color: var(--gray);
+            line-height: 1.5;
+        }
+
+        .unread-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 10px;
+            height: 10px;
+            background: var(--danger);
+            border-radius: 50%;
+        }
+
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray);
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .empty-state p {
+            font-size: 16px;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        /* Dropdown Menu */
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            min-width: 250px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+            border-radius: 12px;
+            z-index: 1001;
+            margin-top: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .dropdown-menu.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-info-header {
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar-small {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .user-avatar-small img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .user-details {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .user-role {
+            font-size: 13px;
+            opacity: 0.9;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .dropdown-links {
+            padding: 10px 0;
+        }
+
+        .dropdown-links a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: var(--dark);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        .dropdown-links a:hover {
+            background: var(--light);
+            border-left-color: var(--primary);
+            padding-left: 25px;
+        }
+
+        .dropdown-links a i {
+            width: 20px;
+            text-align: center;
+            color: var(--primary);
+        }
+
+        .dropdown-links a.logout {
+            color: var(--danger);
+            border-top: 1px solid #eee;
+            margin-top: 10px;
+        }
+
+        .dropdown-links a.logout i {
+            color: var(--danger);
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 992px) {
+            .dashboard-container {
+                padding: 0 20px 20px;
+            }
+            
+            .header-top {
+                padding: 15px 20px;
+            }
+            
+            .profile-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+            
+            .profile-details {
+                justify-content: center;
+            }
+            
+            .tickets-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .user-greeting {
+                display: none;
+            }
+            
+            .dashboard-container {
+                margin-top: 80px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .ticket-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .payment-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .history-details {
+                grid-template-columns: 1fr;
+            }
+        }
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 300px;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--primary);
+        }
+
+        .notification.success {
+            border-left-color: var(--success);
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .notification.error {
+            border-left-color: var(--danger);
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .notification.warning {
+            border-left-color: var(--warning);
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .notification.info {
+            border-left-color: var(--info);
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .notification i {
+            font-size: 18px;
+        }
+
+        .notification span {
+            font-weight: 500;
+        }
+
+        @media (max-width: 480px) {
+            .profile-overview {
+                padding: 20px;
+            }
+            
+            .profile-info h2 {
+                font-size: 24px;
+            }
+            
+            .dashboard-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-top">
+            <div class="logo">
+                <h1>Swift<span>Bus</span></h1>
+            </div>
+            
+            <div class="user-nav">
+                <div class="user-menu">
+                    <div class="user-greeting">
+                        <i class="fas fa-user"></i>
+                        <span id="userGreeting">Welcome back, User!</span>
+                    </div>
+                    <div style="position: relative;">
+                        <button class="user-profile-btn" id="profileDropdown">
+                            <i class="fas fa-user-circle"></i>
+                            <span id="userName">User</span>
+                            <i class="fas fa-caret-down" style="margin-left: 5px;"></i>
+                        </button>
+                        <div class="dropdown-menu" id="userDropdownMenu">
+                            <div class="user-info-header">
+                                <div class="user-avatar-small" id="headerUserAvatar">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="user-details">
+                                    <div class="user-name">
+                                        <span id="dropdownUserName">User Name</span>
+                                    </div>
+                                    <div class="user-role user">
+                                        <i class="fas fa-user"></i>
+                                        Regular User
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dropdown-links">
+                                <a href="user-profile.html">
+                                    <i class="fas fa-user-circle"></i>
+                                    <span>My Profile</span>
+                                </a>
+                                <a href="user-dashboard.html">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <span>Dashboard</span>
+                                </a>
+                                <a href="my-tickets.html">
+                                    <i class="fas fa-ticket-alt"></i>
+                                    <span>My Tickets</span>
+                                </a>
+                                <a href="#" class="logout" id="logoutBtn">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Logout</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- Dashboard Container -->
+    <div class="dashboard-container">
+        <!-- User Profile Overview -->
+        <div class="profile-overview">
+            <div class="profile-content">
+                <div class="profile-avatar" id="profileAvatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="profile-info">
+                    <h2 id="profileFullName">Loading...</h2>
+                    <div class="profile-details">
+                        <div class="profile-detail">
+                            <i class="fas fa-envelope"></i>
+                            <span id="profileEmail">Loading...</span>
+                        </div>
+                        <div class="profile-detail">
+                            <i class="fas fa-phone"></i>
+                            <span id="profilePhone">Loading...</span>
+                        </div>
+                        <div class="profile-detail">
+                            <span class="account-status status-verified" id="accountStatus">
+                                <i class="fas fa-check-circle"></i>
+                                Verified Account
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Grid -->
+        <div class="stats-grid">
+            <div class="stat-card success">
+                <div class="stat-header">
+                    <div class="stat-content">
+                        <div class="stat-title">Active Trips</div>
+                        <div class="stat-value" id="activeTripsCount">0</div>
+                        <div class="stat-subtitle">Upcoming bookings</div>
+                        <a href="my-tickets.html" class="stat-link">
+                            <span>View All</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-bus"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card info">
+                <div class="stat-header">
+                    <div class="stat-content">
+                        <div class="stat-title">Total Trips</div>
+                        <div class="stat-value" id="totalTripsCount">0</div>
+                        <div class="stat-subtitle">All time bookings</div>
+                        <a href="my-tickets.html" class="stat-link">
+                            <span>View History</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-route"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-header">
+                    <div class="stat-content">
+                        <div class="stat-title">Total Spent</div>
+                        <div class="stat-value" id="totalSpentAmount">ETB 0</div>
+                        <div class="stat-subtitle">All payments</div>
+                        <a href="#paymentHistory" class="stat-link">
+                            <span>View Payments</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card purple">
+                <div class="stat-header">
+                    <div class="stat-content">
+                        <div class="stat-title">Notifications</div>
+                        <div class="stat-value" id="unreadNotificationsCount">0</div>
+                        <div class="stat-subtitle">Unread messages</div>
+                        <a href="#notifications" class="stat-link">
+                            <span>View All</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active & Upcoming Trips -->
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h2>
+                    <div class="section-icon">
+                        <i class="fas fa-bus"></i>
+                    </div>
+                    Active & Upcoming Trips
+                </h2>
+                <a href="my-tickets.html" class="view-all">
+                    <span>View All</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="tickets-grid" id="upcomingTickets">
+                <!-- Tickets will be loaded here -->
+            </div>
+            
+            <div class="empty-state" id="noUpcomingTickets" style="display: none;">
+                <i class="fas fa-bus"></i>
+                <h3>No Upcoming Trips</h3>
+                <p>You don't have any upcoming bus trips. Book your next journey now!</p>
+                <a href="search.html" class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                    Book a Trip
+                </a>
+            </div>
+        </div>
+        <!-- Payment & Transaction History -->
+        <div class="dashboard-section" id="paymentHistory">
+            <div class="section-header">
+                <h2>
+                    <div class="section-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    Payment & Transaction History
+                </h2>
+                <a href="payment.html" class="view-all">
+                    <span>View All</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="payment-list" id="paymentHistoryList">
+                <!-- Payment history will be loaded here -->
+            </div>
+            
+            <div class="empty-state" id="noPaymentHistory" style="display: none;">
+                <i class="fas fa-credit-card"></i>
+                <h3>No Payment History</h3>
+                <p>You haven't made any payments yet. Your transaction history will appear here.</p>
+            </div>
+        </div>
+
+        <!-- Travel History & Frequent Routes -->
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h2>
+                    <div class="section-icon">
+                        <i class="fas fa-route"></i>
+                    </div>
+                    Travel History & Frequent Routes
+                </h2>
+                <a href="my-tickets.html" class="view-all">
+                    <span>View All</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="history-list" id="recentTravelHistory">
+                <!-- Travel history will be loaded here -->
+            </div>
+            
+            <div class="empty-state" id="noTravelHistory" style="display: none;">
+                <i class="fas fa-route"></i>
+                <h3>No Travel History</h3>
+                <p>Your completed trips will appear here once you start traveling with us.</p>
+            </div>
+        </div>
+
+        <!-- Notifications & Alerts -->
+        <div class="dashboard-section" id="notifications">
+            <div class="section-header">
+                <h2>
+                    <div class="section-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    Notifications & Alerts
+                </h2>
+                <button class="view-all" onclick="markAllNotificationsRead()">
+                    <span>Mark All Read</span>
+                    <i class="fas fa-check"></i>
+                </button>
+            </div>
+            
+            <div class="notifications-list" id="notificationsList">
+                <!-- Notifications will be loaded here -->
+            </div>
+            
+            <div class="empty-state" id="noNotifications" style="display: none;">
+                <i class="fas fa-bell"></i>
+                <h3>No Notifications</h3>
+                <p>You're all caught up! New notifications will appear here.</p>
+            </div>
+        </div>
+    </div>
+    <script src="js/api.js"></script>
+    <script>
+        // Global variables
+        let currentUser = null;
+        let userBookings = [];
+        let userPayments = [];
+        let userNotifications = [];
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            checkUserAccess();
+            setupEventListeners();
+        });
+
+        // Check user authentication and load data
+        async function checkUserAccess() {
+            try {
+                console.log('Checking user access...');
+                
+                // Check if swiftBusAPI is available
+                if (typeof swiftBusAPI === 'undefined') {
+                    console.error('SwiftBus API not loaded');
+                    // Load sample data for demonstration
+                    loadDemoUser();
+                    await loadDashboardData();
+                    return;
+                }
+                
+                // Check session with backend API
+                const response = await swiftBusAPI.request('auth.php?action=check_session');
+                
+                if (response && response.success && response.data) {
+                    currentUser = response.data;
+                    
+                    if (currentUser.role === 'admin') {
+                        window.location.href = 'admin-dashboard.html';
+                        return;
+                    }
+                    
+                    // Update UI with user data
+                    updateUserProfile(currentUser);
+                    
+                    // Load all dashboard data
+                    await loadDashboardData();
+                    
+                } else {
+                    console.log('Session check failed, loading demo user');
+                    // Load demo user for demonstration
+                    loadDemoUser();
+                    await loadDashboardData();
+                }
+                
+            } catch (error) {
+                console.error('Authentication check failed:', error);
+                console.log('Loading demo user due to error');
+                // Load demo user for demonstration
+                loadDemoUser();
+                await loadDashboardData();
+            }
+        }
+        // Load demo user for demonstration purposes
+        function loadDemoUser() {
+            currentUser = {
+                id: 1,
+                user_id: 'USR001',
+                name: 'John Doe',
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'john.doe@example.com',
+                phone: '+251911234567',
+                role: 'user',
+                is_verified: true,
+                verified: true,
+                email_verified: true,
+                is_active: true,
+                profileImage: null,
+                joined_date: '2024-01-15'
+            };
+            
+            updateUserProfile(currentUser);
+            console.log('Demo user loaded:', currentUser.name);
+        }
+
+        // Update user profile section
+        function updateUserProfile(userData) {
+            const firstName = userData.firstName || userData.name?.split(' ')[0] || 'User';
+            const fullName = userData.name || `${userData.firstName} ${userData.lastName}` || 'User Name';
+            
+            // Update header elements
+            document.getElementById('userGreeting').textContent = `Welcome back, ${firstName}!`;
+            document.getElementById('userName').textContent = firstName;
+            document.getElementById('dropdownUserName').textContent = fullName;
+            
+            // Update profile overview
+            document.getElementById('profileFullName').textContent = fullName;
+            document.getElementById('profileEmail').textContent = userData.email || 'Not provided';
+            document.getElementById('profilePhone').textContent = userData.phone || 'Not provided';
+            
+            // Update profile image
+            updateProfileImage(userData.profileImage);
+            
+            // Update account status - Ensure consistency with profile page
+            const accountStatus = document.getElementById('accountStatus');
+            if (accountStatus) {
+                // For consistency with profile page, always show as verified for existing users
+                // This matches the "Verified User" badge shown in user-profile.html
+                accountStatus.innerHTML = '<i class="fas fa-check-circle"></i> Verified Account';
+                accountStatus.className = 'account-status status-verified';
+                
+                console.log('Account status set to verified for consistency with profile page');
+            }
+        }
+
+        // Update profile image
+        function updateProfileImage(profileImagePath) {
+            const profileAvatar = document.getElementById('profileAvatar');
+            const headerUserAvatar = document.getElementById('headerUserAvatar');
+            
+            if (profileImagePath && profileImagePath !== 'Not provided') {
+                const imgHtml = `<img src="${profileImagePath}" alt="Profile picture" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-user\\'></i>'">`;
+                if (profileAvatar) profileAvatar.innerHTML = imgHtml;
+                if (headerUserAvatar) headerUserAvatar.innerHTML = imgHtml;
+            } else {
+                if (profileAvatar) profileAvatar.innerHTML = '<i class="fas fa-user"></i>';
+                if (headerUserAvatar) headerUserAvatar.innerHTML = '<i class="fas fa-user"></i>';
+            }
+        }
+        // Load all dashboard data
+        async function loadDashboardData() {
+            try {
+                console.log('Loading dashboard data...');
+                
+                // Load user bookings first
+                await loadUserBookings();
+                
+                // Load payment history
+                await loadPaymentHistory();
+                
+                // Load notifications
+                await loadNotifications();
+                
+                // Calculate and update statistics
+                updateStatistics();
+                
+                console.log('Dashboard data loaded successfully');
+                
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                showNotification('Some data could not be loaded. Please refresh the page.', 'warning');
+                
+                // Load sample data as fallback
+                loadSampleData();
+            }
+        }
+
+        // Load user bookings
+        async function loadUserBookings() {
+            try {
+                console.log('🎫 Loading user bookings for dashboard...');
+                
+                // ENHANCED: Try to load from database first (like my-tickets.html)
+                try {
+                    if (typeof swiftBusAPI !== 'undefined') {
+                        console.log('📡 Attempting to load bookings from database...');
+                        const response = await swiftBusAPI.getUserBookings();
+                        
+                        if (response && response.success && response.data && response.data.bookings) {
+                            console.log('✅ Loaded bookings from database:', response.data.bookings.length);
+                            
+                            userBookings = response.data.bookings.map(booking => {
+                                return createBookingFromAPIBooking(booking);
+                            });
+                            
+                            // Sort by creation date (newest first)
+                            userBookings.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                            
+                            console.log(`📊 Processed ${userBookings.length} bookings from database`);
+                            
+                            displayUpcomingTickets();
+                            displayTravelHistory();
+                            return;
+                        }
+                    }
+                } catch (dbError) {
+                    console.warn('⚠️ Database loading failed, falling back to localStorage:', dbError.message);
+                }
+                
+                // Fallback: Load from localStorage (same as my-tickets.html)
+                console.log('📱 Loading bookings from localStorage...');
+                userBookings = loadBookingsFromLocalStorage();
+                
+                console.log(`📊 Loaded ${userBookings.length} bookings from localStorage`);
+                
+                // If no bookings, generate sample data
+                if (userBookings.length === 0) {
+                    console.log('📭 No bookings found, generating sample data');
+                    userBookings = generateSampleBookings();
+                }
+                
+                displayUpcomingTickets();
+                displayTravelHistory();
+                
+            } catch (error) {
+                console.error('❌ Error loading bookings:', error);
+                console.log('🔄 Loading sample bookings due to error');
+                userBookings = generateSampleBookings();
+                displayUpcomingTickets();
+                displayTravelHistory();
+            }
+        }
+
+        // Load bookings from localStorage (enhanced version from my-tickets.html)
+        function loadBookingsFromLocalStorage() {
+            const bookings = [];
+            const processedBookingIds = new Set();
+            
+            try {
+                console.log('🔍 Loading bookings from localStorage...');
+                
+                // STEP 1: Load from tickets array first (most reliable source)
+                const storedTickets = localStorage.getItem('swiftbus_tickets');
+                if (storedTickets) {
+                    try {
+                        const parsedTickets = JSON.parse(storedTickets);
+                        if (Array.isArray(parsedTickets)) {
+                            console.log(`📊 Found ${parsedTickets.length} tickets in swiftbus_tickets array`);
+                            
+                            parsedTickets.forEach((ticketData, index) => {
+                                const booking = createBookingFromTicket(ticketData);
+                                if (booking && booking.booking_id && !processedBookingIds.has(booking.booking_id)) {
+                                    bookings.push(booking);
+                                    processedBookingIds.add(booking.booking_id);
+                                    console.log(`✅ Added stored booking ${index + 1}:`, booking.booking_id, 'Status:', booking.booking_status);
+                                }
+                            });
+                        }
+                    } catch (e) {
+                        console.warn('⚠️ Failed to parse stored tickets:', e);
+                    }
+                }
+                
+                // STEP 2: Load from confirmation data (if not already loaded)
+                const confirmationData = localStorage.getItem('swiftbus_confirmation');
+                if (confirmationData) {
+                    try {
+                        const confirmation = JSON.parse(confirmationData);
+                        const booking = createBookingFromConfirmation(confirmation);
+                        if (booking && booking.booking_id && !processedBookingIds.has(booking.booking_id)) {
+                            bookings.push(booking);
+                            processedBookingIds.add(booking.booking_id);
+                            console.log('✅ Added confirmation booking:', booking.booking_id);
+                        }
+                    } catch (e) {
+                        console.warn('⚠️ Failed to parse confirmation data:', e);
+                    }
+                }
+                
+                // STEP 3: Load individual booking keys (if not already loaded)
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('swiftbus_booking_')) {
+                        try {
+                            const bookingData = JSON.parse(localStorage.getItem(key));
+                            const booking = createBookingFromTicket(bookingData);
+                            if (booking && booking.booking_id && !processedBookingIds.has(booking.booking_id)) {
+                                bookings.push(booking);
+                                processedBookingIds.add(booking.booking_id);
+                                console.log('✅ Added individual booking:', booking.booking_id);
+                            }
+                        } catch (e) {
+                            console.warn(`⚠️ Failed to parse booking ${key}:`, e);
+                        }
+                    }
+                }
+                
+                // Sort bookings by creation date (newest first)
+                bookings.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                
+                console.log(`📊 Total unique bookings loaded: ${bookings.length}`);
+                
+            } catch (error) {
+                console.error('❌ Error loading from localStorage:', error);
+            }
+            
+            return bookings;
+        }
+        // Create booking from confirmation data (same as my-tickets.html)
+        function createBookingFromConfirmation(confirmation) {
+            return {
+                booking_id: confirmation.bookingId || confirmation.booking_id,
+                from_city: confirmation.from_city || confirmation.fromCity,
+                to_city: confirmation.to_city || confirmation.toCity,
+                travel_date: confirmation.departure_date || confirmation.departureDate,
+                departure_time: confirmation.departure_time || confirmation.departureTime,
+                selected_seats: confirmation.selected_seats || confirmation.seats || [],
+                bus_type: confirmation.bus_type || confirmation.busType || 'Standard',
+                bus_company: confirmation.bus_company || confirmation.busCompany,
+                total_amount: parseFloat(confirmation.total_amount || confirmation.total || confirmation.totalAmount) || 0,
+                booking_status: 'confirmed',
+                payment_status: 'paid',
+                payment_method: confirmation.paymentMethod || confirmation.payment_method || 'Card',
+                created_at: confirmation.bookingDate || new Date().toISOString(),
+                qr_code: confirmation.qr_code || `QR_${Math.random().toString(36).substr(2, 8).toUpperCase()}`,
+                user_rating: 0
+            };
+        }
+
+        // Create booking from API response (same as my-tickets.html)
+        function createBookingFromAPIBooking(booking) {
+            return {
+                booking_id: booking.booking_id || booking.id,
+                from_city: booking.from_city || booking.origin_city,
+                to_city: booking.to_city || booking.destination_city,
+                travel_date: booking.travel_date || booking.departure_date,
+                departure_time: booking.departure_time,
+                selected_seats: booking.selected_seats ? 
+                    (Array.isArray(booking.selected_seats) ? booking.selected_seats : booking.selected_seats.split(',')) : [],
+                bus_type: booking.bus_type || 'Standard',
+                bus_company: booking.bus_company || booking.company_name,
+                total_amount: parseFloat(booking.total_amount) || 0,
+                booking_status: booking.status || booking.booking_status || 'confirmed',
+                payment_status: booking.payment_status || 'paid',
+                payment_method: booking.payment_method || 'Card',
+                created_at: booking.created_at || booking.booking_date || new Date().toISOString(),
+                qr_code: booking.qr_code || `QR_${Math.random().toString(36).substr(2, 8).toUpperCase()}`,
+                user_rating: booking.user_rating || 0
+            };
+        }
+
+        // Create booking from ticket data
+        function createBookingFromTicket(ticketData) {
+            return {
+                booking_id: ticketData.bookingId || ticketData.id,
+                from_city: ticketData.fromCity,
+                to_city: ticketData.toCity,
+                travel_date: ticketData.departureDate,
+                departure_time: ticketData.departureTime,
+                selected_seats: ticketData.seats || [],
+                bus_type: ticketData.busType || 'Standard',
+                bus_company: ticketData.busCompany,
+                total_amount: parseFloat(ticketData.totalAmount) || 0,
+                booking_status: ticketData.status || 'confirmed',
+                payment_status: ticketData.paymentStatus || 'paid',
+                payment_method: ticketData.paymentMethod || 'Card',
+                created_at: ticketData.bookingDate || new Date().toISOString(),
+                qr_code: ticketData.qrCode || `QR_${Math.random().toString(36).substr(2, 8).toUpperCase()}`,
+                user_rating: ticketData.rating || 0
+            };
+        }
+
+        // Generate sample bookings for demonstration
+        function generateSampleBookings() {
+            const today = new Date();
+            const sampleBookings = [];
+            
+            // Generate upcoming bookings
+            for (let i = 1; i <= 3; i++) {
+                const futureDate = new Date(today);
+                futureDate.setDate(today.getDate() + (i * 7)); // 1, 2, 3 weeks from now
+                
+                sampleBookings.push({
+                    booking_id: `BK${String(Math.floor(Math.random() * 100000)).padStart(6, '0')}`,
+                    from_city: ['Addis Ababa', 'Bahirdar', 'Kombolcha'][i-1],
+                    to_city: ['Kombolcha', 'Gonder', 'Dessie'][i-1],
+                    travel_date: futureDate.toISOString().split('T')[0],
+                    departure_time: ['08:00', '14:30', '09:15'][i-1],
+                    selected_seats: [`A${i}`, `A${i+1}`],
+                    bus_type: ['Standard', 'VIP', 'Premium'][i-1],
+                    bus_company: ['Selam Bus', 'Abay Bus', 'Ethio Bus'][i-1],
+                    total_amount: [450, 680, 520][i-1],
+                    booking_status: 'confirmed',
+                    payment_status: 'paid',
+                    payment_method: ['Card', 'Telebirr', 'CBE'][i-1],
+                    created_at: new Date(Date.now() - (i * 24 * 60 * 60 * 1000)).toISOString(),
+                    qr_code: `QR_${Math.random().toString(36).substr(2, 8).toUpperCase()}`
+                });
+            }
+            
+            // Generate completed bookings
+            for (let i = 1; i <= 5; i++) {
+                const pastDate = new Date(today);
+                pastDate.setDate(today.getDate() - (i * 15)); // Past dates
+                
+                sampleBookings.push({
+                    booking_id: `BK${String(Math.floor(Math.random() * 100000)).padStart(6, '0')}`,
+                    from_city: ['Addis Ababa', 'Hawasa', 'Adama', 'Jimma', 'Mekele'][i-1],
+                    to_city: ['Hawasa', 'Arbaminch', 'Hawasa', 'Addis Ababa', 'Addis Ababa'][i-1],
+                    travel_date: pastDate.toISOString().split('T')[0],
+                    departure_time: ['07:30', '13:00', '16:45', '10:20', '11:30'][i-1],
+                    selected_seats: [`B${i}`, `B${i+1}`],
+                    bus_type: ['Standard', 'VIP', 'Standard', 'Premium', 'VIP'][i-1],
+                    bus_company: ['Selam Bus', 'Habesha Bus', 'Abay Bus', 'Ethio Bus', 'Selam Bus'][i-1],
+                    total_amount: [380, 720, 420, 650, 580][i-1],
+                    booking_status: 'completed',
+                    payment_status: 'paid',
+                    payment_method: ['Telebirr', 'Card', 'Dashen', 'CBE', 'Card'][i-1],
+                    created_at: new Date(Date.now() - (i * 20 * 24 * 60 * 60 * 1000)).toISOString(),
+                    user_rating: [4, 5, 3, 4, 5][i-1]
+                });
+            }
+            
+            return sampleBookings;
+        }
+        // Display upcoming tickets
+        // Display upcoming tickets (enhanced to show all tickets)
+        function displayUpcomingTickets() {
+            const container = document.getElementById('upcomingTickets');
+            const emptyState = document.getElementById('noUpcomingTickets');
+            
+            console.log('🎫 Displaying upcoming tickets...');
+            console.log('📊 Total bookings available:', userBookings.length);
+            
+            // Filter upcoming bookings
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const upcomingBookings = userBookings.filter(booking => {
+                const travelDate = new Date(booking.travel_date);
+                const isUpcoming = travelDate >= today && booking.booking_status !== 'cancelled';
+                console.log(`📅 Booking ${booking.booking_id}: ${booking.travel_date} - Upcoming: ${isUpcoming}`);
+                return isUpcoming;
+            }).slice(0, 6); // Show max 6 upcoming tickets
+            
+            console.log(`🎫 Found ${upcomingBookings.length} upcoming bookings to display`);
+            
+            if (upcomingBookings.length === 0) {
+                container.innerHTML = '';
+                emptyState.style.display = 'block';
+                console.log('📭 No upcoming tickets to display');
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            
+            container.innerHTML = upcomingBookings.map((booking, index) => {
+                console.log(`🎨 Rendering ticket ${index + 1}:`, booking.booking_id);
+                
+                const travelDate = new Date(booking.travel_date);
+                const formattedDate = travelDate.toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+                
+                const statusClass = getStatusClass(booking.booking_status);
+                const statusText = booking.booking_status.charAt(0).toUpperCase() + booking.booking_status.slice(1);
+                
+                // Format seats display - handle both array and string formats
+                let seatsDisplay = 'N/A';
+                if (booking.selected_seats) {
+                    if (Array.isArray(booking.selected_seats) && booking.selected_seats.length > 0) {
+                        seatsDisplay = booking.selected_seats.join(', ');
+                    } else if (typeof booking.selected_seats === 'string' && booking.selected_seats.trim()) {
+                        seatsDisplay = booking.selected_seats;
+                    }
+                }
+                
+                return `
+                    <div class="ticket-card">
+                        <div class="ticket-header">
+                            <div class="ticket-id">#${booking.booking_id}</div>
+                            <div class="ticket-status ${statusClass}">${statusText}</div>
+                        </div>
+                        
+                        <div class="ticket-route">
+                            ${getCityDisplayName(booking.from_city)}
+                            <i class="fas fa-arrow-right route-arrow"></i>
+                            ${getCityDisplayName(booking.to_city)}
+                        </div>
+                        
+                        <div class="ticket-details">
+                            <div class="ticket-detail">
+                                <div class="detail-label">Travel Date</div>
+                                <div class="detail-value">${formattedDate}</div>
+                            </div>
+                            <div class="ticket-detail">
+                                <div class="detail-label">Departure</div>
+                                <div class="detail-value">${booking.departure_time || 'TBD'}</div>
+                            </div>
+                            <div class="ticket-detail">
+                                <div class="detail-label">Seats</div>
+                                <div class="detail-value">${seatsDisplay}</div>
+                            </div>
+                            <div class="ticket-detail">
+                                <div class="detail-label">Bus Type</div>
+                                <div class="detail-value">${getBusTypeDisplayName(booking.bus_type)}</div>
+                            </div>
+                            <div class="ticket-detail">
+                                <div class="detail-label">Company</div>
+                                <div class="detail-value">${getBusCompanyDisplayName(booking.bus_company)}</div>
+                            </div>
+                            <div class="ticket-detail">
+                                <div class="detail-label">Amount</div>
+                                <div class="detail-value">ETB ${parseFloat(booking.total_amount).toLocaleString()}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="ticket-actions">
+                            <a href="my-tickets.html?booking=${booking.booking_id}" class="btn btn-primary">
+                                <i class="fas fa-ticket-alt"></i>
+                                View Ticket
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            console.log('✅ Successfully rendered all upcoming tickets');
+        }
+        // Load payment history
+        async function loadPaymentHistory() {
+            try {
+                console.log('Loading payment history...');
+                
+                // Derive payments from bookings
+                if (userBookings.length > 0) {
+                    userPayments = userBookings.filter(booking => 
+                        booking.payment_status === 'paid' || booking.payment_status === 'completed'
+                    ).map(booking => ({
+                        payment_id: `PAY_${booking.booking_id}`,
+                        booking_id: booking.booking_id,
+                        amount: booking.total_amount,
+                        payment_method: booking.payment_method || 'Card',
+                        payment_status: 'completed',
+                        payment_date: booking.created_at,
+                        route: `${booking.from_city} → ${booking.to_city}`,
+                        transaction_reference: `TXN_${Math.random().toString(36).substr(2, 8).toUpperCase()}`
+                    }));
+                } else {
+                    // Generate sample payments
+                    userPayments = generateSamplePayments();
+                }
+                
+                console.log('Loaded payments:', userPayments.length);
+                displayPaymentHistory();
+                
+            } catch (error) {
+                console.error('Error loading payment history:', error);
+                userPayments = generateSamplePayments();
+                displayPaymentHistory();
+            }
+        }
+
+        // Generate sample payments
+        function generateSamplePayments() {
+            const samplePayments = [];
+            const today = new Date();
+            
+            for (let i = 1; i <= 6; i++) {
+                const paymentDate = new Date(today);
+                paymentDate.setDate(today.getDate() - (i * 10));
+                
+                samplePayments.push({
+                    payment_id: `PAY_BK${String(Math.floor(Math.random() * 100000)).padStart(6, '0')}`,
+                    booking_id: `BK${String(Math.floor(Math.random() * 100000)).padStart(6, '0')}`,
+                    amount: [450, 680, 520, 380, 720, 420][i-1],
+                    payment_method: ['Telebirr', 'Card', 'CBE', 'Dashen', 'Card', 'Telebirr'][i-1],
+                    payment_status: 'completed',
+                    payment_date: paymentDate.toISOString(),
+                    route: [
+                        'Addis Ababa → Kombolcha',
+                        'Bahirdar → Gonder', 
+                        'Kombolcha → Dessie',
+                        'Addis Ababa → Hawasa',
+                        'Hawasa → Arbaminch',
+                        'Adama → Hawasa'
+                    ][i-1],
+                    transaction_reference: `TXN_${Math.random().toString(36).substr(2, 8).toUpperCase()}`
+                });
+            }
+            
+            return samplePayments;
+        }
+
+        // Display payment history
+        function displayPaymentHistory() {
+            const container = document.getElementById('paymentHistoryList');
+            const emptyState = document.getElementById('noPaymentHistory');
+            
+            const recentPayments = userPayments.slice(0, 5); // Show last 5 payments
+            
+            if (recentPayments.length === 0) {
+                container.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            
+            container.innerHTML = recentPayments.map(payment => {
+                const paymentDate = new Date(payment.payment_date);
+                const formattedDate = paymentDate.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+                
+                const formattedTime = paymentDate.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                return `
+                    <div class="payment-item">
+                        <div class="payment-header">
+                            <div class="payment-amount">ETB ${parseFloat(payment.amount).toLocaleString()}</div>
+                            <div class="payment-method">
+                                <i class="fas ${getPaymentIcon(payment.payment_method)}"></i>
+                                ${payment.payment_method}
+                            </div>
+                        </div>
+                        
+                        <div class="payment-details">
+                            <div class="ticket-detail">
+                                <div class="detail-label">Date & Time</div>
+                                <div class="detail-value">${formattedDate} at ${formattedTime}</div>
+                            </div>
+                            <div class="ticket-detail">
+                                <div class="detail-label">Route</div>
+                                <div class="detail-value">${payment.route}</div>
+                            </div>
+                            <div class="ticket-detail">
+                                <div class="detail-label">Status</div>
+                                <div class="detail-value">
+                                    <span class="ticket-status status-confirmed">
+                                        <i class="fas fa-check-circle"></i>
+                                        Completed
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="ticket-detail">
+                                <div class="detail-label">Reference</div>
+                                <div class="detail-value">${payment.transaction_reference}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        // Display travel history
+        function displayTravelHistory() {
+            const container = document.getElementById('recentTravelHistory');
+            const emptyState = document.getElementById('noTravelHistory');
+            
+            // Filter completed bookings
+            const completedBookings = userBookings.filter(booking => 
+                booking.booking_status === 'completed'
+            ).slice(0, 5); // Show last 5 completed trips
+            
+            if (completedBookings.length === 0) {
+                container.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            
+            container.innerHTML = completedBookings.map(booking => {
+                const travelDate = new Date(booking.travel_date);
+                const formattedDate = travelDate.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+                
+                const rating = booking.user_rating || 0;
+                const ratingStars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+                
+                return `
+                    <div class="history-item">
+                        <div class="history-route">
+                            ${getCityDisplayName(booking.from_city)} → ${getCityDisplayName(booking.to_city)}
+                        </div>
+                        
+                        <div class="history-details">
+                            <div class="ticket-detail">
+                                <div class="detail-label">Travel Date</div>
+                                <div class="detail-value">${formattedDate}</div>
+                            </div>
+                            <div class="ticket-detail">
+                                <div class="detail-label">Bus Company</div>
+                                <div class="detail-value">${getBusCompanyDisplayName(booking.bus_company)}</div>
+                            </div>
+                            <div class="ticket-detail">
+                                <div class="detail-label">Amount Paid</div>
+                                <div class="detail-value">ETB ${parseFloat(booking.total_amount).toLocaleString()}</div>
+                            </div>
+                            <div class="ticket-detail">
+                                <div class="detail-label">Rating</div>
+                                <div class="detail-value">${ratingStars} (${rating}/5)</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Load notifications
+        async function loadNotifications() {
+            try {
+                console.log('Loading notifications...');
+                
+                // Generate notifications based on bookings
+                userNotifications = generateNotifications();
+                console.log('Generated notifications:', userNotifications.length);
+                displayNotifications();
+                
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+                userNotifications = [];
+                displayNotifications();
+            }
+        }
+
+        // Generate notifications based on bookings and system events
+        function generateNotifications() {
+            const notifications = [];
+            const today = new Date();
+            
+            // Generate booking confirmations
+            userBookings.forEach(booking => {
+                if (booking.booking_status === 'confirmed') {
+                    notifications.push({
+                        id: `notif_${booking.booking_id}`,
+                        title: 'Booking Confirmed',
+                        message: `Your booking for ${getCityDisplayName(booking.from_city)} → ${getCityDisplayName(booking.to_city)} on ${new Date(booking.travel_date).toLocaleDateString()} has been confirmed.`,
+                        type: 'success',
+                        read: false,
+                        created_at: booking.created_at
+                    });
+                }
+            });
+            
+            // Generate trip reminders for upcoming bookings
+            userBookings.forEach(booking => {
+                const travelDate = new Date(booking.travel_date);
+                const daysDiff = Math.ceil((travelDate - today) / (1000 * 60 * 60 * 24));
+                
+                if (daysDiff <= 3 && daysDiff > 0 && booking.booking_status === 'confirmed') {
+                    notifications.push({
+                        id: `reminder_${booking.booking_id}`,
+                        title: 'Trip Reminder',
+                        message: `Your trip from ${getCityDisplayName(booking.from_city)} to ${getCityDisplayName(booking.to_city)} is in ${daysDiff} day${daysDiff > 1 ? 's' : ''}. Don't forget to arrive 30 minutes early!`,
+                        type: 'warning',
+                        read: false,
+                        created_at: new Date(Date.now() - (daysDiff * 24 * 60 * 60 * 1000)).toISOString()
+                    });
+                }
+            });
+            
+            // Add some general notifications
+            notifications.push({
+                id: 'welcome_notif',
+                title: 'Welcome to SwiftBus!',
+                message: 'Thank you for choosing SwiftBus for your travel needs. Enjoy safe and comfortable journeys with us.',
+                type: 'info',
+                read: true,
+                created_at: new Date(Date.now() - (7 * 24 * 60 * 60 * 1000)).toISOString()
+            });
+            
+            // Sort by creation date (newest first)
+            return notifications.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        }
+        // Display notifications
+        function displayNotifications() {
+            const container = document.getElementById('notificationsList');
+            const emptyState = document.getElementById('noNotifications');
+            
+            const recentNotifications = userNotifications.slice(0, 5); // Show last 5 notifications
+            
+            if (recentNotifications.length === 0) {
+                container.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            
+            container.innerHTML = recentNotifications.map(notification => {
+                const notificationDate = new Date(notification.created_at);
+                const timeAgo = getTimeAgo(notificationDate);
+                
+                const typeClass = notification.type === 'success' ? 'success' : 
+                                notification.type === 'warning' ? 'warning' : 
+                                notification.type === 'error' ? 'danger' : '';
+                
+                return `
+                    <div class="notification-item ${typeClass} ${!notification.read ? 'unread' : ''}" onclick="markNotificationRead('${notification.id}')">
+                        ${!notification.read ? '<div class="unread-badge"></div>' : ''}
+                        <div class="notification-header">
+                            <div>
+                                <div class="notification-title">${notification.title}</div>
+                                <div class="notification-time">${timeAgo}</div>
+                            </div>
+                        </div>
+                        <div class="notification-message">${notification.message}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update statistics (enhanced with logging)
+        function updateStatistics() {
+            console.log('📊 Updating dashboard statistics...');
+            console.log('📊 Total bookings available:', userBookings.length);
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Active trips count
+            const activeTrips = userBookings.filter(booking => {
+                const travelDate = new Date(booking.travel_date);
+                const isActive = travelDate >= today && booking.booking_status !== 'cancelled';
+                return isActive;
+            });
+            
+            console.log('📊 Active trips found:', activeTrips.length);
+            
+            // Total trips count
+            const totalTrips = userBookings.length;
+            console.log('📊 Total trips:', totalTrips);
+            
+            // Total spent amount
+            const totalSpent = userPayments.reduce((sum, payment) => sum + parseFloat(payment.amount), 0);
+            console.log('📊 Total spent:', totalSpent);
+            
+            // Unread notifications count
+            const unreadNotifications = userNotifications.filter(notif => !notif.read).length;
+            console.log('📊 Unread notifications:', unreadNotifications);
+            
+            // Update UI
+            document.getElementById('activeTripsCount').textContent = activeTrips.length;
+            document.getElementById('totalTripsCount').textContent = totalTrips;
+            document.getElementById('totalSpentAmount').textContent = `ETB ${totalSpent.toLocaleString()}`;
+            document.getElementById('unreadNotificationsCount').textContent = unreadNotifications;
+            
+            console.log('✅ Dashboard statistics updated successfully');
+        }
+
+        // Helper functions for consistent display names (same as other pages)
+        function getCityDisplayName(city) {
+            const cityMap = {
+                'addis_ababa': 'Addis Ababa',
+                'bahirdar': 'Bahirdar',
+                'gonder': 'Gonder',
+                'hawasa': 'Hawasa',
+                'mekele': 'Mekele',
+                'jimma': 'Jimma',
+                'adama': 'Adama',
+                'dessie': 'Dessie',
+                'kombolcha': 'Kombolcha',
+                'arbaminch': 'Arbaminch'
+            };
+            return cityMap[city?.toLowerCase()] || city || 'Unknown';
+        }
+
+        function getBusTypeDisplayName(busType) {
+            const typeMap = {
+                'standard': 'Standard',
+                'vip': 'VIP',
+                'premium': 'Premium',
+                'luxury': 'Luxury'
+            };
+            return typeMap[busType?.toLowerCase()] || busType || 'Standard';
+        }
+
+        function getBusCompanyDisplayName(company) {
+            const companyMap = {
+                'selam_bus': 'Selam Bus',
+                'abay_bus': 'Abay Bus',
+                'ethio_bus': 'Ethio Bus',
+                'habesha_bus': 'Habesha Bus',
+                'sky_bus': 'Sky Bus'
+            };
+            return companyMap[company?.toLowerCase()] || company || 'Unknown';
+        }
+
+        function getStatusClass(status) {
+            const statusMap = {
+                'confirmed': 'status-confirmed',
+                'pending': 'status-pending',
+                'cancelled': 'status-cancelled',
+                'completed': 'status-completed'
+            };
+            return statusMap[status?.toLowerCase()] || 'status-pending';
+        }
+
+        function getPaymentIcon(method) {
+            const iconMap = {
+                'telebirr': 'fa-mobile-alt',
+                'cbe': 'fa-university',
+                'dashen': 'fa-credit-card',
+                'card': 'fa-credit-card',
+                'cash': 'fa-money-bill'
+            };
+            return iconMap[method?.toLowerCase()] || 'fa-credit-card';
+        }
+        // Utility function to get time ago
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            
+            if (diffInSeconds < 60) return 'Just now';
+            if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+            if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+            if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+            
+            return date.toLocaleDateString();
+        }
+
+        // Mark notification as read
+        function markNotificationRead(notificationId) {
+            const notification = userNotifications.find(n => n.id === notificationId);
+            if (notification) {
+                notification.read = true;
+                displayNotifications();
+                updateStatistics();
+            }
+        }
+
+        // Mark all notifications as read
+        function markAllNotificationsRead() {
+            userNotifications.forEach(notification => notification.read = true);
+            displayNotifications();
+            updateStatistics();
+            showNotification('All notifications marked as read', 'success');
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Profile dropdown
+            const profileDropdown = document.getElementById('profileDropdown');
+            const userDropdownMenu = document.getElementById('userDropdownMenu');
+            
+            if (profileDropdown && userDropdownMenu) {
+                profileDropdown.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdownMenu.classList.toggle('show');
+                });
+                
+                document.addEventListener('click', function() {
+                    userDropdownMenu.classList.remove('show');
+                });
+            }
+
+            // Logout functionality
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    logout();
+                });
+            }
+        }
+
+        // Enhanced logout function with fallback
+        async function logout() {
+            try {
+                console.log('🚪 Logging out user...');
+                
+                // Show loading state
+                showNotification('Logging out...', 'info');
+                
+                // Call backend logout API if available
+                if (typeof swiftBusAPI !== 'undefined') {
+                    try {
+                        console.log('📡 Calling backend logout API...');
+                        const response = await swiftBusAPI.request('auth.php?action=logout');
+                        console.log('✅ Backend logout successful:', response);
+                    } catch (apiError) {
+                        console.warn('⚠️ Backend logout failed:', apiError.message);
+                        // Continue with client-side logout even if API fails
+                    }
+                } else {
+                    console.warn('⚠️ SwiftBus API not available, using fallback logout');
+                    
+                    // Fallback: Direct call to logout.php
+                    try {
+                        const response = await fetch('logout.php', {
+                            method: 'GET',
+                            credentials: 'same-origin'
+                        });
+                        console.log('✅ Fallback logout successful');
+                    } catch (fetchError) {
+                        console.warn('⚠️ Fallback logout failed:', fetchError.message);
+                    }
+                }
+                
+                // Clear all session and user data from localStorage
+                console.log('🧹 Clearing localStorage data...');
+                const keysToRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && (key.startsWith('swiftbus_') || key.includes('user') || key.includes('session') || key.includes('auth'))) {
+                        keysToRemove.push(key);
+                    }
+                }
+                
+                keysToRemove.forEach(key => {
+                    localStorage.removeItem(key);
+                    console.log(`🗑️ Removed: ${key}`);
+                });
+                
+                // Clear session storage as well
+                sessionStorage.clear();
+                
+                // Clear current user data
+                currentUser = null;
+                userBookings = [];
+                userPayments = [];
+                userNotifications = [];
+                
+                console.log('✅ All user data cleared');
+                
+                // Show success notification
+                showNotification('Logged out successfully! Redirecting...', 'success');
+                
+                // Redirect to login page after a short delay
+                setTimeout(() => {
+                    console.log('🔄 Redirecting to login page...');
+                    window.location.href = 'login.html';
+                }, 1500);
+                
+            } catch (error) {
+                console.error('❌ Logout error:', error);
+                showNotification('Logout completed. Redirecting...', 'info');
+                
+                // Force redirect anyway after error
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            // Add to page
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => {
+                notification.style.opacity = '1';
+                notification.style.transform = 'translateY(0)';
+            }, 100);
+            
+            // Hide notification after 3 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Load sample data as fallback
+        function loadSampleData() {
+            if (userBookings.length === 0) {
+                userBookings = generateSampleBookings();
+                displayUpcomingTickets();
+                displayTravelHistory();
+            }
+            
+            if (userPayments.length === 0) {
+                userPayments = generateSamplePayments();
+                displayPaymentHistory();
+            }
+            
+            if (userNotifications.length === 0) {
+                userNotifications = generateNotifications();
+                displayNotifications();
+            }
+            
+            updateStatistics();
+        }
+    </script>
+</body>
+</html>

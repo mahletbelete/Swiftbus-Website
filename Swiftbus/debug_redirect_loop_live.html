@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Redirect Loop Debug - SwiftBus</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
+        .critical { background: #dc3545; color: white; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .success { background: #28a745; color: white; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .warning { background: #ffc107; color: #000; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .info { background: #17a2b8; color: white; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .step { background: #f8f9fa; padding: 15px; margin: 15px 0; border-left: 4px solid #007bff; border-radius: 5px; }
+        button { background: #007bff; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .btn-danger { background: #dc3545; }
+        .btn-success { background: #28a745; }
+        .btn-warning { background: #ffc107; color: #000; }
+        pre { background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 12px; max-height: 300px; }
+        .log-entry { margin: 5px 0; padding: 8px; border-radius: 3px; font-family: monospace; font-size: 12px; }
+        .log-error { background: #f8d7da; color: #721c24; }
+        .log-success { background: #d4edda; color: #155724; }
+        .log-info { background: #d1ecf1; color: #0c5460; }
+        .log-warning { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Live Redirect Loop Debug</h1>
+        
+        <div class="critical">
+            <h3>🚨 ACTIVE DEBUGGING</h3>
+            <p>This tool will trace the exact redirect loop in real-time and fix it.</p>
+        </div>
+
+        <!-- Current Status -->
+        <div class="step">
+            <h3>📊 Current Authentication Status</h3>
+            <button onclick="checkCurrentAuth()">Check Current Status</button>
+            <div id="currentStatus"></div>
+        </div>
+
+        <!-- Live Login Test -->
+        <div class="step">
+            <h3>🔐 Live Login Test</h3>
+            <div>
+                <input type="email" id="testEmail" placeholder="Email" value="mubarekali974@gmail.com" style="padding: 8px; margin: 5px; width: 250px;">
+                <input type="password" id="testPassword" placeholder="Password" value="Admin@123" style="padding: 8px; margin: 5px; width: 250px;">
+                <br><br>
+                <button onclick="testLiveLogin()" class="btn-success">Test Live Login Flow</button>
+            </div>
+            <div id="loginTestResult"></div>
+        </div>
+
+        <!-- Navigation Test -->
+        <div class="step">
+            <h3>🧭 Navigation Test</h3>
+            <button onclick="testNavigation('admin-dashboard.html')">Test Dashboard</button>
+            <button onclick="testNavigation('admin-profile.html')">Test Profile</button>
+            <button onclick="testNavigation('admin-settings.html')">Test Settings</button>
+            <div id="navigationResult"></div>
+        </div>
+
+        <!-- Emergency Fix -->
+        <div class="step">
+            <h3>🚨 Emergency Fix</h3>
+            <button onclick="emergencyFixRedirectLoop()" class="btn-danger">Emergency Fix Redirect Loop</button>
+            <div id="emergencyFixResult"></div>
+        </div>
+
+        <!-- Live Log -->
+        <div class="step">
+            <h3>📝 Live Debug Log</h3>
+            <button onclick="clearLog()">Clear Log</button>
+            <div id="liveLog" style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; background: #f8f9fa;"></div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let logEntries = [];
+
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = `[${timestamp}] ${message}`;
+            logEntries.push({message: entry, type});
+            
+            const logDiv = document.getElementById('liveLog');
+            const entryDiv = document.createElement('div');
+            entryDiv.className = `log-entry log-${type}`;
+            entryDiv.textContent = entry;
+            logDiv.appendChild(entryDiv);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            
+            console.log(`[DEBUG] ${entry}`);
+        }
+
+        function clearLog() {
+            document.getElementById('liveLog').innerHTML = '';
+            logEntries = [];
+        }
+
+        async function checkCurrentAuth() {
+            const container = document.getElementById('currentStatus');
+            container.innerHTML = '';
+            
+            addLog('🔍 Checking current authentication status...', 'info');
+            
+            try {
+                // Check API authentication
+                addLog('📡 Testing swiftBusAPI.checkSession()...', 'info');
+                const apiResponse = await swiftBusAPI.checkSession();
+                
+                if (apiResponse.success && apiResponse.data) {
+                    addLog(`✅ API Auth SUCCESS: ${apiResponse.data.name} (${apiResponse.data.role})`, 'success');
+                    
+                    container.innerHTML += `
+                        <div class="success">
+                            <strong>✅ API Authentication: SUCCESS</strong><br>
+                            Name: ${apiResponse.data.name}<br>
+                            Email: ${apiResponse.data.email}<br>
+                            Role: ${apiResponse.data.role}<br>
+                            Admin Access: ${apiResponse.data.role === 'admin' ? 'GRANTED' : 'DENIED'}
+                        </div>
+                    `;
+                    
+                    if (apiResponse.data.role === 'admin') {
+                        addLog('🎉 Admin privileges confirmed via API', 'success');
+                    } else {
+                        addLog(`❌ User role is '${apiResponse.data.role}', not 'admin'`, 'error');
+                    }
+                } else {
+                    addLog('❌ API Auth FAILED: No valid session', 'error');
+                    container.innerHTML += `<div class="critical">❌ API Authentication: FAILED<br>Message: ${apiResponse.message || 'No active session'}</div>`;
+                }
+                
+                // Check localStorage
+                addLog('💾 Checking localStorage authentication...', 'info');
+                const localLoggedIn = localStorage.getItem('swiftbus_user_loggedin');
+                const localUserData = localStorage.getItem('swiftbus_user_data');
+                
+                if (localLoggedIn === 'true' && localUserData) {
+                    const userData = JSON.parse(localUserData);
+                    addLog(`✅ localStorage Auth: ${userData.name} (${userData.role})`, 'success');
+                    
+                    container.innerHTML += `
+                        <div class="info">
+                            <strong>💾 localStorage Authentication:</strong><br>
+                            Logged In: ${localLoggedIn}<br>
+                            User: ${userData.name} (${userData.role})
+                        </div>
+                    `;
+                } else {
+                    addLog('❌ localStorage Auth: Not set or invalid', 'error');
+                    container.innerHTML += `<div class="warning">⚠️ localStorage: Not properly set</div>`;
+                }
+                
+                // Check for conflicts
+                if (apiResponse.success && localLoggedIn === 'true') {
+                    const apiRole = apiResponse.data.role;
+                    const localRole = JSON.parse(localUserData).role;
+                    
+                    if (apiRole === localRole && apiRole === 'admin') {
+                        addLog('✅ API and localStorage are synchronized - admin access should work', 'success');
+                    } else {
+                        addLog(`❌ CONFLICT: API role='${apiRole}', localStorage role='${localRole}'`, 'error');
+                    }
+                }
+                
+            } catch (error) {
+                addLog(`💥 Authentication check failed: ${error.message}`, 'error');
+                container.innerHTML += `<div class="critical">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testLiveLogin() {
+            const container = document.getElementById('loginTestResult');
+            container.innerHTML = '';
+            
+            const email = document.getElementById('testEmail').value;
+            const password = document.getElementById('testPassword').value;
+            
+            addLog(`🔐 Starting live login test for: ${email}`, 'info');
+            
+            try {
+                // Step 1: Clear existing session
+                addLog('🧹 Clearing existing session...', 'info');
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                // Step 2: Attempt login
+                addLog('📡 Attempting API login...', 'info');
+                const loginResponse = await swiftBusAPI.login({
+                    email: email,
+                    password: password
+                });
+                
+                if (!loginResponse.success) {
+                    addLog(`❌ Login FAILED: ${loginResponse.message}`, 'error');
+                    container.innerHTML = `<div class="critical">❌ Login Failed: ${loginResponse.message}</div>`;
+                    return;
+                }
+                
+                addLog(`✅ Login SUCCESS: ${loginResponse.data.name}`, 'success');
+                
+                // Step 3: Immediately check session
+                addLog('🔍 Checking session immediately after login...', 'info');
+                const sessionCheck = await swiftBusAPI.checkSession();
+                
+                if (sessionCheck.success && sessionCheck.data.role === 'admin') {
+                    addLog('✅ Session valid and admin role confirmed', 'success');
+                    
+                    // Step 4: Set localStorage for compatibility
+                    addLog('💾 Setting localStorage for compatibility...', 'info');
+                    localStorage.setItem('swiftbus_user_loggedin', 'true');
+                    localStorage.setItem('swiftbus_user_data', JSON.stringify(sessionCheck.data));
+                    
+                    // Step 5: Test navigation
+                    addLog('🧭 Testing navigation to admin pages...', 'info');
+                    
+                    container.innerHTML = `
+                        <div class="success">
+                            <h4>✅ Login Test: SUCCESS</h4>
+                            <p>User: ${sessionCheck.data.name} (${sessionCheck.data.role})</p>
+                            <p>Admin access should now work. Try the navigation test below.</p>
+                        </div>
+                    `;
+                    
+                } else {
+                    addLog('❌ Session check failed after login - THIS IS THE PROBLEM!', 'error');
+                    container.innerHTML = `<div class="critical">❌ Session not persisting after login</div>`;
+                }
+                
+            } catch (error) {
+                addLog(`💥 Login test failed: ${error.message}`, 'error');
+                container.innerHTML = `<div class="critical">❌ Login Test Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testNavigation(page) {
+            const container = document.getElementById('navigationResult');
+            
+            addLog(`🧭 Testing navigation to: ${page}`, 'info');
+            
+            try {
+                // Check current auth status
+                const authCheck = await swiftBusAPI.checkSession();
+                
+                if (!authCheck.success || !authCheck.data) {
+                    addLog('❌ Cannot navigate: Not authenticated', 'error');
+                    container.innerHTML += `<div class="critical">❌ Navigation blocked: Not authenticated</div>`;
+                    return;
+                }
+                
+                if (authCheck.data.role !== 'admin') {
+                    addLog(`❌ Cannot navigate: Role is '${authCheck.data.role}', not 'admin'`, 'error');
+                    container.innerHTML += `<div class="critical">❌ Navigation blocked: Not admin</div>`;
+                    return;
+                }
+                
+                addLog(`✅ Navigation should work for: ${page}`, 'success');
+                
+                // Open in new tab to test
+                const newWindow = window.open(page, '_blank');
+                
+                container.innerHTML += `
+                    <div class="success">
+                        ✅ ${page} opened in new tab<br>
+                        Check if it loads without redirect loops
+                    </div>
+                `;
+                
+                // Monitor for redirect loops
+                setTimeout(() => {
+                    if (newWindow && !newWindow.closed) {
+                        addLog(`✅ ${page} appears to be stable (no immediate redirect)`, 'success');
+                    }
+                }, 3000);
+                
+            } catch (error) {
+                addLog(`💥 Navigation test failed: ${error.message}`, 'error');
+                container.innerHTML += `<div class="critical">❌ Navigation Error: ${error.message}</div>`;
+            }
+        }
+
+        async function emergencyFixRedirectLoop() {
+            const container = document.getElementById('emergencyFixResult');
+            container.innerHTML = '';
+            
+            addLog('🚨 Starting emergency redirect loop fix...', 'warning');
+            
+            try {
+                // Step 1: Complete session reset
+                addLog('🧹 Step 1: Complete session reset...', 'info');
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                // Clear cookies
+                document.cookie.split(";").forEach(function(c) { 
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                });
+                
+                // Step 2: Fresh login
+                addLog('🔐 Step 2: Fresh admin login...', 'info');
+                const loginResponse = await swiftBusAPI.login({
+                    email: 'mubarekali974@gmail.com',
+                    password: 'Admin@123'
+                });
+                
+                if (!loginResponse.success) {
+                    throw new Error(`Login failed: ${loginResponse.message}`);
+                }
+                
+                // Step 3: Verify session
+                addLog('🔍 Step 3: Verifying session...', 'info');
+                const sessionCheck = await swiftBusAPI.checkSession();
+                
+                if (!sessionCheck.success || sessionCheck.data.role !== 'admin') {
+                    throw new Error('Session verification failed');
+                }
+                
+                // Step 4: Force localStorage sync
+                addLog('💾 Step 4: Force localStorage synchronization...', 'info');
+                const userData = sessionCheck.data;
+                localStorage.setItem('swiftbus_user_loggedin', 'true');
+                localStorage.setItem('swiftbus_user_data', JSON.stringify(userData));
+                localStorage.setItem('swiftbus_user_email', userData.email);
+                localStorage.setItem('swiftbus_user_name', userData.name);
+                localStorage.setItem('swiftbus_user_role', userData.role);
+                
+                // Step 5: Test admin page access
+                addLog('🧪 Step 5: Testing admin page access...', 'info');
+                
+                // Simulate admin page authentication check
+                const testAuth = await swiftBusAPI.checkSession();
+                if (testAuth.success && testAuth.data.role === 'admin') {
+                    addLog('🎉 EMERGENCY FIX SUCCESS: Admin access restored!', 'success');
+                    
+                    container.innerHTML = `
+                        <div class="success">
+                            <h4>🎉 EMERGENCY FIX: SUCCESS!</h4>
+                            <p><strong>Admin access restored for:</strong> ${userData.name}</p>
+                            <p><strong>Role:</strong> ${userData.role}</p>
+                            <p><strong>Status:</strong> Ready to access admin pages</p>
+                            <br>
+                            <p><strong>Next steps:</strong></p>
+                            <ol>
+                                <li>Try navigating to admin pages</li>
+                                <li>Should work without redirect loops</li>
+                                <li>If issues persist, refresh browser and try again</li>
+                            </ol>
+                        </div>
+                    `;
+                } else {
+                    throw new Error('Admin access test failed after fix');
+                }
+                
+            } catch (error) {
+                addLog(`💥 Emergency fix failed: ${error.message}`, 'error');
+                container.innerHTML = `
+                    <div class="critical">
+                        <h4>❌ Emergency Fix Failed</h4>
+                        <p>Error: ${error.message}</p>
+                        <p><strong>Manual steps needed:</strong></p>
+                        <ol>
+                            <li>Close all browser tabs</li>
+                            <li>Clear browser cache completely</li>
+                            <li>Go to login.html</li>
+                            <li>Login with: mubarekali974@gmail.com / Admin@123</li>
+                        </ol>
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-start status check
+        setTimeout(() => {
+            checkCurrentAuth();
+        }, 1000);
+
+        // Monitor for redirect loops
+        let redirectCount = 0;
+        const originalLocation = window.location.href;
+
+        setInterval(() => {
+            if (window.location.href !== originalLocation) {
+                redirectCount++;
+                addLog(`⚠️ Page redirect detected (${redirectCount})`, 'warning');
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

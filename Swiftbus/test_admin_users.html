@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Users - SwiftBus</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-title {
+            color: #1a73e8;
+            border-bottom: 2px solid #1a73e8;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .test-result {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .btn {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover { background: #0d47a1; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border: 1px solid #e9ecef;
+        }
+        .user-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .user-header {
+            font-weight: bold;
+            color: #1a73e8;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .user-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .detail-item {
+            background: white;
+            padding: 8px;
+            border-radius: 3px;
+            border-left: 3px solid #1a73e8;
+        }
+        .detail-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+        }
+        .detail-value {
+            font-weight: bold;
+            color: #333;
+        }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .status-active { background: #28a745; color: white; }
+        .status-suspended { background: #dc3545; color: white; }
+        .status-verified { background: #1a73e8; color: white; }
+        .status-unverified { background: #ffc107; color: #212529; }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: #1a73e8;
+            color: white;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>👥 Admin Users API Test</h1>
+    
+    <div class="test-container">
+        <h2 class="test-title">Authentication Test</h2>
+        <button class="btn" onclick="testAuthentication()">Test Authentication</button>
+        <div id="authResult"></div>
+    </div>
+
+    <div class="test-container">
+        <h2 class="test-title">Users API Tests</h2>
+        <button class="btn" onclick="testGetUsers()">Get All Users</button>
+        <button class="btn" onclick="testGetUsersWithFilters()">Get Users with Filters</button>
+        <button class="btn" onclick="testUpdateUser()">Update User</button>
+        <button class="btn" onclick="testVerifyUser()">Verify User</button>
+        <button class="btn btn-danger" onclick="testSuspendUser()">Suspend User</button>
+        <div id="usersResult"></div>
+    </div>
+
+    <div class="test-container">
+        <h2 class="test-title">Users Display</h2>
+        <div id="usersDisplay"></div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let swiftBusAPI;
+        let testUserId = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof SwiftBusAPI !== 'undefined') {
+                swiftBusAPI = new SwiftBusAPI();
+                console.log('✅ SwiftBusAPI initialized for testing');
+                showResult('authResult', 'API initialized successfully', 'info');
+            } else {
+                showResult('authResult', 'SwiftBusAPI not available', 'error');
+            }
+        });
+
+        async function testAuthentication() {
+            try {
+                showResult('authResult', 'Testing authentication...', 'info');
+                
+                const response = await swiftBusAPI.checkSession();
+                console.log('Auth response:', response);
+                
+                if (response.success && response.data) {
+                    const userData = response.data;
+                    if (userData.role === 'admin') {
+                        showResult('authResult', 
+                            `✅ Admin authenticated successfully!<br>
+                            Name: ${userData.name || userData.full_name}<br>
+                            Role: ${userData.role}<br>
+                            Email: ${userData.email}`, 'success');
+                    } else {
+                        showResult('authResult', 
+                            `❌ Admin access required. Current role: ${userData.role}`, 'error');
+                    }
+                } else {
+                    showResult('authResult', '❌ Authentication failed: ' + (response.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Auth test error:', error);
+                showResult('authResult', '❌ Authentication test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testGetUsers() {
+            try {
+                showResult('usersResult', 'Loading all users...', 'info');
+                
+                const response = await swiftBusAPI.request('admin_users.php?action=get_users');
+                console.log('Get users response:', response);
+                
+                if (response.success && response.data) {
+                    const users = response.data;
+                    showResult('usersResult', 
+                        `✅ Successfully loaded ${users.length} users`, 'success');
+                    
+                    // Set test user ID from first user
+                    if (users.length > 0) {
+                        testUserId = users[0].id;
+                    }
+                    
+                    displayUsers(users);
+                } else {
+                    showResult('usersResult', '❌ Failed to load users: ' + (response.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Get users test error:', error);
+                showResult('usersResult', '❌ Get users test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testGetUsersWithFilters() {
+            try {
+                showResult('usersResult', 'Loading users with filters...', 'info');
+                
+                const response = await swiftBusAPI.request('admin_users.php?action=get_users&status=active&search=Abebe');
+                console.log('Get filtered users response:', response);
+                
+                if (response.success && response.data) {
+                    const users = response.data;
+                    showResult('usersResult', 
+                        `✅ Successfully loaded ${users.length} filtered users (active status, search: "Abebe")`, 'success');
+                    
+                    displayUsers(users);
+                } else {
+                    showResult('usersResult', '❌ Failed to load filtered users: ' + (response.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Get filtered users test error:', error);
+                showResult('usersResult', '❌ Get filtered users test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testUpdateUser() {
+            if (!testUserId) {
+                showResult('usersResult', '❌ No test user available. Load users first.', 'error');
+                return;
+            }
+            
+            try {
+                showResult('usersResult', 'Updating test user...', 'info');
+                
+                const updateData = {
+                    action: 'update_user',
+                    id: testUserId,
+                    name: 'Updated Test User',
+                    phone: '+251 911223344'
+                };
+                
+                const response = await swiftBusAPI.request('admin_users.php', {
+                    method: 'POST',
+                    body: JSON.stringify(updateData)
+                });
+                
+                console.log('Update user response:', response);
+                
+                if (response.success) {
+                    showResult('usersResult', 
+                        `✅ Successfully updated user: ${testUserId}<br>
+                        Updated user information`, 'success');
+                } else {
+                    showResult('usersResult', '❌ Failed to update user: ' + (response.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Update user test error:', error);
+                showResult('usersResult', '❌ Update user test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testVerifyUser() {
+            if (!testUserId) {
+                showResult('usersResult', '❌ No test user available. Load users first.', 'error');
+                return;
+            }
+            
+            try {
+                showResult('usersResult', 'Verifying test user...', 'info');
+                
+                const response = await swiftBusAPI.request('admin_users.php', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'verify_user',
+                        id: testUserId
+                    })
+                });
+                
+                console.log('Verify user response:', response);
+                
+                if (response.success) {
+                    showResult('usersResult', 
+                        `✅ Successfully verified user: ${testUserId}`, 'success');
+                } else {
+                    showResult('usersResult', '❌ Failed to verify user: ' + (response.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Verify user test error:', error);
+                showResult('usersResult', '❌ Verify user test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testSuspendUser() {
+            if (!testUserId) {
+                showResult('usersResult', '❌ No test user available. Load users first.', 'error');
+                return;
+            }
+            
+            if (!confirm(`Are you sure you want to suspend test user ${testUserId}?`)) {
+                return;
+            }
+            
+            try {
+                showResult('usersResult', 'Suspending test user...', 'info');
+                
+                const response = await swiftBusAPI.request('admin_users.php', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'suspend_user',
+                        id: testUserId
+                    })
+                });
+                
+                console.log('Suspend user response:', response);
+                
+                if (response.success) {
+                    showResult('usersResult', 
+                        `✅ Successfully suspended user: ${testUserId}`, 'success');
+                } else {
+                    showResult('usersResult', '❌ Failed to suspend user: ' + (response.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Suspend user test error:', error);
+                showResult('usersResult', '❌ Suspend user test failed: ' + error.message, 'error');
+            }
+        }
+
+        function displayUsers(users) {
+            const container = document.getElementById('usersDisplay');
+            
+            if (!users || users.length === 0) {
+                container.innerHTML = '<div class="info">No users to display</div>';
+                return;
+            }
+            
+            let html = `<h3>👥 Users Data (${users.length} users)</h3>`;
+            
+            users.forEach(user => {
+                const initials = user.full_name.split(' ').map(n => n[0]).join('');
+                html += `
+                    <div class="user-item">
+                        <div class="user-header">
+                            <div style="display: flex; align-items: center;">
+                                <div class="user-avatar">${initials}</div>
+                                <span>${user.id} - ${user.full_name}</span>
+                            </div>
+                            <span class="status-badge status-${user.status}">${user.status}</span>
+                        </div>
+                        <div class="user-details">
+                            <div class="detail-item">
+                                <div class="detail-label">User ID</div>
+                                <div class="detail-value">${user.id}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Full Name 👤</div>
+                                <div class="detail-value">${user.full_name}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Email 📧</div>
+                                <div class="detail-value">${user.email}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Phone 📱</div>
+                                <div class="detail-value">${user.phone}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Account Status ✅</div>
+                                <div class="detail-value">${user.status}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Total Bookings 🧾</div>
+                                <div class="detail-value">${user.total_bookings}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Trips Taken</div>
+                                <div class="detail-value">${user.trips_taken}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Registration Date</div>
+                                <div class="detail-value">${new Date(user.registration_date).toLocaleDateString()}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Last Login</div>
+                                <div class="detail-value">${new Date(user.last_login).toLocaleDateString()}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Email Verified</div>
+                                <div class="detail-value">${user.email_verified ? 'Yes' : 'No'}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function showResult(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `<div class="test-result ${type}">${message}</div>`;
+        }
+    </script>
+</body>
+</html>

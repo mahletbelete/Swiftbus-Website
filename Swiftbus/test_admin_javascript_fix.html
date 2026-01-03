@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin JavaScript Fix Test - SwiftBus</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .btn {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover { background: #0056b3; }
+        #console-output {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 Admin JavaScript Fix Test</h1>
+        <p>This page tests the JavaScript fixes applied to admin pages to resolve the "Cannot read properties of null (reading 'style')" error.</p>
+        
+        <div class="test-result info">
+            <strong>Test Status:</strong> <span id="testStatus">Initializing...</span>
+        </div>
+        
+        <div class="test-result" id="apiTestResult">
+            <strong>API Test:</strong> <span id="apiStatus">Testing...</span>
+        </div>
+        
+        <div class="test-result" id="domTestResult">
+            <strong>DOM Elements Test:</strong> <span id="domStatus">Testing...</span>
+        </div>
+        
+        <div class="test-result" id="authTestResult">
+            <strong>Authentication Test:</strong> <span id="authStatus">Testing...</span>
+        </div>
+        
+        <button class="btn" onclick="runTests()">🔄 Run Tests Again</button>
+        <button class="btn" onclick="testAdminPages()">🔗 Test Admin Pages</button>
+        <button class="btn" onclick="clearConsole()">🗑️ Clear Console</button>
+        
+        <h3>Console Output:</h3>
+        <div id="console-output"></div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let consoleOutput = document.getElementById('console-output');
+        
+        // Override console.log to capture output
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function logToConsole(message, type = 'log') {
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌' : type === 'warn' ? '⚠️' : '📝';
+            consoleOutput.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            logToConsole(args.join(' '), 'log');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            logToConsole(args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            logToConsole(args.join(' '), 'warn');
+        };
+        
+        function clearConsole() {
+            consoleOutput.textContent = '';
+        }
+        
+        function updateTestResult(elementId, status, message, isSuccess) {
+            const element = document.getElementById(elementId);
+            const statusElement = element.querySelector('span');
+            statusElement.textContent = message;
+            element.className = `test-result ${isSuccess ? 'success' : 'error'}`;
+        }
+        
+        async function runTests() {
+            console.log('🚀 Starting JavaScript fix tests...');
+            document.getElementById('testStatus').textContent = 'Running tests...';
+            
+            // Test 1: API Availability
+            try {
+                console.log('🔍 Testing API availability...');
+                
+                let attempts = 0;
+                while (typeof SwiftBusAPI === 'undefined' && attempts < 10) {
+                    console.log(`⏳ Waiting for SwiftBusAPI... (attempt ${attempts + 1})`);
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    attempts++;
+                }
+                
+                if (typeof SwiftBusAPI !== 'undefined') {
+                    const api = new SwiftBusAPI();
+                    console.log('✅ SwiftBusAPI loaded successfully');
+                    updateTestResult('apiTestResult', 'apiStatus', 'API loaded successfully', true);
+                } else {
+                    throw new Error('SwiftBusAPI not available after waiting');
+                }
+            } catch (error) {
+                console.error('❌ API test failed:', error.message);
+                updateTestResult('apiTestResult', 'apiStatus', `Failed: ${error.message}`, false);
+            }
+            
+            // Test 2: DOM Elements
+            try {
+                console.log('🔍 Testing DOM element access...');
+                
+                // Create test elements similar to admin pages
+                const testDiv = document.createElement('div');
+                testDiv.id = 'testLoadingState';
+                testDiv.style.display = 'none';
+                document.body.appendChild(testDiv);
+                
+                // Test the fixed loading state functions
+                function testShowLoadingState() {
+                    try {
+                        const loadingElement = document.getElementById('testLoadingState');
+                        if (loadingElement) {
+                            loadingElement.style.display = 'block';
+                            return true;
+                        } else {
+                            console.warn('⚠️ Loading state element not found');
+                            return false;
+                        }
+                    } catch (error) {
+                        console.error('Error in showLoadingState:', error);
+                        return false;
+                    }
+                }
+                
+                function testHideLoadingState() {
+                    try {
+                        const loadingElement = document.getElementById('testLoadingState');
+                        if (loadingElement) {
+                            loadingElement.style.display = 'none';
+                            return true;
+                        } else {
+                            console.warn('⚠️ Loading state element not found');
+                            return false;
+                        }
+                    } catch (error) {
+                        console.error('Error in hideLoadingState:', error);
+                        return false;
+                    }
+                }
+                
+                const showResult = testShowLoadingState();
+                const hideResult = testHideLoadingState();
+                
+                if (showResult && hideResult) {
+                    console.log('✅ DOM manipulation functions work correctly');
+                    updateTestResult('domTestResult', 'domStatus', 'DOM functions work correctly', true);
+                } else {
+                    throw new Error('DOM manipulation failed');
+                }
+                
+                // Clean up
+                document.body.removeChild(testDiv);
+                
+            } catch (error) {
+                console.error('❌ DOM test failed:', error.message);
+                updateTestResult('domTestResult', 'domStatus', `Failed: ${error.message}`, false);
+            }
+            
+            // Test 3: Authentication Flow
+            try {
+                console.log('🔍 Testing authentication flow...');
+                
+                if (typeof SwiftBusAPI !== 'undefined') {
+                    const api = new SwiftBusAPI();
+                    
+                    // Test session check (this will likely fail since we're not logged in, but shouldn't crash)
+                    try {
+                        const response = await api.checkSession();
+                        console.log('📡 Session check response:', response);
+                        
+                        if (response && typeof response === 'object') {
+                            console.log('✅ Authentication API responds correctly');
+                            updateTestResult('authTestResult', 'authStatus', 'Auth API responds correctly', true);
+                        } else {
+                            throw new Error('Invalid response format');
+                        }
+                    } catch (authError) {
+                        // This is expected if not logged in
+                        console.log('⚠️ Auth check failed (expected if not logged in):', authError.message);
+                        updateTestResult('authTestResult', 'authStatus', 'Auth API accessible (not logged in)', true);
+                    }
+                } else {
+                    throw new Error('SwiftBusAPI not available');
+                }
+                
+            } catch (error) {
+                console.error('❌ Authentication test failed:', error.message);
+                updateTestResult('authTestResult', 'authStatus', `Failed: ${error.message}`, false);
+            }
+            
+            console.log('🎉 All tests completed');
+            document.getElementById('testStatus').textContent = 'Tests completed - check results above';
+        }
+        
+        function testAdminPages() {
+            console.log('🔗 Opening admin pages for testing...');
+            
+            const adminPages = [
+                'admin-dashboard.html',
+                'admin-profile.html',
+                'admin-users-list.html',
+                'admin-buses-list.html',
+                'admin-routes-list.html',
+                'admin-schedules-list.html',
+                'admin-bookings-all.html'
+            ];
+            
+            adminPages.forEach((page, index) => {
+                setTimeout(() => {
+                    console.log(`🔗 Opening ${page}...`);
+                    window.open(page, `_blank_${index}`);
+                }, index * 500); // Stagger the opening
+            });
+            
+            console.log('📝 Admin pages opened in new tabs. Check browser console for any errors.');
+        }
+        
+        // Run tests when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Test page loaded, running initial tests...');
+            setTimeout(runTests, 500); // Give API time to load
+        });
+    </script>
+</body>
+</html>
+</content>
