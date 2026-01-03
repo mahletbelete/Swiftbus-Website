@@ -1,9 +1,8 @@
 # Swiftbus-Website
-# Swiftbus-Website
 # 🚌 SwiftBus - Ethiopian Bus Booking System
 
 <p align="center">
-  <img src="swiftbus.jpg" alt="SwiftBus Logo" width="200">
+  <img src="Swiftbus/uploads/avatars/U2025543347_1767123528.jpg" alt="SwiftBus Logo" width="200">
 </p>
 
 <p align="center">
