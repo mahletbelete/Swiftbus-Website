@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug API URL Issue</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .result {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+            border-left: 4px solid #1a73e8;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .warning {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+        pre {
+            background: #f1f3f4;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        button {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background: #0d47a1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debug API URL Issue</h1>
+    <p>This will help identify why the API connection is failing.</p>
+    
+    <button onclick="debugURLs()">Debug API URLs</button>
+    <button onclick="testAPIFiles()">Test API File Access</button>
+    <button onclick="testBookingAPI()">Test Booking API</button>
+    
+    <div id="results"></div>
+
+    <script src="js/api.js"></script>
+    <script>
+        function addResult(title, message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = `<strong>${title}:</strong><br>${message}`;
+            results.appendChild(div);
+        }
+        
+        function debugURLs() {
+            document.getElementById('results').innerHTML = '';
+            
+            // Get current page info
+            const pageInfo = {
+                href: window.location.href,
+                origin: window.location.origin,
+                pathname: window.location.pathname,
+                port: window.location.port,
+                hostname: window.location.hostname,
+                protocol: window.location.protocol
+            };
+            
+            addResult('Current Page Info', `<pre>${JSON.stringify(pageInfo, null, 2)}</pre>`, 'info');
+            
+            // Test API URL construction
+            const api = new SwiftBusAPI();
+            
+            addResult('API Configuration', `
+                Base URL: ${api.baseURL}<br>
+                API URL: ${api.apiURL}
+            `, 'info');
+            
+            // Test specific endpoint URLs
+            const endpoints = [
+                'auth.php?action=check_session',
+                'booking_clean.php?action=create_booking',
+                'booking_clean.php?action=get_booking_stats'
+            ];
+            
+            endpoints.forEach(endpoint => {
+                const fullUrl = `${api.apiURL}/${endpoint}`;
+                addResult(`Endpoint: ${endpoint}`, `Full URL: ${fullUrl}`, 'info');
+            });
+            
+            // Check URL construction logic
+            const isLocalDev = window.location.port === '5501' || window.location.port === '3000' || window.location.hostname === '127.0.0.1';
+            addResult('URL Logic Check', `
+                Port: ${window.location.port}<br>
+                Hostname: ${window.location.hostname}<br>
+                isLocalDev: ${isLocalDev}<br>
+                Using XAMPP path: ${!isLocalDev || window.location.port === '80' || window.location.port === '8080'}
+            `, 'warning');
+        }
+        
+        async function testAPIFiles() {
+            addResult('Testing API File Access', 'Checking if API files are accessible...', 'info');
+            
+            const api = new SwiftBusAPI();
+            
+            // Test different possible URLs
+            const testUrls = [
+                `${api.apiURL}/booking_clean.php`,
+                `api/booking_clean.php`,
+                `./api/booking_clean.php`,
+                `../api/booking_clean.php`,
+                `http://localhost/api/booking_clean.php`,
+                `http://localhost/bus/api/booking_clean.php`
+            ];
+            
+            for (const url of testUrls) {
+                try {
+                    addResult(`Testing URL: ${url}`, 'Attempting connection...', 'info');
+                    
+                    const response = await fetch(url + '?action=get_booking_stats', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        addResult(`✅ SUCCESS: ${url}`, `
+                            Status: ${response.status}<br>
+                            Response: <pre>${JSON.stringify(data, null, 2)}</pre>
+                        `, 'success');
+                        break; // Found working URL
+                    } else {
+                        addResult(`❌ FAILED: ${url}`, `
+                            Status: ${response.status} ${response.statusText}
+                        `, 'error');
+                    }
+                } catch (error) {
+                    addResult(`❌ ERROR: ${url}`, `
+                        Error: ${error.message}
+                    `, 'error');
+                }
+            }
+        }
+        
+        async function testBookingAPI() {
+            addResult('Testing Booking API', 'Testing the exact booking creation call...', 'info');
+            
+            const testData = {
+                from_city: 'addis-ababa',
+                to_city: 'bahirdar',
+                departure_date: '2025-01-15',
+                departure_time: '08:00',
+                bus_company: 'selam-bus',
+                bus_type: 'premium-ac',
+                passenger_count: 1,
+                selected_seats: [1],
+                passenger_details: {
+                    fullName: 'Test User',
+                    email: 'test@example.com',
+                    phone: '+251911234567',
+                    nationality: 'ethiopian',
+                    idNumber: 'ID123456',
+                    ageGroup: 'adult'
+                },
+                total_amount: 520.00,
+                payment_method: 'telebirr'
+            };
+            
+            try {
+                // First check authentication
+                const authResponse = await swiftBusAPI.checkSession();
+                addResult('Authentication Check', `<pre>${JSON.stringify(authResponse, null, 2)}</pre>`, 
+                    authResponse.success ? 'success' : 'warning');
+                
+                if (!authResponse.success) {
+                    addResult('Authentication Required', 'Please login first at login.html', 'warning');
+                    return;
+                }
+                
+                // Test booking creation
+                const bookingResponse = await swiftBusAPI.createSimpleBooking(testData);
+                
+                if (bookingResponse.success) {
+                    addResult('✅ Booking API Success', `
+                        Booking ID: ${bookingResponse.data.booking_id}<br>
+                        <pre>${JSON.stringify(bookingResponse, null, 2)}</pre>
+                    `, 'success');
+                } else {
+                    addResult('❌ Booking API Failed', `
+                        Error: ${bookingResponse.message}<br>
+                        <pre>${JSON.stringify(bookingResponse, null, 2)}</pre>
+                    `, 'error');
+                }
+                
+            } catch (error) {
+                addResult('❌ Booking API Error', `
+                    This is the exact error you're seeing:<br>
+                    ${error.message}
+                `, 'error');
+            }
+        }
+        
+        // Auto-run URL debug on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            debugURLs();
+        });
+    </script>
+</body>
+</html>

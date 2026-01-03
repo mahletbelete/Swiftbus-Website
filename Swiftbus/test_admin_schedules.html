@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Schedules - SwiftBus</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .test-card { background: white; margin: 20px 0; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .success { border-left: 5px solid #28a745; background: #d4edda; }
+        .error { border-left: 5px solid #dc3545; background: #f8d7da; }
+        .info { border-left: 5px solid #17a2b8; background: #d1ecf1; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 12px; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; border: none; border-radius: 5px; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        input, select { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; }
+        .form-group { margin: 10px 0; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .test-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Admin Schedules API Test</h1>
+        
+        <div class="test-card info">
+            <h3>Test Instructions</h3>
+            <p>This page tests the admin schedules functionality. Make sure you're logged in as an admin first.</p>
+            <button class="btn-primary" onclick="window.open('admin-schedules-list.html', '_blank')">Open Admin Schedules</button>
+        </div>
+        
+        <div class="test-grid">
+            <div class="test-card">
+                <h3>🔐 Authentication Test</h3>
+                <button class="btn-primary" onclick="testAuth()">Test Authentication</button>
+                <div id="authResult"></div>
+            </div>
+            
+            <div class="test-card">
+                <h3>📅 Get Schedules Test</h3>
+                <button class="btn-primary" onclick="testGetSchedules()">Get All Schedules</button>
+                <button class="btn-primary" onclick="testGetSchedulesFiltered()">Get Filtered Schedules</button>
+                <div id="schedulesResult"></div>
+            </div>
+        </div>
+        
+        <div class="test-card">
+            <h3>➕ Create Schedule Test</h3>
+            <div class="form-group">
+                <label>Bus ID:</label>
+                <select id="testBusId">
+                    <option value="BUS001">BUS001 - Swift Express 001</option>
+                    <option value="BUS002">BUS002 - Swift Express 002</option>
+                    <option value="BUS003">BUS003 - Swift Express 003</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Route ID:</label>
+                <select id="testRouteId">
+                    <option value="RT001">RT001 - Addis Ababa → Bahirdar</option>
+                    <option value="RT002">RT002 - Addis Ababa → Hawasa</option>
+                    <option value="RT003">RT003 - Bahirdar → Gonder</option>
+                </select>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="form-group">
+                    <label>Departure Time:</label>
+                    <input type="time" id="testDepartureTime" value="08:00">
+                </div>
+                <div class="form-group">
+                    <label>Arrival Time:</label>
+                    <input type="time" id="testArrivalTime" value="14:00">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Schedule Date:</label>
+                <input type="date" id="testScheduleDate">
+            </div>
+            <div class="form-group">
+                <label>Status:</label>
+                <select id="testStatus">
+                    <option value="active">Active</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="maintenance">Maintenance</option>
+                </select>
+            </div>
+            <button class="btn-success" onclick="testCreateSchedule()">Create Schedule</button>
+            <div id="createResult"></div>
+        </div>
+        
+        <div class="test-grid">
+            <div class="test-card">
+                <h3>✏️ Update Schedule Test</h3>
+                <div class="form-group">
+                    <label>Schedule ID to Update:</label>
+                    <input type="text" id="updateScheduleId" placeholder="SCH001">
+                </div>
+                <div class="form-group">
+                    <label>New Status:</label>
+                    <select id="updateStatus">
+                        <option value="active">Active</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="maintenance">Maintenance</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <button class="btn-success" onclick="testUpdateSchedule()">Update Schedule</button>
+                <div id="updateResult"></div>
+            </div>
+            
+            <div class="test-card">
+                <h3>🗑️ Delete Schedule Test</h3>
+                <div class="form-group">
+                    <label>Schedule ID to Delete:</label>
+                    <input type="text" id="deleteScheduleId" placeholder="SCH001">
+                </div>
+                <button class="btn-danger" onclick="testDeleteSchedule()">Delete Schedule</button>
+                <p><small>⚠️ Be careful - this will actually delete the schedule!</small></p>
+                <div id="deleteResult"></div>
+            </div>
+        </div>
+        
+        <div class="test-card">
+            <h3>🔍 Schedule Details Test</h3>
+            <div class="form-group">
+                <label>Schedule ID:</label>
+                <input type="text" id="detailsScheduleId" placeholder="SCH001">
+            </div>
+            <button class="btn-primary" onclick="testGetScheduleDetails()">Get Schedule Details</button>
+            <div id="detailsResult"></div>
+        </div>
+        
+        <div class="test-card">
+            <h3>🚀 Quick Actions</h3>
+            <button class="btn-success" onclick="runAllTests()">Run All Tests</button>
+            <button class="btn-primary" onclick="clearResults()">Clear Results</button>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let swiftBusAPI;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof SwiftBusAPI !== 'undefined') {
+                swiftBusAPI = new SwiftBusAPI();
+                console.log('✅ SwiftBusAPI initialized for testing');
+                
+                // Set default date to tomorrow
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                document.getElementById('testScheduleDate').value = tomorrow.toISOString().split('T')[0];
+            } else {
+                alert('❌ SwiftBusAPI not available');
+            }
+        });
+        
+        async function testAuth() {
+            const resultDiv = document.getElementById('authResult');
+            resultDiv.innerHTML = '<p>Testing authentication...</p>';
+            
+            try {
+                const response = await swiftBusAPI.checkSession();
+                
+                let resultClass = response.success ? 'success' : 'error';
+                let statusIcon = response.success ? '✅' : '❌';
+                
+                resultDiv.innerHTML = `
+                    <div class="${resultClass}">
+                        <h4>${statusIcon} Authentication Result</h4>
+                        <p><strong>Success:</strong> ${response.success}</p>
+                        <p><strong>Role:</strong> ${response.data?.role || 'N/A'}</p>
+                        <p><strong>Name:</strong> ${response.data?.name || response.data?.full_name || 'N/A'}</p>
+                    </div>
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><strong>Error:</strong> ${error.message}</div>`;
+            }
+        }
+        
+        async function testGetSchedules() {
+            const resultDiv = document.getElementById('schedulesResult');
+            resultDiv.innerHTML = '<p>Getting schedules...</p>';
+            
+            try {
+                const response = await swiftBusAPI.request('admin_schedules.php?action=get_schedules');
+                
+                let resultClass = response.success ? 'success' : 'error';
+                let statusIcon = response.success ? '✅' : '❌';
+                
+                resultDiv.innerHTML = `
+                    <div class="${resultClass}">
+                        <h4>${statusIcon} Get Schedules Result</h4>
+                        <p><strong>Success:</strong> ${response.success}</p>
+                        <p><strong>Schedules Count:</strong> ${response.data ? response.data.length : 0}</p>
+                        ${response.data && response.data.length > 0 ? `
+                            <h5>Sample Schedules:</h5>
+                            <ul>
+                                ${response.data.slice(0, 3).map(schedule => 
+                                    `<li><strong>${schedule.id}:</strong> ${schedule.route_name} - ${schedule.departure_time} (${schedule.status})</li>`
+                                ).join('')}
+                            </ul>
+                        ` : ''}
+                        <details>
+                            <summary>Full Response</summary>
+                            <pre>${JSON.stringify(response, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><strong>Error:</strong> ${error.message}</div>`;
+            }
+        }
+        
+        async function testGetSchedulesFiltered() {
+            const resultDiv = document.getElementById('schedulesResult');
+            resultDiv.innerHTML = '<p>Getting filtered schedules...</p>';
+            
+            try {
+                const response = await swiftBusAPI.request('admin_schedules.php?action=get_schedules&status=active&search=Addis');
+                
+                let resultClass = response.success ? 'success' : 'error';
+                let statusIcon = response.success ? '✅' : '❌';
+                
+                resultDiv.innerHTML = `
+                    <div class="${resultClass}">
+                        <h4>${statusIcon} Get Filtered Schedules Result</h4>
+                        <p><strong>Success:</strong> ${response.success}</p>
+                        <p><strong>Filtered Schedules:</strong> ${response.data ? response.data.length : 0}</p>
+                        <p><strong>Filter:</strong> Status=active, Search=Addis</p>
+                        <details>
+                            <summary>Full Response</summary>
+                            <pre>${JSON.stringify(response, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><strong>Error:</strong> ${error.message}</div>`;
+            }
+        }
+        
+        async function testCreateSchedule() {
+            const resultDiv = document.getElementById('createResult');
+            resultDiv.innerHTML = '<p>Creating schedule...</p>';
+            
+            try {
+                const scheduleData = {
+                    bus_id: document.getElementById('testBusId').value,
+                    route_id: document.getElementById('testRouteId').value,
+                    departure_time: document.getElementById('testDepartureTime').value,
+                    arrival_time: document.getElementById('testArrivalTime').value,
+                    schedule_date: document.getElementById('testScheduleDate').value,
+                    status: document.getElementById('testStatus').value,
+                    notes: 'Test schedule created via API test'
+                };
+                
+                const response = await swiftBusAPI.request('admin_schedules.php?action=create_schedule', {
+                    method: 'POST',
+                    body: JSON.stringify(scheduleData)
+                });
+                
+                let resultClass = response.success ? 'success' : 'error';
+                let statusIcon = response.success ? '✅' : '❌';
+                
+                resultDiv.innerHTML = `
+                    <div class="${resultClass}">
+                        <h4>${statusIcon} Create Schedule Result</h4>
+                        <p><strong>Success:</strong> ${response.success}</p>
+                        <p><strong>Message:</strong> ${response.message}</p>
+                        ${response.data ? `<p><strong>Created Schedule ID:</strong> ${response.data.id}</p>` : ''}
+                        <details>
+                            <summary>Full Response</summary>
+                            <pre>${JSON.stringify(response, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><strong>Error:</strong> ${error.message}</div>`;
+            }
+        }
+        
+        async function testUpdateSchedule() {
+            const resultDiv = document.getElementById('updateResult');
+            
+            const scheduleId = document.getElementById('updateScheduleId').value;
+            if (!scheduleId) {
+                resultDiv.innerHTML = '<div class="error">Please enter a schedule ID to update</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<p>Updating schedule...</p>';
+            
+            try {
+                const updateData = {
+                    id: scheduleId,
+                    status: document.getElementById('updateStatus').value,
+                    notes: 'Updated via API test'
+                };
+                
+                const response = await swiftBusAPI.request('admin_schedules.php?action=update_schedule', {
+                    method: 'POST',
+                    body: JSON.stringify(updateData)
+                });
+                
+                let resultClass = response.success ? 'success' : 'error';
+                let statusIcon = response.success ? '✅' : '❌';
+                
+                resultDiv.innerHTML = `
+                    <div class="${resultClass}">
+                        <h4>${statusIcon} Update Schedule Result</h4>
+                        <p><strong>Success:</strong> ${response.success}</p>
+                        <p><strong>Message:</strong> ${response.message}</p>
+                        <details>
+                            <summary>Full Response</summary>
+                            <pre>${JSON.stringify(response, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><strong>Error:</strong> ${error.message}</div>`;
+            }
+        }
+        
+        async function testDeleteSchedule() {
+            const resultDiv = document.getElementById('deleteResult');
+            
+            const scheduleId = document.getElementById('deleteScheduleId').value;
+            if (!scheduleId) {
+                resultDiv.innerHTML = '<div class="error">Please enter a schedule ID to delete</div>';
+                return;
+            }
+            
+            if (!confirm(`Are you sure you want to delete schedule ${scheduleId}? This action cannot be undone!`)) {
+                return;
+            }
+            
+            resultDiv.innerHTML = '<p>Deleting schedule...</p>';
+            
+            try {
+                const response = await swiftBusAPI.request('admin_schedules.php?action=delete_schedule', {
+                    method: 'POST',
+                    body: JSON.stringify({ id: scheduleId })
+                });
+                
+                let resultClass = response.success ? 'success' : 'error';
+                let statusIcon = response.success ? '✅' : '❌';
+                
+                resultDiv.innerHTML = `
+                    <div class="${resultClass}">
+                        <h4>${statusIcon} Delete Schedule Result</h4>
+                        <p><strong>Success:</strong> ${response.success}</p>
+                        <p><strong>Message:</strong> ${response.message}</p>
+                        ${response.success ? '<p><strong>⚠️ Schedule has been deleted!</strong></p>' : ''}
+                    </div>
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><strong>Error:</strong> ${error.message}</div>`;
+            }
+        }
+        
+        async function testGetScheduleDetails() {
+            const resultDiv = document.getElementById('detailsResult');
+            
+            const scheduleId = document.getElementById('detailsScheduleId').value;
+            if (!scheduleId) {
+                resultDiv.innerHTML = '<div class="error">Please enter a schedule ID</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<p>Getting schedule details...</p>';
+            
+            try {
+                const response = await swiftBusAPI.request(`admin_schedules.php?action=get_schedule_details&id=${scheduleId}`);
+                
+                let resultClass = response.success ? 'success' : 'error';
+                let statusIcon = response.success ? '✅' : '❌';
+                
+                resultDiv.innerHTML = `
+                    <div class="${resultClass}">
+                        <h4>${statusIcon} Schedule Details Result</h4>
+                        <p><strong>Success:</strong> ${response.success}</p>
+                        ${response.data ? `
+                            <h5>Schedule Information:</h5>
+                            <ul>
+                                <li><strong>ID:</strong> ${response.data.id}</li>
+                                <li><strong>Bus:</strong> ${response.data.bus_name}</li>
+                                <li><strong>Route:</strong> ${response.data.route_name}</li>
+                                <li><strong>Date:</strong> ${response.data.schedule_date}</li>
+                                <li><strong>Time:</strong> ${response.data.departure_time} - ${response.data.arrival_time}</li>
+                                <li><strong>Seats:</strong> ${response.data.available_seats}/${response.data.total_seats}</li>
+                                <li><strong>Status:</strong> ${response.data.status}</li>
+                                <li><strong>Bookings:</strong> ${response.data.bookings ? response.data.bookings.length : 0}</li>
+                            </ul>
+                        ` : ''}
+                        <details>
+                            <summary>Full Response</summary>
+                            <pre>${JSON.stringify(response, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><strong>Error:</strong> ${error.message}</div>`;
+            }
+        }
+        
+        async function runAllTests() {
+            console.log('🔄 Running all schedule tests...');
+            
+            await testAuth();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testGetSchedules();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testGetSchedulesFiltered();
+            
+            console.log('✅ All tests completed');
+        }
+        
+        function clearResults() {
+            document.getElementById('authResult').innerHTML = '';
+            document.getElementById('schedulesResult').innerHTML = '';
+            document.getElementById('createResult').innerHTML = '';
+            document.getElementById('updateResult').innerHTML = '';
+            document.getElementById('deleteResult').innerHTML = '';
+            document.getElementById('detailsResult').innerHTML = '';
+        }
+    </script>
+</body>
+</html>

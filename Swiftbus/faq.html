@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - SwiftBus | Premium Ethiopian Bus Travel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --secondary: #ff6d00;
+            --dark: #222;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --chat-user: #e3f2fd;
+            --chat-bot: #f5f5f5;
+            --accent: #00c6ff;
+            --ethiopia-green: #078930;
+            --ethiopia-yellow: #fcdd09;
+            --ethiopia-red: #da121a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Back Button */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateX(-5px);
+            box-shadow: 0 6px 20px rgba(26, 115, 232, 0.3);
+        }
+
+        /* Page Hero */
+        .page-hero {
+            background: linear-gradient(135deg, 
+                rgba(26, 115, 232, 0.85) 0%, 
+                rgba(7, 137, 48, 0.8) 50%, 
+                rgba(255, 109, 0, 0.85) 100%);
+            color: white;
+            padding: 120px 0 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 1s ease;
+        }
+
+        .page-hero p {
+            font-size: 1.3rem;
+            max-width: 700px;
+            margin: 0 auto 40px;
+            opacity: 0.9;
+            animation: fadeInUp 1s ease 0.2s forwards;
+            opacity: 0;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* FAQ Content */
+        .faq-content {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-title h2 {
+            font-size: 36px;
+            color: var(--dark);
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--secondary);
+            border-radius: 2px;
+        }
+
+        .section-title p {
+            color: var(--gray);
+            max-width: 600px;
+            margin: 0 auto;
+            font-size: 18px;
+        }
+
+        /* FAQ Categories */
+        .faq-categories {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            background: var(--light);
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 12px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .category-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .category-btn:hover:not(.active) {
+            background: rgba(26, 115, 232, 0.1);
+        }
+
+        /* FAQ Accordion */
+        .faq-accordion {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            margin-bottom: 20px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .faq-item:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .faq-question {
+            padding: 25px;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .faq-question h3 {
+            font-size: 18px;
+            color: var(--dark);
+            font-weight: 600;
+            margin-right: 20px;
+        }
+
+        .faq-icon {
+            color: var(--primary);
+            font-size: 20px;
+            transition: transform 0.3s ease;
+            min-width: 20px;
+        }
+
+        .faq-answer {
+            padding: 0 25px;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .faq-answer p {
+            padding-bottom: 25px;
+            color: var(--gray);
+            line-height: 1.8;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 500px;
+            border-top: 1px solid #eee;
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+        }
+
+        /* FAQ Search */
+        .faq-search {
+            max-width: 600px;
+            margin: 0 auto 50px;
+            position: relative;
+        }
+
+        .faq-search input {
+            width: 100%;
+            padding: 18px 25px;
+            padding-right: 60px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            background: white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .faq-search input:focus {
+            outline: none;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .faq-search button {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .faq-search button:hover {
+            background: #0d47a1;
+        }
+
+        /* Popular Questions */
+        .popular-questions {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 80px 0;
+        }
+
+        .popular-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .popular-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .popular-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .popular-card h4 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .popular-card p {
+            color: var(--gray);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* Navigation Footer */
+        .nav-footer {
+            background: var(--dark);
+            color: white;
+            padding: 40px 0 20px;
+            margin-top: 60px;
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+
+        .nav-column h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .nav-column h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--secondary);
+            border-radius: 2px;
+        }
+
+        .nav-links {
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-bottom: 12px;
+        }
+
+        .nav-links a {
+            color: #bbb;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: block;
+            padding: 5px 0;
+        }
+
+        .nav-links a:hover {
+            color: white;
+            padding-left: 5px;
+        }
+
+        .nav-links a.active {
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #bbb;
+            font-size: 14px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .page-hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .page-hero p {
+                font-size: 1.1rem;
+            }
+            
+            .section-title h2 {
+                font-size: 28px;
+            }
+            
+            .faq-question {
+                padding: 20px;
+            }
+            
+            .faq-question h3 {
+                font-size: 16px;
+            }
+            
+            .popular-card {
+                padding: 25px;
+            }
+            
+            .faq-categories {
+                gap: 10px;
+            }
+            
+            .category-btn {
+                padding: 10px 20px;
+                font-size: 13px;
+            }
+            
+            .nav-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 30px;
+            }
+            
+            .back-btn {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-hero h1 {
+                font-size: 2rem;
+            }
+            
+            .page-hero {
+                padding: 100px 0 40px;
+            }
+            
+            .faq-question {
+                padding: 15px;
+            }
+            
+            .faq-question h3 {
+                font-size: 15px;
+            }
+            
+            .nav-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Back Button -->
+    <div class="back-button">
+        <a href="index.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Back to Home
+        </a>
+    </div>
+
+    <!-- Page Hero -->
+    <section class="page-hero">
+        <div class="container">
+            <h1>Frequently Asked Questions</h1>
+            <p>Find quick answers to common questions about SwiftBus services</p>
+        </div>
+    </section>
+
+    <!-- FAQ Content -->
+    <section class="faq-content">
+        <div class="container">
+            <div class="section-title">
+                <h2>How Can We Help?</h2>
+                <p>Search through our FAQ or browse by category</p>
+            </div>
+            
+            <!-- FAQ Search -->
+            <div class="faq-search">
+                <input type="text" id="faqSearch" placeholder="Search for answers...">
+                <button type="button" id="searchBtn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            
+            <!-- FAQ Categories -->
+            <div class="faq-categories">
+                <button class="category-btn active" data-category="all">All Questions</button>
+                <button class="category-btn" data-category="booking">Booking</button>
+                <button class="category-btn" data-category="payment">Payment</button>
+                <button class="category-btn" data-category="travel">Travel</button>
+                <button class="category-btn" data-category="cancellation">Cancellation</button>
+                <button class="category-btn" data-category="technical">Technical</button>
+            </div>
+            
+            <!-- FAQ Accordion -->
+            <div class="faq-accordion" id="faqAccordion">
+                <!-- FAQ items will be populated by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Popular Questions -->
+    <section class="popular-questions">
+        <div class="container">
+            <div class="section-title">
+                <h2>Popular Questions</h2>
+                <p>Most frequently asked questions by our customers</p>
+            </div>
+            
+            <div class="popular-grid">
+                <div class="popular-card">
+                    <h4><i class="fas fa-question-circle"></i> How do I book a bus ticket?</h4>
+                    <p>Book tickets easily through our website or mobile app in just a few steps.</p>
+                </div>
+                
+                <div class="popular-card">
+                    <h4><i class="fas fa-question-circle"></i> What payment methods do you accept?</h4>
+                    <p>We accept Telebirr, CBE, Bank of Abyssinia, Dashen Bank, and major credit cards.</p>
+                </div>
+                
+                <div class="popular-card">
+                    <h4><i class="fas fa-question-circle"></i> Can I cancel or modify my booking?</h4>
+                    <p>Yes, you can cancel or modify bookings up to 3 hours before departure.</p>
+                </div>
+                
+                <div class="popular-card">
+                    <h4><i class="fas fa-question-circle"></i> How early should I arrive at the bus station?</h4>
+                    <p>We recommend arriving at least 45 minutes before departure time.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Navigation Footer -->
+    <footer class="nav-footer">
+        <div class="container">
+            <div class="nav-grid">
+                <div class="nav-column">
+                    <h3>SwiftBus Pages</h3>
+                    <ul class="nav-links">
+                        <li><a href="index.html">Home Page</a></li>
+                        <li><a href="about-us.html">About Us</a></li>
+                        <li><a href="reviews.html">Customer Reviews</a></li>
+                        <li><a href="faq.html" class="active">FAQ & Help</a></li>
+                        <li><a href="contact-us.html">Contact Us</a></li>
+                    </ul>
+                </div>
+                
+                <div class="nav-column">
+                    <h3>Support Pages</h3>
+                    <ul class="nav-links">
+                       
+                        <li><a href="feedback.html">Submit Feedback</a></li>
+                        <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                        <li><a href="terms-conditions.html">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+                
+                <div class="nav-column">
+                    <h3>Main Features</h3>
+                    <ul class="nav-links">
+                        <li><a href="index.html#routes">Bus Routes</a></li>
+                        <li><a href="index.html#companies">Bus Companies</a></li>
+                        <li><a href="index.html#tracking">Live Tracking</a></li>
+                        <li><a href="index.html#chatbot">AI Assistant</a></li>
+                    </ul>
+                </div>
+                
+                <div class="nav-column">
+                    <h3>Account</h3>
+                    <ul class="nav-links">
+                        <li><a href="login.html">Login</a></li>
+                        <li><a href="signup.html">Sign Up</a></li>
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="my-tickets.html">My Tickets</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2023 SwiftBus. All rights reserved. | Your trusted bus travel partner in Ethiopia</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // FAQ Data
+        const faqData = [
+            // Booking Questions
+            {
+                id: 1,
+                category: "booking",
+                question: "How do I book a bus ticket online?",
+                answer: "Booking is simple! 1) Select your departure and destination cities, 2) Choose your travel date, 3) Select a bus company and seat, 4) Enter passenger details, 5) Make payment, 6) Receive e-ticket via email/SMS."
+            },
+            {
+                id: 2,
+                category: "booking",
+                question: "Can I book tickets for multiple passengers?",
+                answer: "Yes, you can book for up to 10 passengers in a single transaction. Simply increase the passenger count during booking and provide details for each traveler."
+            },
+            {
+                id: 3,
+                category: "booking",
+                question: "Do I need to create an account to book?",
+                answer: "While you can browse without an account, you need to create a free SwiftBus account to complete bookings. This helps us manage your tickets and provide better service."
+            },
+            
+            // Payment Questions
+            {
+                id: 4,
+                category: "payment",
+                question: "What payment methods do you accept?",
+                answer: "We accept: Telebirr mobile payment, Commercial Bank of Ethiopia, Bank of Abyssinia, Dashen Bank, and major credit/debit cards (Visa, MasterCard)."
+            },
+            {
+                id: 5,
+                category: "payment",
+                question: "Is my payment information secure?",
+                answer: "Absolutely! We use 256-bit SSL encryption and comply with PCI DSS standards. We never store your full card details on our servers."
+            },
+            {
+                id: 6,
+                category: "payment",
+                question: "When will I receive my refund?",
+                answer: "Refunds are processed within 3-5 business days after cancellation approval. The time to appear in your account depends on your bank/payment provider."
+            },
+            
+            // Travel Questions
+            {
+                id: 7,
+                category: "travel",
+                question: "What should I bring to the bus station?",
+                answer: "Bring: 1) Your e-ticket (digital or printed), 2) Valid ID (passport or national ID), 3) Face mask (if required), 4) Essential personal items."
+            },
+            {
+                id: 8,
+                category: "travel",
+                question: "Can I bring luggage on the bus?",
+                answer: "Yes, each passenger can bring: 1 main suitcase (20kg max) and 1 small hand luggage. Additional luggage may incur extra charges."
+            },
+            {
+                id: 9,
+                category: "travel",
+                question: "Are there amenities on the buses?",
+                answer: "Most buses offer: WiFi, charging ports, AC, reclining seats, and entertainment systems. Premium buses may include meals and extra legroom."
+            },
+            
+            // Cancellation Questions
+            {
+                id: 10,
+                category: "cancellation",
+                question: "What is your cancellation policy?",
+                answer: "You can cancel up to 3 hours before departure. Cancellation fees apply: 100% refund if cancelled 24+ hours before, 50% refund 3-24 hours before, no refund within 3 hours."
+            },
+            {
+                id: 11,
+                category: "cancellation",
+                question: "How do I cancel my booking?",
+                answer: "Log into your account, go to 'My Tickets', select the booking, and click 'Cancel'. You can also contact our support team for assistance."
+            },
+            {
+                id: 12,
+                category: "cancellation",
+                question: "Can I reschedule my journey?",
+                answer: "Yes, you can reschedule up to 6 hours before departure. Rescheduling fees may apply depending on the bus company's policy."
+            },
+            
+            // Technical Questions
+            {
+                id: 13,
+                category: "technical",
+                question: "The website/app is not working. What should I do?",
+                answer: "Try these steps: 1) Refresh the page, 2) Clear browser cache, 3) Try incognito mode, 4) Update the app, 5) Contact support if issues persist."
+            },
+            {
+                id: 14,
+                category: "technical",
+                question: "I didn't receive my e-ticket. What now?",
+                answer: "Check your spam/junk folder first. If not found, log into your account and go to 'My Tickets'. You can download it there or contact support for resending."
+            },
+            {
+                id: 15,
+                category: "technical",
+                question: "How do I update my account information?",
+                answer: "Log into your account, go to 'Profile Settings', make your changes, and save. Some changes may require verification."
+            }
+        ];
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeFAQ();
+            setupEventListeners();
+        });
+
+        function initializeFAQ() {
+            populateFAQAccordion('all');
+        }
+
+        function populateFAQAccordion(category) {
+            const accordion = document.getElementById('faqAccordion');
+            accordion.innerHTML = '';
+            
+            const filteredFAQs = category === 'all' 
+                ? faqData 
+                : faqData.filter(faq => faq.category === category);
+            
+            filteredFAQs.forEach(faq => {
+                const faqItem = document.createElement('div');
+                faqItem.className = 'faq-item';
+                faqItem.setAttribute('data-category', faq.category);
+                
+                faqItem.innerHTML = `
+                    <div class="faq-question">
+                        <h3>${faq.question}</h3>
+                        <div class="faq-icon">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    <div class="faq-answer" id="answer-${faq.id}">
+                        <p>${faq.answer}</p>
+                    </div>
+                `;
+                
+                // Add click event to question
+                const questionDiv = faqItem.querySelector('.faq-question');
+                questionDiv.addEventListener('click', function() {
+                    toggleFAQ(faq.id);
+                });
+                
+                accordion.appendChild(faqItem);
+            });
+        }
+
+        function toggleFAQ(id) {
+            const faqItem = document.querySelector(`#answer-${id}`).closest('.faq-item');
+            const answer = document.getElementById(`answer-${id}`);
+            
+            // Close all other FAQs
+            document.querySelectorAll('.faq-item.active').forEach(item => {
+                if (item !== faqItem) {
+                    item.classList.remove('active');
+                }
+            });
+            
+            // Toggle current FAQ
+            faqItem.classList.toggle('active');
+        }
+
+        function setupEventListeners() {
+            // Add active class to current page link
+            const currentPage = window.location.pathname.split('/').pop();
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                if (link.getAttribute('href') === currentPage) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Category buttons
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Update active button
+                    document.querySelectorAll('.category-btn').forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    // Filter FAQs
+                    const category = this.getAttribute('data-category');
+                    populateFAQAccordion(category);
+                });
+            });
+
+            // Search functionality
+            const searchInput = document.getElementById('faqSearch');
+            const searchBtn = document.getElementById('searchBtn');
+            
+            function performSearch() {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                
+                if (!searchTerm) {
+                    const activeCategory = document.querySelector('.category-btn.active').getAttribute('data-category');
+                    populateFAQAccordion(activeCategory);
+                    return;
+                }
+                
+                const filteredFAQs = faqData.filter(faq => 
+                    faq.question.toLowerCase().includes(searchTerm) || 
+                    faq.answer.toLowerCase().includes(searchTerm)
+                );
+                
+                const accordion = document.getElementById('faqAccordion');
+                accordion.innerHTML = '';
+                
+                if (filteredFAQs.length === 0) {
+                    accordion.innerHTML = `
+                        <div class="no-results" style="text-align: center; padding: 40px;">
+                            <i class="fas fa-search" style="font-size: 48px; color: var(--gray); margin-bottom: 20px;"></i>
+                            <h3 style="color: var(--dark); margin-bottom: 10px;">No results found</h3>
+                            <p style="color: var(--gray);">Try different keywords or contact our support team for help.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                filteredFAQs.forEach(faq => {
+                    const faqItem = document.createElement('div');
+                    faqItem.className = 'faq-item';
+                    
+                    faqItem.innerHTML = `
+                        <div class="faq-question">
+                            <h3>${faq.question}</h3>
+                            <div class="faq-icon">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                        <div class="faq-answer" id="answer-${faq.id}">
+                            <p>${faq.answer}</p>
+                        </div>
+                    `;
+                    
+                    // Add click event
+                    const questionDiv = faqItem.querySelector('.faq-question');
+                    questionDiv.addEventListener('click', function() {
+                        toggleFAQ(faq.id);
+                    });
+                    
+                    accordion.appendChild(faqItem);
+                });
+            }
+            
+            searchBtn.addEventListener('click', performSearch);
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+
+            // Smooth scroll for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+        }
+    </script>
+
+    <script src="js/api.js"></script>
+    <script>
+        // API Integration for this page
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Check user session (optional)
+            const user = await authManager.checkAuth();
+            updateUIForUser(user);
+
+        });
+
+        // Helper functions for this page
+        function updateUIForUser(user) {
+            if (user) {
+                // Update UI for logged-in user
+                const userElements = document.querySelectorAll('.user-name');
+                userElements.forEach(el => el.textContent = user.name);
+                
+                const loginBtns = document.querySelectorAll('.login-btn');
+                loginBtns.forEach(btn => btn.style.display = 'none');
+                
+                const userMenus = document.querySelectorAll('.user-menu');
+                userMenus.forEach(menu => menu.style.display = 'block');
+            }
+        }
+
+        // Placeholder functions - implement as needed
+        function displayPopularRoutes(routes) {
+            console.log('Popular routes:', routes);
+            // Implement route display logic
+        }
+
+        function populateCityDropdowns(cities) {
+            console.log('Cities:', cities);
+            // Implement city dropdown population
+        }
+
+        function displayUserBookings(bookings) {
+            console.log('User bookings:', bookings);
+            // Implement booking display logic
+        }
+
+        function displayBookingStats(stats) {
+            console.log('Booking stats:', stats);
+            // Implement stats display logic
+        }
+
+        function displayAdminStats(stats) {
+            console.log('Admin stats:', stats);
+            // Implement admin stats display logic
+        }
+
+        function displayAllBookings(bookings) {
+            console.log('All bookings:', bookings);
+            // Implement all bookings display logic
+        }
+
+        function displayBuses(buses) {
+            console.log('Buses:', buses);
+            // Implement buses display logic
+        }
+
+        function displaySchedules(schedules) {
+            console.log('Schedules:', schedules);
+            // Implement schedules display logic
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Dropdown Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --secondary: #ff6d00;
+            --dark: #222;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --accent: #00c6ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .test-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+
+        .test-section h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        /* User Profile Button */
+        .user-profile-btn {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 10px 0;
+        }
+
+        .user-profile-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Dropdown Menu */
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            min-width: 250px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+            border-radius: 12px;
+            z-index: 1001;
+            margin-top: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .dropdown-menu.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-info-header {
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar-small {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .user-avatar-small img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .user-role {
+            font-size: 13px;
+            opacity: 0.9;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+        }
+
+        .dropdown-links {
+            padding: 10px 0;
+        }
+
+        .dropdown-links a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: var(--dark);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .dropdown-links a:hover {
+            background: var(--light);
+            border-left-color: var(--primary);
+            padding-left: 25px;
+        }
+
+        .dropdown-links a i {
+            width: 20px;
+            text-align: center;
+            color: var(--primary);
+        }
+
+        /* Mobile User Profile */
+        .mobile-user-profile {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            color: white;
+            text-align: center;
+        }
+
+        .mobile-user-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mobile-user-name {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mobile-user-role {
+            font-size: 14px;
+            background: rgba(255,255,255,0.2);
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .dropdown-menu {
+                position: fixed;
+                top: auto;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                max-width: 100%;
+                margin: 0;
+                border-radius: 20px 20px 0 0;
+                max-height: 70vh;
+                overflow-y: auto;
+                z-index: 1002;
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .dropdown-menu {
+                position: absolute;
+                top: 100%;
+                right: 0;
+                left: auto;
+                bottom: auto;
+                width: auto;
+                min-width: 250px;
+                max-width: 300px;
+                margin-top: 10px;
+                border-radius: 12px;
+                max-height: none;
+            }
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1557b0;
+        }
+
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>Mobile Dropdown Menu Test</h1>
+            <p>Test the mobile responsive dropdown menu functionality</p>
+        </div>
+
+        <div class="test-section">
+            <h3>Desktop/Tablet Dropdown Test</h3>
+            <p>Click the profile button below to test the dropdown menu:</p>
+            <div style="position: relative; display: inline-block;">
+                <button class="user-profile-btn" id="profileDropdown">
+                    <i class="fas fa-user-circle"></i>
+                    <span>John Doe</span>
+                    <i class="fas fa-caret-down"></i>
+                </button>
+                <div class="dropdown-menu" id="userDropdownMenu">
+                    <div class="user-info-header">
+                        <div class="user-avatar-small">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="user-details">
+                            <div class="user-name">John Doe</div>
+                            <div class="user-role user">
+                                <i class="fas fa-user"></i>
+                                User
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dropdown-links">
+                        <a href="#" onclick="showStatus('Profile clicked')">
+                            <i class="fas fa-user-circle"></i>
+                            <span>Profile</span>
+                        </a>
+                        <a href="#" onclick="showStatus('My Tickets clicked')">
+                            <i class="fas fa-ticket-alt"></i>
+                            <span>My Tickets</span>
+                        </a>
+                        <a href="#" onclick="showStatus('Dashboard clicked')">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                        <a href="#" onclick="showStatus('Logout clicked')" style="color: var(--danger); border-top: 1px solid #eee; margin-top: 10px;">
+                            <i class="fas fa-sign-out-alt" style="color: var(--danger);"></i>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div id="status" class="status" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Mobile User Profile Section</h3>
+            <p>This is how the user profile appears in mobile navigation:</p>
+            <div class="mobile-user-profile">
+                <div class="mobile-user-info">
+                    <div class="mobile-user-name">
+                        <i class="fas fa-user"></i>
+                        <span>John Doe</span>
+                    </div>
+                    <div class="mobile-user-role user">
+                        <i class="fas fa-user"></i>
+                        User
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test Instructions</h3>
+            <div class="status info">
+                <strong>Desktop/Tablet (≥481px):</strong> Dropdown appears positioned relative to the button<br>
+                <strong>Mobile (≤480px):</strong> Dropdown appears as a bottom sheet covering the full width<br>
+                <strong>Small Mobile (≤768px):</strong> Dropdown slides up from bottom with rounded top corners
+            </div>
+            <p><strong>How to test:</strong></p>
+            <ol>
+                <li>Click the profile button above on desktop - dropdown should appear next to button</li>
+                <li>Resize browser to mobile width (≤768px) and click again - dropdown should appear from bottom</li>
+                <li>Test on actual mobile device for best results</li>
+                <li>Check that the mobile user profile section displays correctly</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // Dropdown functionality
+        const profileDropdown = document.getElementById('profileDropdown');
+        const dropdownMenu = document.getElementById('userDropdownMenu');
+
+        profileDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('show');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.user-profile-btn') && !e.target.closest('.dropdown-menu')) {
+                dropdownMenu.classList.remove('show');
+            }
+        });
+
+        function showStatus(message) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status success';
+            status.style.display = 'block';
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 3000);
+        }
+
+        // Display current screen size info
+        function updateScreenInfo() {
+            const width = window.innerWidth;
+            let screenType = '';
+            
+            if (width <= 480) {
+                screenType = 'Small Mobile (≤480px)';
+            } else if (width <= 768) {
+                screenType = 'Mobile/Tablet (≤768px)';
+            } else {
+                screenType = 'Desktop (>768px)';
+            }
+            
+            console.log(`Current screen: ${screenType} - ${width}px`);
+        }
+
+        window.addEventListener('resize', updateScreenInfo);
+        updateScreenInfo();
+    </script>
+</body>
+</html>

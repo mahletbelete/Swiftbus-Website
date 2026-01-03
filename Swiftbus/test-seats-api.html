@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Seats API - SwiftBus</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .result { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 3px; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>SwiftBus Seats API Test</h1>
+    
+    <div class="test-section">
+        <h3>Test Parameters</h3>
+        <p><strong>Bus Company:</strong> selam-bus</p>
+        <p><strong>Bus Type:</strong> premium-ac</p>
+        <p><strong>Route:</strong> addis-ababa-kombolcha</p>
+        <p><strong>Date:</strong> <span id="testDate"></span></p>
+        <p><strong>Time:</strong> 08:00</p>
+        
+        <button onclick="testSeatsAPI()">Test Seats API</button>
+        <button onclick="clearResults()">Clear Results</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>API Response</h3>
+        <div id="apiResult" class="result">Click "Test Seats API" to see results</div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Console Logs</h3>
+        <div id="consoleLogs" class="result">Console logs will appear here</div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        // Set tomorrow's date
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const formattedDate = tomorrow.toISOString().split('T')[0];
+        document.getElementById('testDate').textContent = formattedDate;
+        
+        // Capture console logs
+        const originalLog = console.log;
+        const originalError = console.error;
+        const logs = [];
+        
+        console.log = function(...args) {
+            logs.push('LOG: ' + args.join(' '));
+            updateConsoleLogs();
+            originalLog.apply(console, args);
+        };
+        
+        console.error = function(...args) {
+            logs.push('ERROR: ' + args.join(' '));
+            updateConsoleLogs();
+            originalError.apply(console, args);
+        };
+        
+        function updateConsoleLogs() {
+            document.getElementById('consoleLogs').innerHTML = logs.slice(-10).join('<br>');
+        }
+        
+        async function testSeatsAPI() {
+            const resultDiv = document.getElementById('apiResult');
+            resultDiv.innerHTML = 'Testing API...';
+            resultDiv.className = 'result';
+            
+            try {
+                console.log('🧪 Starting seats API test');
+                
+                const response = await swiftBusAPI.getAvailableSeats(
+                    'selam-bus',
+                    'premium-ac', 
+                    'addis-ababa-kombolcha',
+                    formattedDate,
+                    '08:00'
+                );
+                
+                console.log('📡 API Response received:', response);
+                
+                if (response.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <h4>✅ API Success</h4>
+                        <p><strong>Total Seats:</strong> ${response.data.total_seats}</p>
+                        <p><strong>Available Seats:</strong> ${response.data.available_seats}</p>
+                        <p><strong>Sample Seats:</strong></p>
+                        <pre>${JSON.stringify(response.data.seats.slice(0, 5), null, 2)}</pre>
+                        <p><strong>Full Response:</strong></p>
+                        <pre>${JSON.stringify(response, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+                        <h4>❌ API Error</h4>
+                        <p><strong>Message:</strong> ${response.message}</p>
+                        <p><strong>Full Response:</strong></p>
+                        <pre>${JSON.stringify(response, null, 2)}</pre>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('🚨 Test failed with error:', error);
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h4>🚨 Test Failed</h4>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <p><strong>Stack:</strong></p>
+                    <pre>${error.stack}</pre>
+                `;
+            }
+        }
+        
+        function clearResults() {
+            document.getElementById('apiResult').innerHTML = 'Click "Test Seats API" to see results';
+            document.getElementById('apiResult').className = 'result';
+            logs.length = 0;
+            updateConsoleLogs();
+        }
+        
+        // Auto-test on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Test page loaded, SwiftBus API initialized');
+            console.log('API Base URL:', swiftBusAPI.apiURL);
+        });
+    </script>
+</body>
+</html>

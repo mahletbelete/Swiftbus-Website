@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftBus AI Chatbot Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .test-queries {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .query-btn {
+            background: rgba(26, 115, 232, 0.8);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .query-btn:hover {
+            background: rgba(26, 115, 232, 1);
+            transform: translateY(-2px);
+        }
+        
+        .status {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .status.success {
+            background: rgba(40, 167, 69, 0.3);
+        }
+        
+        .status.info {
+            background: rgba(23, 162, 184, 0.3);
+        }
+        
+        .back-btn {
+            display: inline-block;
+            background: rgba(255, 109, 0, 0.8);
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 109, 0, 1);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-robot"></i> SwiftBus AI Chatbot Test</h1>
+        
+        <div class="status success">
+            <h3><i class="fas fa-check-circle"></i> AI Chatbot Successfully Integrated!</h3>
+            <p>The SwiftBus website now features an intelligent AI chatbot with multiple fallback systems.</p>
+        </div>
+        
+        <div class="test-section">
+            <h3><i class="fas fa-cogs"></i> Features Implemented</h3>
+            <ul>
+                <li><strong>AI Integration:</strong> Hugging Face free inference API with smart fallbacks</li>
+                <li><strong>Context Awareness:</strong> Trained on SwiftBus-specific information</li>
+                <li><strong>Cross-page Support:</strong> Floating buttons redirect to main chatbot</li>
+                <li><strong>Enhanced UI:</strong> Typing indicators, quick replies, formatted responses</li>
+                <li><strong>Multilingual:</strong> English and Amharic support</li>
+                <li><strong>Fallback System:</strong> Comprehensive predefined responses if AI fails</li>
+            </ul>
+        </div>
+        
+        <div class="test-section">
+            <h3><i class="fas fa-flask"></i> Test the Chatbot</h3>
+            <p>Click the button below to open the main page and test the AI chatbot with these sample queries:</p>
+            
+            <div class="test-queries">
+                <button class="query-btn" onclick="testQuery('Hello, I need help with booking')">
+                    <i class="fas fa-comment"></i><br>Greeting Test
+                </button>
+                <button class="query-btn" onclick="testQuery('Routes from Addis Ababa to Bahirdar')">
+                    <i class="fas fa-route"></i><br>Route Information
+                </button>
+                <button class="query-btn" onclick="testQuery('How do I book a ticket?')">
+                    <i class="fas fa-ticket-alt"></i><br>Booking Help
+                </button>
+                <button class="query-btn" onclick="testQuery('What bus companies are available?')">
+                    <i class="fas fa-bus"></i><br>Company Info
+                </button>
+                <button class="query-btn" onclick="testQuery('Payment methods accepted')">
+                    <i class="fas fa-credit-card"></i><br>Payment Options
+                </button>
+                <button class="query-btn" onclick="testQuery('Contact support information')">
+                    <i class="fas fa-phone"></i><br>Support Contact
+                </button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3><i class="fas fa-info-circle"></i> How It Works</h3>
+            <ol>
+                <li><strong>AI First:</strong> Tries Hugging Face API for intelligent responses</li>
+                <li><strong>Smart Fallback:</strong> Uses comprehensive predefined responses if AI fails</li>
+                <li><strong>Context Aware:</strong> Understands SwiftBus routes, prices, and services</li>
+                <li><strong>Always Helpful:</strong> Guarantees useful response regardless of AI status</li>
+            </ol>
+        </div>
+        
+        <div class="status info">
+            <p><strong>Note:</strong> The AI uses free services, so responses may vary. The fallback system ensures users always get helpful information about SwiftBus services.</p>
+        </div>
+        
+        <div style="text-align: center;">
+            <a href="index.html#chatbot-open" class="back-btn">
+                <i class="fas fa-robot"></i> Open AI Chatbot
+            </a>
+            <a href="index.html" class="back-btn">
+                <i class="fas fa-home"></i> Back to Homepage
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function testQuery(query) {
+            // Store the test query for the chatbot
+            sessionStorage.setItem('chatbotContext', 'test');
+            sessionStorage.setItem('chatbotMessage', query);
+            
+            // Redirect to main page with chatbot open
+            window.location.href = 'index.html#chatbot-open';
+        }
+        
+        // Show success message
+        setTimeout(() => {
+            console.log('SwiftBus AI Chatbot Test Page Loaded Successfully!');
+        }, 1000);
+    </script>
+</body>
+</html>

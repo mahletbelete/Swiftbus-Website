@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Data Collector - SwiftBus</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .collector-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid;
+        }
+        .success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border-color: #17a2b8;
+            color: #0c5460;
+        }
+        .warning {
+            background: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .data-summary {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .progress {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background: #007bff;
+            transition: width 0.3s ease;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="collector-container">
+        <h1>🗄️ Admin Data Collector</h1>
+        <p>This page collects all data from database, payment.html, book-ticket.html, my-tickets.html, and user-dashboard.html and stores it in localStorage for consistent admin page display.</p>
+
+        <div class="progress">
+            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+        </div>
+
+        <div id="statusContainer"></div>
+
+        <div class="data-summary">
+            <h3>📊 Data Summary</h3>
+            <div id="dataSummary">
+                <p>Click "Collect All Data" to start gathering information...</p>
+            </div>
+        </div>
+
+        <div>
+            <button onclick="collectAllData()">🚀 Collect All Data</button>
+            <button onclick="viewStoredData()">👁️ View Stored Data</button>
+            <button onclick="clearStoredData()">🗑️ Clear Stored Data</button>
+            <button onclick="testAdminPages()">🧪 Test Admin Pages</button>
+        </div>
+
+        <div id="storedDataView" style="display: none;">
+            <h3>💾 Stored Data</h3>
+            <pre id="storedDataContent"></pre>
+        </div>
+    </div>
+
+    <!-- Load API script -->
+    <script src="js/api.js"></script>
+    <script src="js/admin-profile-sync.js"></script>
+
+    <script>
+        let collectionProgress = 0;
+        let totalSteps = 8;
+
+        function updateProgress(step, message) {
+            collectionProgress = step;
+            const percentage = (step / totalSteps) * 100;
+            document.getElementById('progressBar').style.width = percentage + '%';
+            addStatus('info', `Step ${step}/${totalSteps}: ${message}`);
+        }
+
+        function addStatus(type, message) {
+            const container = document.getElementById('statusContainer');
+            const status = document.createElement('div');
+            status.className = `status ${type}`;
+            status.innerHTML = `<strong>[${new Date().toLocaleTimeString()}]</strong> ${message}`;
+            container.appendChild(status);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function collectAllData() {
+            try {
+                addStatus('info', '🚀 Starting comprehensive data collection...');
+                collectionProgress = 0;
+                
+                // Clear existing data
+                clearStoredData(false);
+                
+                // Step 1: Collect database bookings
+                updateProgress(1, 'Collecting database bookings...');
+                await collectDatabaseBookings();
+                
+                // Step 2: Collect database users
+                updateProgress(2, 'Collecting database users...');
+                await collectDatabaseUsers();
+                
+                // Step 3: Collect payment page data
+                updateProgress(3, 'Collecting payment page data...');
+                await collectPaymentData();
+                
+                // Step 4: Collect booking page data
+                updateProgress(4, 'Collecting booking page data...');
+                await collectBookingData();
+                
+                // Step 5: Collect my-tickets page data
+                updateProgress(5, 'Collecting my-tickets page data...');
+                await collectMyTicketsData();
+                
+                // Step 6: Collect user dashboard data
+                updateProgress(6, 'Collecting user dashboard data...');
+                await collectUserDashboardData();
+                
+                // Step 7: Generate admin statistics
+                updateProgress(7, 'Generating admin statistics...');
+                await generateAdminStatistics();
+                
+                // Step 8: Finalize and store
+                updateProgress(8, 'Finalizing data collection...');
+                await finalizeDataCollection();
+                
+                addStatus('success', '✅ Data collection completed successfully!');
+                updateDataSummary();
+                
+            } catch (error) {
+                addStatus('error', `❌ Data collection failed: ${error.message}`);
+                console.error('Data collection error:', error);
+            }
+        }
+
+        async function collectDatabaseBookings() {
+            try {
+                // Try to get bookings from database via API
+                let bookings = [];
+                
+                try {
+                    const response = await swiftBusAPI.request('api/admin_unified.php?action=get_bookings&limit=1000');
+                    if (response.success && response.data) {
+                        bookings = response.data;
+                        addStatus('success', `✅ Collected ${bookings.length} bookings from database`);
+                    }
+                } catch (apiError) {
+                    addStatus('warning', '⚠️ Database API failed, using fallback method');
+                    // Fallback: try to get from existing localStorage
+                    const existingBookings = localStorage.getItem('swiftbus_bookings');
+                    if (existingBookings) {
+                        bookings = JSON.parse(existingBookings);
+                        addStatus('info', `📦 Using ${bookings.length} bookings from localStorage`);
+                    }
+                }
+                
+                // Store in localStorage
+                localStorage.setItem('admin_all_bookings', JSON.stringify(bookings));
+                localStorage.setItem('admin_bookings_timestamp', new Date().toISOString());
+                
+                return bookings;
+            } catch (error) {
+                addStatus('error', `❌ Failed to collect bookings: ${error.message}`);
+                return [];
+            }
+        }
+
+        async function collectDatabaseUsers() {
+            try {
+                let users = [];
+                
+                try {
+                    const response = await swiftBusAPI.request('api/admin_unified.php?action=get_users&limit=1000');
+                    if (response.success && response.data) {
+                        users = response.data;
+                        addStatus('success', `✅ Collected ${users.length} users from database`);
+                    }
+                } catch (apiError) {
+                    addStatus('warning', '⚠️ Users API failed, generating sample data');
+                    // Generate sample users based on bookings
+                    const bookings = JSON.parse(localStorage.getItem('admin_all_bookings') || '[]');
+                    const uniqueUsers = new Set();
+                    bookings.forEach(booking => {
+                        if (booking.user_name || booking.user_email) {
+                            uniqueUsers.add(JSON.stringify({
+                                id: booking.user_id || Math.random().toString(36).substr(2, 9),
+                                full_name: booking.user_name || 'Unknown User',
+                                email: booking.user_email || 'user@example.com',
+                                phone: booking.user_phone || '',
+                                role: 'user',
+                                status: 'active',
+                                created_at: booking.booking_date || new Date().toISOString()
+                            }));
+                        }
+                    });
+                    users = Array.from(uniqueUsers).map(u => JSON.parse(u));
+                    addStatus('info', `📦 Generated ${users.length} users from booking data`);
+                }
+                
+                localStorage.setItem('admin_all_users', JSON.stringify(users));
+                localStorage.setItem('admin_users_timestamp', new Date().toISOString());
+                
+                return users;
+            } catch (error) {
+                addStatus('error', `❌ Failed to collect users: ${error.message}`);
+                return [];
+            }
+        }
+
+        async function collectPaymentData() {
+            try {
+                // Collect payment data from localStorage (set by payment.html)
+                const paymentData = {
+                    payments: JSON.parse(localStorage.getItem('swiftbus_payments') || '[]'),
+                    payment_history: JSON.parse(localStorage.getItem('payment_history') || '[]'),
+                    successful_payments: JSON.parse(localStorage.getItem('successful_payments') || '[]'),
+                    failed_payments: JSON.parse(localStorage.getItem('failed_payments') || '[]')
+                };
+                
+                const totalPayments = paymentData.payments.length + 
+                                    paymentData.payment_history.length + 
+                                    paymentData.successful_payments.length;
+                
+                localStorage.setItem('admin_payment_data', JSON.stringify(paymentData));
+                localStorage.setItem('admin_payment_timestamp', new Date().toISOString());
+                
+                addStatus('success', `✅ Collected ${totalPayments} payment records`);
+                return paymentData;
+            } catch (error) {
+                addStatus('error', `❌ Failed to collect payment data: ${error.message}`);
+                return { payments: [], payment_history: [], successful_payments: [], failed_payments: [] };
+            }
+        }
+
+        async function collectBookingData() {
+            try {
+                // Collect booking data from localStorage (set by book-ticket.html)
+                const bookingData = {
+                    current_booking: JSON.parse(localStorage.getItem('current_booking') || 'null'),
+                    booking_history: JSON.parse(localStorage.getItem('booking_history') || '[]'),
+                    selected_seats: JSON.parse(localStorage.getItem('selected_seats') || '[]'),
+                    booking_details: JSON.parse(localStorage.getItem('booking_details') || 'null'),
+                    route_data: JSON.parse(localStorage.getItem('route_data') || '[]')
+                };
+                
+                localStorage.setItem('admin_booking_data', JSON.stringify(bookingData));
+                localStorage.setItem('admin_booking_timestamp', new Date().toISOString());
+                
+                const bookingCount = bookingData.booking_history.length + (bookingData.current_booking ? 1 : 0);
+                addStatus('success', `✅ Collected booking data (${bookingCount} records)`);
+                return bookingData;
+            } catch (error) {
+                addStatus('error', `❌ Failed to collect booking data: ${error.message}`);
+                return { current_booking: null, booking_history: [], selected_seats: [], booking_details: null, route_data: [] };
+            }
+        }
+
+        async function collectMyTicketsData() {
+            try {
+                // Collect my-tickets data from localStorage (set by my-tickets.html)
+                const ticketsData = {
+                    user_tickets: JSON.parse(localStorage.getItem('user_tickets') || '[]'),
+                    user_bookings: JSON.parse(localStorage.getItem('user_bookings') || '[]'),
+                    ticket_history: JSON.parse(localStorage.getItem('ticket_history') || '[]'),
+                    upcoming_trips: JSON.parse(localStorage.getItem('upcoming_trips') || '[]')
+                };
+                
+                localStorage.setItem('admin_tickets_data', JSON.stringify(ticketsData));
+                localStorage.setItem('admin_tickets_timestamp', new Date().toISOString());
+                
+                const ticketCount = ticketsData.user_tickets.length + ticketsData.user_bookings.length;
+                addStatus('success', `✅ Collected tickets data (${ticketCount} records)`);
+                return ticketsData;
+            } catch (error) {
+                addStatus('error', `❌ Failed to collect tickets data: ${error.message}`);
+                return { user_tickets: [], user_bookings: [], ticket_history: [], upcoming_trips: [] };
+            }
+        }
+
+        async function collectUserDashboardData() {
+            try {
+                // Collect user dashboard data from localStorage (set by user-dashboard.html)
+                const dashboardData = {
+                    user_stats: JSON.parse(localStorage.getItem('user_stats') || 'null'),
+                    recent_activities: JSON.parse(localStorage.getItem('recent_activities') || '[]'),
+                    user_preferences: JSON.parse(localStorage.getItem('user_preferences') || 'null'),
+                    dashboard_data: JSON.parse(localStorage.getItem('dashboard_data') || 'null')
+                };
+                
+                localStorage.setItem('admin_dashboard_data', JSON.stringify(dashboardData));
+                localStorage.setItem('admin_dashboard_timestamp', new Date().toISOString());
+                
+                addStatus('success', '✅ Collected user dashboard data');
+                return dashboardData;
+            } catch (error) {
+                addStatus('error', `❌ Failed to collect dashboard data: ${error.message}`);
+                return { user_stats: null, recent_activities: [], user_preferences: null, dashboard_data: null };
+            }
+        }
+
+        async function generateAdminStatistics() {
+            try {
+                // Get all collected data
+                const bookings = JSON.parse(localStorage.getItem('admin_all_bookings') || '[]');
+                const users = JSON.parse(localStorage.getItem('admin_all_users') || '[]');
+                const paymentData = JSON.parse(localStorage.getItem('admin_payment_data') || '{}');
+                const ticketsData = JSON.parse(localStorage.getItem('admin_tickets_data') || '{}');
+                
+                // Calculate comprehensive statistics
+                const today = new Date().toISOString().split('T')[0];
+                const thisMonth = new Date().toISOString().substr(0, 7);
+                
+                const stats = {
+                    // Booking statistics
+                    bookings: {
+                        total: bookings.length,
+                        today: bookings.filter(b => b.booking_date?.startsWith(today) || b.created_at?.startsWith(today)).length,
+                        this_month: bookings.filter(b => b.booking_date?.startsWith(thisMonth) || b.created_at?.startsWith(thisMonth)).length,
+                        confirmed: bookings.filter(b => b.booking_status === 'confirmed').length,
+                        pending: bookings.filter(b => b.booking_status === 'pending').length,
+                        cancelled: bookings.filter(b => b.booking_status === 'cancelled').length
+                    },
+                    
+                    // User statistics
+                    users: {
+                        total: users.length,
+                        active: users.filter(u => u.status === 'active' || u.is_active === 1).length,
+                        new_today: users.filter(u => u.created_at?.startsWith(today)).length,
+                        admins: users.filter(u => u.role === 'admin').length
+                    },
+                    
+                    // Revenue statistics
+                    revenue: {
+                        total: bookings.reduce((sum, b) => sum + (parseFloat(b.total_amount) || 0), 0),
+                        today: bookings.filter(b => b.booking_date?.startsWith(today) || b.created_at?.startsWith(today))
+                                      .reduce((sum, b) => sum + (parseFloat(b.total_amount) || 0), 0),
+                        this_month: bookings.filter(b => b.booking_date?.startsWith(thisMonth) || b.created_at?.startsWith(thisMonth))
+                                           .reduce((sum, b) => sum + (parseFloat(b.total_amount) || 0), 0)
+                    },
+                    
+                    // Payment statistics
+                    payments: {
+                        total: (paymentData.payments || []).length + (paymentData.payment_history || []).length,
+                        successful: (paymentData.successful_payments || []).length,
+                        failed: (paymentData.failed_payments || []).length,
+                        pending: bookings.filter(b => b.payment_status === 'pending').length
+                    },
+                    
+                    // System statistics
+                    system: {
+                        buses: {
+                            total: 15, // Default estimate
+                            active: 12,
+                            maintenance: 2,
+                            inactive: 1
+                        },
+                        routes: {
+                            total: 8, // Default estimate
+                            active: 7,
+                            popular: ['Addis Ababa → Bahirdar', 'Addis Ababa → Hawasa', 'Bahirdar → Gonder']
+                        }
+                    },
+                    
+                    // Timestamps
+                    generated_at: new Date().toISOString(),
+                    last_updated: new Date().toISOString()
+                };
+                
+                // Store comprehensive statistics
+                localStorage.setItem('admin_statistics', JSON.stringify(stats));
+                localStorage.setItem('admin_statistics_timestamp', new Date().toISOString());
+                
+                addStatus('success', `✅ Generated comprehensive statistics (${stats.bookings.total} bookings, ${stats.users.total} users, ETB ${stats.revenue.total.toLocaleString()} revenue)`);
+                return stats;
+            } catch (error) {
+                addStatus('error', `❌ Failed to generate statistics: ${error.message}`);
+                return null;
+            }
+        }
+
+        async function finalizeDataCollection() {
+            try {
+                // Create a master data index
+                const masterIndex = {
+                    collection_timestamp: new Date().toISOString(),
+                    data_sources: {
+                        database_bookings: localStorage.getItem('admin_bookings_timestamp'),
+                        database_users: localStorage.getItem('admin_users_timestamp'),
+                        payment_data: localStorage.getItem('admin_payment_timestamp'),
+                        booking_data: localStorage.getItem('admin_booking_timestamp'),
+                        tickets_data: localStorage.getItem('admin_tickets_timestamp'),
+                        dashboard_data: localStorage.getItem('admin_dashboard_timestamp'),
+                        statistics: localStorage.getItem('admin_statistics_timestamp')
+                    },
+                    data_counts: {
+                        bookings: JSON.parse(localStorage.getItem('admin_all_bookings') || '[]').length,
+                        users: JSON.parse(localStorage.getItem('admin_all_users') || '[]').length,
+                        payments: Object.values(JSON.parse(localStorage.getItem('admin_payment_data') || '{}')).flat().length,
+                        tickets: Object.values(JSON.parse(localStorage.getItem('admin_tickets_data') || '{}')).flat().length
+                    },
+                    version: '1.0.0',
+                    status: 'complete'
+                };
+                
+                localStorage.setItem('admin_data_index', JSON.stringify(masterIndex));
+                
+                // Set flag for admin pages to know data is available
+                localStorage.setItem('admin_data_ready', 'true');
+                localStorage.setItem('admin_data_collection_complete', new Date().toISOString());
+                
+                addStatus('success', '✅ Data collection finalized and ready for admin pages');
+                return masterIndex;
+            } catch (error) {
+                addStatus('error', `❌ Failed to finalize data collection: ${error.message}`);
+                return null;
+            }
+        }
+
+        function updateDataSummary() {
+            try {
+                const index = JSON.parse(localStorage.getItem('admin_data_index') || '{}');
+                const stats = JSON.parse(localStorage.getItem('admin_statistics') || '{}');
+                
+                if (index.status === 'complete') {
+                    document.getElementById('dataSummary').innerHTML = `
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                            <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; text-align: center;">
+                                <h4 style="margin: 0; color: #28a745;">📊 Bookings</h4>
+                                <p style="font-size: 24px; font-weight: bold; margin: 5px 0;">${index.data_counts.bookings}</p>
+                                <small>Total Records</small>
+                            </div>
+                            <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; text-align: center;">
+                                <h4 style="margin: 0; color: #1976d2;">👥 Users</h4>
+                                <p style="font-size: 24px; font-weight: bold; margin: 5px 0;">${index.data_counts.users}</p>
+                                <small>Total Users</small>
+                            </div>
+                            <div style="background: #fff3e0; padding: 15px; border-radius: 8px; text-align: center;">
+                                <h4 style="margin: 0; color: #f57c00;">💰 Revenue</h4>
+                                <p style="font-size: 24px; font-weight: bold; margin: 5px 0;">ETB ${(stats.revenue?.total || 0).toLocaleString()}</p>
+                                <small>Total Revenue</small>
+                            </div>
+                            <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; text-align: center;">
+                                <h4 style="margin: 0; color: #7b1fa2;">🎫 Tickets</h4>
+                                <p style="font-size: 24px; font-weight: bold; margin: 5px 0;">${index.data_counts.tickets}</p>
+                                <small>Total Tickets</small>
+                            </div>
+                        </div>
+                        <p style="margin-top: 15px; color: #666; font-size: 14px;">
+                            <strong>Last Updated:</strong> ${new Date(index.collection_timestamp).toLocaleString()}<br>
+                            <strong>Status:</strong> <span style="color: #28a745;">✅ Ready for Admin Pages</span>
+                        </p>
+                    `;
+                } else {
+                    document.getElementById('dataSummary').innerHTML = '<p>No data collected yet. Click "Collect All Data" to start.</p>';
+                }
+            } catch (error) {
+                document.getElementById('dataSummary').innerHTML = '<p style="color: #dc3545;">Error displaying data summary.</p>';
+            }
+        }
+
+        function viewStoredData() {
+            const dataView = document.getElementById('storedDataView');
+            const content = document.getElementById('storedDataContent');
+            
+            if (dataView.style.display === 'none') {
+                const allData = {
+                    index: JSON.parse(localStorage.getItem('admin_data_index') || '{}'),
+                    statistics: JSON.parse(localStorage.getItem('admin_statistics') || '{}'),
+                    bookings_sample: JSON.parse(localStorage.getItem('admin_all_bookings') || '[]').slice(0, 3),
+                    users_sample: JSON.parse(localStorage.getItem('admin_all_users') || '[]').slice(0, 3)
+                };
+                
+                content.textContent = JSON.stringify(allData, null, 2);
+                dataView.style.display = 'block';
+            } else {
+                dataView.style.display = 'none';
+            }
+        }
+
+        function clearStoredData(showMessage = true) {
+            const keys = [
+                'admin_all_bookings', 'admin_all_users', 'admin_payment_data',
+                'admin_booking_data', 'admin_tickets_data', 'admin_dashboard_data',
+                'admin_statistics', 'admin_data_index', 'admin_data_ready',
+                'admin_data_collection_complete', 'admin_bookings_timestamp',
+                'admin_users_timestamp', 'admin_payment_timestamp',
+                'admin_booking_timestamp', 'admin_tickets_timestamp',
+                'admin_dashboard_timestamp', 'admin_statistics_timestamp'
+            ];
+            
+            keys.forEach(key => localStorage.removeItem(key));
+            
+            if (showMessage) {
+                addStatus('info', '🗑️ All stored admin data cleared');
+                updateDataSummary();
+            }
+        }
+
+        function testAdminPages() {
+            const dataReady = localStorage.getItem('admin_data_ready');
+            if (dataReady === 'true') {
+                addStatus('success', '✅ Data is ready! Admin pages should now display consistent data.');
+                addStatus('info', '🔗 You can now visit any admin page to see the collected data.');
+                
+                // Show links to admin pages
+                const links = [
+                    'admin-dashboard.html',
+                    'admin-bookings-all.html',
+                    'admin-users-list.html',
+                    'admin-buses-list.html',
+                    'admin-routes-list.html',
+                    'admin-schedules-list.html'
+                ];
+                
+                const linksHtml = links.map(link => 
+                    `<a href="${link}" target="_blank" style="margin: 5px; padding: 8px 12px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; display: inline-block;">${link}</a>`
+                ).join('');
+                
+                const linkContainer = document.createElement('div');
+                linkContainer.innerHTML = `
+                    <div class="status info">
+                        <strong>🔗 Test Admin Pages:</strong><br>
+                        ${linksHtml}
+                    </div>
+                `;
+                document.getElementById('statusContainer').appendChild(linkContainer);
+            } else {
+                addStatus('warning', '⚠️ Data not ready. Please run "Collect All Data" first.');
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            addStatus('info', '🚀 Admin Data Collector initialized');
+            updateDataSummary();
+            
+            // Check if data already exists
+            const dataReady = localStorage.getItem('admin_data_ready');
+            if (dataReady === 'true') {
+                addStatus('success', '✅ Previously collected data found');
+            }
+        });
+    </script>
+</body>
+</html>

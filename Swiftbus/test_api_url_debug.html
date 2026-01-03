@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API URL Debug - SwiftBus</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .result {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+            border-left: 4px solid #1a73e8;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .warning {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+        pre {
+            background: #f1f3f4;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        button {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background: #0d47a1;
+        }
+    </style>
+</head>
+<body>
+    <h1>SwiftBus API URL Debug</h1>
+    
+    <div class="test-section">
+        <h2>URL Construction Test</h2>
+        <p>This will test how the API URLs are being constructed and if they're accessible.</p>
+        
+        <button onclick="testURLConstruction()">Test URL Construction</button>
+        <button onclick="testAPIAccess()">Test API Access</button>
+        <button onclick="testBookingAPI()">Test Booking API</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        function addResult(title, message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = `<strong>${title}:</strong><br>${message}`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+        
+        function testURLConstruction() {
+            addResult('URL Construction Test', 'Testing how API URLs are constructed...', 'info');
+            
+            // Get current page info
+            const currentInfo = {
+                origin: window.location.origin,
+                pathname: window.location.pathname,
+                port: window.location.port,
+                hostname: window.location.hostname,
+                href: window.location.href
+            };
+            
+            addResult('Current Page Info', `<pre>${JSON.stringify(currentInfo, null, 2)}</pre>`, 'info');
+            
+            // Test API URL construction
+            const api = new SwiftBusAPI();
+            addResult('API Configuration', `
+                Base URL: ${api.baseURL}<br>
+                API URL: ${api.apiURL}
+            `, 'info');
+            
+            // Test specific endpoints
+            const endpoints = [
+                'auth.php?action=check_session',
+                'booking_clean.php?action=get_booking_stats',
+                'search.php?action=get_cities'
+            ];
+            
+            endpoints.forEach(endpoint => {
+                const fullUrl = `${api.apiURL}/${endpoint}`;
+                addResult(`Endpoint: ${endpoint}`, `Full URL: ${fullUrl}`, 'info');
+            });
+        }
+        
+        async function testAPIAccess() {
+            addResult('API Access Test', 'Testing if API endpoints are accessible...', 'info');
+            
+            const api = new SwiftBusAPI();
+            
+            // Test different endpoints
+            const tests = [
+                {
+                    name: 'Auth Check Session',
+                    url: `${api.apiURL}/auth.php?action=check_session`,
+                    method: 'GET'
+                },
+                {
+                    name: 'Booking Stats',
+                    url: `${api.apiURL}/booking_clean.php?action=get_booking_stats`,
+                    method: 'GET'
+                },
+                {
+                    name: 'Get Cities',
+                    url: `${api.apiURL}/search.php?action=get_cities`,
+                    method: 'GET'
+                }
+            ];
+            
+            for (const test of tests) {
+                try {
+                    addResult(`Testing: ${test.name}`, `URL: ${test.url}`, 'info');
+                    
+                    const response = await fetch(test.url, {
+                        method: test.method,
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    const status = response.status;
+                    const statusText = response.statusText;
+                    
+                    if (response.ok) {
+                        try {
+                            const data = await response.json();
+                            addResult(`✅ ${test.name}`, `
+                                Status: ${status} ${statusText}<br>
+                                Response: <pre>${JSON.stringify(data, null, 2)}</pre>
+                            `, 'success');
+                        } catch (jsonError) {
+                            const text = await response.text();
+                            addResult(`⚠️ ${test.name}`, `
+                                Status: ${status} ${statusText}<br>
+                                Response (not JSON): <pre>${text.substring(0, 500)}...</pre>
+                            `, 'warning');
+                        }
+                    } else {
+                        const text = await response.text();
+                        addResult(`❌ ${test.name}`, `
+                            Status: ${status} ${statusText}<br>
+                            Response: <pre>${text.substring(0, 500)}...</pre>
+                        `, 'error');
+                    }
+                } catch (error) {
+                    addResult(`❌ ${test.name}`, `
+                        Network Error: ${error.message}<br>
+                        This usually means the file doesn't exist or server is not running
+                    `, 'error');
+                }
+            }
+        }
+        
+        async function testBookingAPI() {
+            addResult('Booking API Test', 'Testing the booking creation API specifically...', 'info');
+            
+            const api = new SwiftBusAPI();
+            
+            // First check if user is logged in
+            try {
+                const sessionCheck = await api.checkSession();
+                addResult('Session Check', `<pre>${JSON.stringify(sessionCheck, null, 2)}</pre>`, 
+                    sessionCheck.success ? 'success' : 'warning');
+                
+                if (!sessionCheck.success) {
+                    addResult('Authentication Required', 'You need to login first to test booking creation', 'warning');
+                    return;
+                }
+            } catch (error) {
+                addResult('Session Check Failed', error.message, 'error');
+                return;
+            }
+            
+            // Test booking creation
+            const testBookingData = {
+                from_city: 'addis-ababa',
+                to_city: 'bahirdar',
+                departure_date: '2025-01-15',
+                departure_time: '08:00',
+                bus_company: 'selam-bus',
+                bus_type: 'premium-ac',
+                passenger_count: 1,
+                selected_seats: [1],
+                passenger_details: {
+                    fullName: 'Test User',
+                    email: 'test@example.com',
+                    phone: '+251911234567',
+                    nationality: 'ethiopian',
+                    idNumber: 'ID123456',
+                    ageGroup: 'adult'
+                },
+                total_amount: 520.00,
+                payment_method: 'telebirr'
+            };
+            
+            addResult('Test Booking Data', `<pre>${JSON.stringify(testBookingData, null, 2)}</pre>`, 'info');
+            
+            try {
+                const response = await api.createSimpleBooking(testBookingData);
+                
+                if (response.success) {
+                    addResult('✅ Booking Creation Success', `
+                        Booking ID: ${response.data.booking_id}<br>
+                        <pre>${JSON.stringify(response, null, 2)}</pre>
+                    `, 'success');
+                } else {
+                    addResult('❌ Booking Creation Failed', `
+                        Error: ${response.message}<br>
+                        <pre>${JSON.stringify(response, null, 2)}</pre>
+                    `, 'error');
+                }
+            } catch (error) {
+                addResult('❌ Booking API Error', `
+                    Error: ${error.message}<br>
+                    This is the exact error you're seeing in book-ticket.html
+                `, 'error');
+            }
+        }
+        
+        // Auto-run URL construction test on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            addResult('🚀 API URL Debug Tool Loaded', 'Click the buttons above to test different aspects of the API', 'info');
+            testURLConstruction();
+        });
+    </script>
+</body>
+</html>

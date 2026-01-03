@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Routes Authentication</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-danger { background-color: #dc3545; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Routes Page Authentication Test</h1>
+    
+    <div class="test-section info">
+        <h3>Current Status</h3>
+        <p><strong>User Status:</strong> <span id="userStatus">Checking...</span></p>
+        <p><strong>User Data:</strong> <span id="userData">Loading...</span></p>
+        <p><strong>LocalStorage Status:</strong> <span id="localStorageStatus">Checking...</span></p>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test Actions</h3>
+        <button class="btn-primary" onclick="testSessionCheck()">Test Session Check</button>
+        <button class="btn-success" onclick="simulateLogin()">Simulate Login</button>
+        <button class="btn-danger" onclick="simulateLogout()">Simulate Logout</button>
+        <button class="btn-primary" onclick="refreshStatus()">Refresh Status</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test Results</h3>
+        <div id="testResults"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Navigation Links</h3>
+        <p><a href="routes.html" target="_blank">Open Routes Page</a></p>
+        <p><a href="login.html" target="_blank">Open Login Page</a></p>
+        <p><a href="index.html" target="_blank">Open Home Page</a></p>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let testResults = [];
+        
+        // Initialize test
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshStatus();
+        });
+        
+        function addTestResult(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            testResults.push({ timestamp, message, type });
+            updateTestResults();
+        }
+        
+        function updateTestResults() {
+            const resultsDiv = document.getElementById('testResults');
+            resultsDiv.innerHTML = testResults.map(result => 
+                `<div class="${result.type}" style="margin: 5px 0; padding: 5px;">
+                    <strong>[${result.timestamp}]</strong> ${result.message}
+                </div>`
+            ).join('');
+        }
+        
+        async function refreshStatus() {
+            // Check localStorage
+            const userLoggedIn = localStorage.getItem('swiftbus_user_loggedin') === 'true';
+            const userData = JSON.parse(localStorage.getItem('swiftbus_user_data') || 'null');
+            
+            document.getElementById('localStorageStatus').textContent = 
+                userLoggedIn ? `Logged in (${userData?.name || 'Unknown'})` : 'Not logged in';
+            
+            // Check session
+            try {
+                const response = await swiftBusAPI.checkSession();
+                if (response.success && response.data) {
+                    document.getElementById('userStatus').textContent = 'Logged in via API';
+                    document.getElementById('userData').textContent = 
+                        `${response.data.name} (${response.data.role})`;
+                    addTestResult(`API Session: User ${response.data.name} is logged in as ${response.data.role}`, 'success');
+                } else {
+                    document.getElementById('userStatus').textContent = 'Not logged in via API';
+                    document.getElementById('userData').textContent = 'No user data';
+                    addTestResult('API Session: No active session', 'info');
+                }
+            } catch (error) {
+                document.getElementById('userStatus').textContent = 'API Error';
+                document.getElementById('userData').textContent = error.message;
+                addTestResult(`API Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testSessionCheck() {
+            addTestResult('Testing session check...', 'info');
+            try {
+                const response = await swiftBusAPI.checkSession();
+                if (response.success) {
+                    addTestResult(`Session check successful: ${response.data.name}`, 'success');
+                } else {
+                    addTestResult(`Session check failed: ${response.message}`, 'error');
+                }
+            } catch (error) {
+                addTestResult(`Session check error: ${error.message}`, 'error');
+            }
+            refreshStatus();
+        }
+        
+        function simulateLogin() {
+            // Simulate a logged-in user for testing
+            const testUser = {
+                id: 'U123456',
+                email: 'test@example.com',
+                name: 'Test User',
+                firstName: 'Test',
+                lastName: 'User',
+                role: 'user',
+                phone: '+251912345678',
+                joinedDate: '2024-01-01',
+                isVerified: true
+            };
+            
+            localStorage.setItem('swiftbus_user_loggedin', 'true');
+            localStorage.setItem('swiftbus_user_data', JSON.stringify(testUser));
+            
+            addTestResult('Simulated user login in localStorage', 'success');
+            refreshStatus();
+        }
+        
+        function simulateLogout() {
+            localStorage.removeItem('swiftbus_user_loggedin');
+            localStorage.removeItem('swiftbus_user_data');
+            
+            addTestResult('Simulated user logout from localStorage', 'success');
+            refreshStatus();
+        }
+    </script>
+</body>
+</html>

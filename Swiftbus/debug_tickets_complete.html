@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete My Tickets Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .debug-section {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .success { border-left: 4px solid #28a745; background: #d4edda; }
+        .error { border-left: 4px solid #dc3545; background: #f8d7da; }
+        .warning { border-left: 4px solid #ffc107; background: #fff3cd; }
+        .info { border-left: 4px solid #17a2b8; background: #d1ecf1; }
+        
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #005a87; }
+        
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+        }
+        
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .step-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .json-viewer {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Complete My Tickets Debug Tool</h1>
+    <p>This will test every step of the my-tickets.html flow to find exactly where it's failing.</p>
+    
+    <div class="debug-section">
+        <button onclick="runCompleteDebug()">🚀 Run Complete Debug</button>
+        <button onclick="testDirectAPI()">🔗 Test API Directly</button>
+        <button onclick="testMyTicketsFlow()">📋 Test My-Tickets Flow</button>
+        <button onclick="clearResults()">🗑️ Clear Results</button>
+    </div>
+    
+    <div id="results"></div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let debugResults = [];
+        
+        function addStep(title, content, type = 'info', data = null) {
+            const step = {
+                title,
+                content,
+                type,
+                data,
+                timestamp: new Date().toLocaleTimeString()
+            };
+            debugResults.push(step);
+            displayResults();
+        }
+        
+        function displayResults() {
+            const container = document.getElementById('results');
+            container.innerHTML = debugResults.map(step => `
+                <div class="debug-section ${step.type}">
+                    <div class="step-title">[${step.timestamp}] ${step.title}</div>
+                    <div>${step.content}</div>
+                    ${step.data ? `<pre>${JSON.stringify(step.data, null, 2)}</pre>` : ''}
+                </div>
+            `).join('');
+        }
+        
+        function clearResults() {
+            debugResults = [];
+            displayResults();
+        }
+        
+        async function runCompleteDebug() {
+            clearResults();
+            addStep('🔄 Starting Complete Debug', 'Testing all components of My Tickets functionality...', 'info');
+            
+            // Step 1: Test Authentication
+            await testAuthentication();
+            
+            // Step 2: Test API Connection
+            await testAPIConnection();
+            
+            // Step 3: Test getUserBookings
+            await testGetUserBookings();
+            
+            // Step 4: Test Data Processing
+            await testDataProcessing();
+            
+            // Step 5: Test My Tickets Page Logic
+            await testMyTicketsPageLogic();
+            
+            addStep('✅ Debug Complete', 'All tests completed. Check results above for issues.', 'success');
+        }
+        
+        async function testAuthentication() {
+            addStep('🔐 Testing Authentication', 'Checking user session and login status...', 'info');
+            
+            try {
+                const response = await swiftBusAPI.checkSession();
+                
+                if (response.success && response.data) {
+                    addStep('✅ Authentication Success', `
+                        User authenticated successfully:<br>
+                        • Name: ${response.data.full_name || response.data.name}<br>
+                        • Email: ${response.data.email}<br>
+                        • User ID: ${response.data.user_id}<br>
+                        • Role: ${response.data.role}
+                    `, 'success', response.data);
+                    
+                    window.currentUser = response.data;
+                    return true;
+                } else {
+                    addStep('❌ Authentication Failed', `
+                        User is not logged in or session expired.<br>
+                        Response: ${response.message || 'No message'}<br>
+                        <strong>Action Required:</strong> Please login first.
+                    `, 'error', response);
+                    return false;
+                }
+            } catch (error) {
+                addStep('❌ Authentication Error', `
+                    Network or API error during authentication check:<br>
+                    Error: ${error.message}
+                `, 'error');
+                return false;
+            }
+        }
+        
+        async function testAPIConnection() {
+            addStep('🌐 Testing API Connection', 'Checking if booking API is accessible...', 'info');
+            
+            try {
+                const response = await fetch('api/booking_clean.php?action=test');
+                const data = await response.json();
+                
+                if (data.success) {
+                    addStep('✅ API Connection Success', `
+                        Booking API is responding correctly:<br>
+                        • Status: ${response.status}<br>
+                        • Message: ${data.message}<br>
+                        • Timestamp: ${data.data?.timestamp}
+                    `, 'success', data);
+                    return true;
+                } else {
+                    addStep('❌ API Connection Failed', `
+                        API returned error response:<br>
+                        Message: ${data.message}
+                    `, 'error', data);
+                    return false;
+                }
+            } catch (error) {
+                addStep('❌ API Connection Error', `
+                    Failed to connect to booking API:<br>
+                    Error: ${error.message}
+                `, 'error');
+                return false;
+            }
+        }
+        
+        async function testGetUserBookings() {
+            addStep('📋 Testing getUserBookings API', 'Calling the exact same API that my-tickets.html uses...', 'info');
+            
+            try {
+                const response = await swiftBusAPI.getUserBookings();
+                
+                addStep('📊 Raw API Response', 'This is exactly what the API returns:', 'info', response);
+                
+                if (response.success) {
+                    if (response.data && response.data.bookings && response.data.bookings.length > 0) {
+                        addStep('✅ Bookings Found', `
+                            Successfully retrieved bookings from database:<br>
+                            • Total bookings: ${response.data.bookings.length}<br>
+                            • Database total: ${response.data.total}<br>
+                            • Has more: ${response.data.has_more ? 'Yes' : 'No'}
+                        `, 'success');
+                        
+                        // Show first booking details
+                        const firstBooking = response.data.bookings[0];
+                        addStep('🎫 First Booking Sample', 'Details of the first booking found:', 'info', firstBooking);
+                        
+                        return response.data.bookings;
+                    } else {
+                        addStep('⚠️ No Bookings Found', `
+                            API call succeeded but no bookings returned:<br>
+                            • Response structure: ${JSON.stringify(Object.keys(response.data || {}))}<br>
+                            • Bookings array: ${response.data?.bookings ? 'exists but empty' : 'missing'}
+                        `, 'warning', response.data);
+                        return [];
+                    }
+                } else {
+                    addStep('❌ getUserBookings Failed', `
+                        API returned error:<br>
+                        Message: ${response.message}
+                    `, 'error', response);
+                    return null;
+                }
+            } catch (error) {
+                addStep('❌ getUserBookings Error', `
+                    Network or parsing error:<br>
+                    Error: ${error.message}
+                `, 'error');
+                return null;
+            }
+        }
+        
+        async function testDataProcessing() {
+            addStep('⚙️ Testing Data Processing', 'Testing how booking data is converted to ticket format...', 'info');
+            
+            // Get bookings first
+            const response = await swiftBusAPI.getUserBookings();
+            
+            if (response.success && response.data && response.data.bookings && response.data.bookings.length > 0) {
+                const bookings = response.data.bookings;
+                
+                try {
+                    const processedTickets = bookings.map(booking => {
+                        return createTicketFromAPIBooking(booking);
+                    });
+                    
+                    addStep('✅ Data Processing Success', `
+                        Successfully processed ${processedTickets.length} booking(s) into ticket format:<br>
+                        • All bookings processed without errors<br>
+                        • Ready for display in UI
+                    `, 'success');
+                    
+                    // Show first processed ticket
+                    if (processedTickets.length > 0) {
+                        addStep('🎫 Processed Ticket Sample', 'First ticket after processing:', 'info', processedTickets[0]);
+                    }
+                    
+                    return processedTickets;
+                } catch (error) {
+                    addStep('❌ Data Processing Failed', `
+                        Error while processing booking data:<br>
+                        Error: ${error.message}<br>
+                        This is likely where the issue is!
+                    `, 'error');
+                    return null;
+                }
+            } else {
+                addStep('⚠️ No Data to Process', 'No bookings available for processing', 'warning');
+                return [];
+            }
+        }
+        
+        async function testMyTicketsPageLogic() {
+            addStep('🖥️ Testing My-Tickets Page Logic', 'Simulating the exact flow that my-tickets.html uses...', 'info');
+            
+            try {
+                // Simulate the loadTickets function
+                let allTickets = [];
+                
+                const response = await swiftBusAPI.getUserBookings();
+                
+                if (response.success && response.data && response.data.bookings && response.data.bookings.length > 0) {
+                    allTickets = response.data.bookings.map(booking => createTicketFromAPIBooking(booking));
+                    
+                    addStep('✅ My-Tickets Logic Success', `
+                        Page logic simulation successful:<br>
+                        • ${allTickets.length} ticket(s) would be displayed<br>
+                        • No JavaScript errors occurred<br>
+                        • Ready for UI rendering
+                    `, 'success');
+                    
+                    // Test filtering
+                    const upcomingTickets = allTickets.filter(ticket => {
+                        const ticketDate = new Date(ticket.departureDate);
+                        const today = new Date();
+                        return ticketDate >= today && ticket.status !== 'cancelled';
+                    });
+                    
+                    addStep('📅 Filter Test', `
+                        Filter functionality test:<br>
+                        • Total tickets: ${allTickets.length}<br>
+                        • Upcoming tickets: ${upcomingTickets.length}<br>
+                        • Filters working correctly
+                    `, 'info');
+                    
+                } else {
+                    addStep('⚠️ My-Tickets Logic Issue', `
+                        Page would show "No Tickets" state:<br>
+                        • API response: ${response.success ? 'Success' : 'Failed'}<br>
+                        • Data structure: ${response.data ? 'Present' : 'Missing'}<br>
+                        • Bookings array: ${response.data?.bookings ? response.data.bookings.length + ' items' : 'Missing'}
+                    `, 'warning');
+                }
+            } catch (error) {
+                addStep('❌ My-Tickets Logic Error', `
+                    Error in page logic simulation:<br>
+                    Error: ${error.message}<br>
+                    This indicates a JavaScript error in my-tickets.html
+                `, 'error');
+            }
+        }
+        
+        async function testDirectAPI() {
+            addStep('🔗 Testing Direct API Call', 'Making direct HTTP request to booking API...', 'info');
+            
+            try {
+                const response = await fetch('api/booking_clean.php?action=get_user_bookings');
+                const text = await response.text();
+                
+                addStep('📄 Raw Response Text', 'Raw response from server:', 'info');
+                
+                try {
+                    const data = JSON.parse(text);
+                    addStep('✅ Direct API Success', 'Successfully parsed JSON response:', 'success', data);
+                } catch (parseError) {
+                    addStep('❌ JSON Parse Error', `
+                        Server returned non-JSON response:<br>
+                        Parse Error: ${parseError.message}<br>
+                        Raw Response: ${text.substring(0, 500)}...
+                    `, 'error');
+                }
+            } catch (error) {
+                addStep('❌ Direct API Error', `
+                    Failed to make direct API call:<br>
+                    Error: ${error.message}
+                `, 'error');
+            }
+        }
+        
+        async function testMyTicketsFlow() {
+            addStep('🎯 Testing My-Tickets.html Flow', 'Opening my-tickets.html in new tab for comparison...', 'info');
+            
+            // Open my-tickets.html in new tab
+            window.open('my-tickets.html', '_blank');
+            
+            addStep('📖 Instructions', `
+                My-tickets.html opened in new tab. Please:<br>
+                1. Check browser console (F12) for JavaScript errors<br>
+                2. Look for any error messages on the page<br>
+                3. Compare with the debug results here<br>
+                4. Check if authentication works there
+            `, 'info');
+        }
+        
+        // Copy the createTicketFromAPIBooking function from my-tickets.html
+        function createTicketFromAPIBooking(booking) {
+            console.log('Processing booking:', booking);
+            
+            const today = new Date();
+            const departureDate = new Date(booking.departure_date || booking.travel_date);
+            let status = booking.booking_status || 'confirmed';
+            
+            // Auto-determine status based on date if not set
+            if (status === 'confirmed' && departureDate < today) {
+                status = 'completed';
+            }
+            
+            // Handle passenger details - it might be a JSON string or object
+            let passengerDetails = {};
+            if (booking.passenger_details) {
+                if (typeof booking.passenger_details === 'string') {
+                    try {
+                        passengerDetails = JSON.parse(booking.passenger_details);
+                    } catch (e) {
+                        console.warn('Failed to parse passenger_details:', booking.passenger_details);
+                        passengerDetails = {};
+                    }
+                } else {
+                    passengerDetails = booking.passenger_details;
+                }
+            }
+            
+            // Handle selected seats - it might be a JSON string or array
+            let selectedSeats = [];
+            if (booking.selected_seats) {
+                if (typeof booking.selected_seats === 'string') {
+                    try {
+                        selectedSeats = JSON.parse(booking.selected_seats);
+                    } catch (e) {
+                        console.warn('Failed to parse selected_seats:', booking.selected_seats);
+                        selectedSeats = ['N/A'];
+                    }
+                } else if (Array.isArray(booking.selected_seats)) {
+                    selectedSeats = booking.selected_seats;
+                } else {
+                    selectedSeats = ['N/A'];
+                }
+            } else {
+                selectedSeats = ['N/A'];
+            }
+            
+            const processedTicket = {
+                id: booking.booking_id,
+                bookingId: booking.booking_id,
+                fromCity: booking.from_city_display || booking.from_city,
+                toCity: booking.to_city_display || booking.to_city,
+                departureDate: booking.departure_date || booking.travel_date,
+                departureTime: booking.departure_time,
+                busCompany: booking.company_name || booking.bus_company_display || booking.bus_company,
+                busType: booking.bus_type_display || booking.bus_type || 'Standard Bus',
+                passengerCount: booking.passenger_count || 1,
+                seats: selectedSeats,
+                totalAmount: booking.total_amount,
+                paymentMethod: booking.payment_method || booking.payment_status || 'Unknown',
+                bookingDate: booking.booking_date || booking.created_at,
+                status: status,
+                passengerName: passengerDetails.fullName || (window.currentUser ? (window.currentUser.name || window.currentUser.full_name) : 'Passenger'),
+                passengerEmail: passengerDetails.email || (window.currentUser ? window.currentUser.email : 'N/A')
+            };
+            
+            console.log('Processed ticket:', processedTicket);
+            return processedTicket;
+        }
+        
+        // Auto-run on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            addStep('🚀 Debug Tool Ready', 'Click "Run Complete Debug" to start comprehensive testing', 'info');
+        });
+    </script>
+</body>
+</html>

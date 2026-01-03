@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Payment - SwiftBus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --secondary: #ff6d00;
+            --dark: #222;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background-color: white;
+            box-shadow: var(--shadow);
+            padding: 20px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo h1 {
+            color: var(--primary);
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .logo span {
+            color: var(--secondary);
+        }
+
+        .back-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .back-btn:hover {
+            background: #0d47a1;
+            transform: translateY(-2px);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 40px 0;
+        }
+
+        .payment-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .payment-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                max-width: 100%;
+            }
+            
+            .container {
+                padding: 0 15px;
+            }
+            
+            .main-content {
+                padding: 20px 0;
+            }
+            
+            .payment-method-section,
+            .booking-summary {
+                padding: 20px;
+                margin: 0;
+                border-radius: 10px;
+            }
+            
+            .payment-method-section h2,
+            .booking-summary h2 {
+                font-size: 1.3rem;
+            }
+            
+            .form-control {
+                font-size: 16px; /* Prevents zoom on iOS */
+                padding: 15px;
+            }
+            
+            .btn {
+                padding: 15px 20px;
+                font-size: 16px;
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .payment-success-content {
+                padding: 30px 20px;
+                margin: 0 10px;
+                max-width: calc(100vw - 20px);
+                width: 100%;
+            }
+            
+            .success-icon {
+                width: 80px;
+                height: 80px;
+                font-size: 36px;
+            }
+            
+            .payment-success-content h2 {
+                font-size: 1.5rem;
+            }
+            
+            .booking-details {
+                padding: 15px;
+                margin: 20px 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 10px;
+            }
+            
+            .main-content {
+                padding: 15px 0;
+            }
+            
+            .payment-method-section,
+            .booking-summary {
+                padding: 15px;
+            }
+            
+            .form-group {
+                margin-bottom: 15px;
+            }
+            
+            .payment-method-logo i {
+                font-size: 40px;
+            }
+            
+            .booking-details {
+                padding: 10px;
+            }
+            
+            .summary-item {
+                font-size: 14px;
+                margin-bottom: 10px;
+                padding-bottom: 10px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            
+            .summary-item span:first-child {
+                min-width: auto;
+                font-weight: 600;
+            }
+            
+            .summary-item span:last-child {
+                text-align: left;
+                padding-left: 10px;
+            }
+            
+            .summary-item.total {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .payment-success-content {
+                padding: 20px 15px;
+                margin: 0 10px;
+                max-width: calc(100vw - 20px);
+                max-height: 85vh;
+                border-radius: 12px;
+            }
+            
+            .success-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 28px;
+                margin-bottom: 15px;
+            }
+            
+            .payment-success-content h2 {
+                font-size: 1.4rem;
+                margin-bottom: 8px;
+            }
+            
+            .payment-success-content p {
+                font-size: 14px;
+                margin-bottom: 15px;
+            }
+            
+            .booking-details {
+                padding: 12px;
+                margin: 12px 0;
+            }
+            
+            .booking-details p {
+                margin: 4px 0;
+                font-size: 13px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 2px;
+            }
+            
+            .booking-details strong {
+                min-width: auto;
+                font-size: 13px;
+            }
+            
+            .booking-details span {
+                text-align: left;
+                padding-left: 8px;
+                font-size: 12px;
+            }
+            
+            .btn {
+                padding: 12px 15px;
+                font-size: 14px;
+            }
+        }
+
+        .payment-method-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .payment-method-section h2 {
+            color: var(--primary);
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .payment-method-section h2 i {
+            font-size: 1.2rem;
+        }
+
+        .payment-form {
+            margin-top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-primary:hover {
+            background: #0d47a1;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(26, 115, 232, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .booking-summary {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .booking-summary h2 {
+            color: var(--primary);
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .summary-item span:first-child {
+            font-weight: 500;
+            color: var(--dark);
+            min-width: 120px;
+            flex-shrink: 0;
+        }
+        
+        .summary-item span:last-child {
+            text-align: right;
+            word-break: break-word;
+        }
+
+        .summary-item.total {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--primary);
+            border-bottom: none;
+            padding-top: 15px;
+            margin-top: 15px;
+            border-top: 2px solid #ddd;
+        }
+
+        .payment-method-logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .payment-method-logo i {
+            font-size: 60px;
+            color: var(--primary);
+        }
+
+        /* Payment Success Overlay */
+        .payment-success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 3000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .payment-success-overlay.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .payment-success-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.5s ease;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .success-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--success), #20c997);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 32px;
+            box-shadow: 0 8px 16px rgba(40, 167, 69, 0.3);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .payment-success-content h2 {
+            color: var(--success);
+            margin-bottom: 10px;
+            font-size: 1.6rem;
+        }
+
+        .payment-success-content p {
+            color: var(--gray);
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+
+        .booking-details {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: left;
+            border: 1px solid #e9ecef;
+        }
+
+        .booking-details p {
+            margin: 5px 0;
+            color: var(--dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .booking-details strong {
+            color: var(--primary);
+            min-width: 120px;
+            flex-shrink: 0;
+        }
+        
+        .booking-details span {
+            text-align: right;
+            word-break: break-word;
+        }
+
+        
+
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 80px 0 20px;
+            margin-top: auto;
+            position: relative;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-column h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--secondary);
+            border-radius: 2px;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: #bbb;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: white;
+            padding-left: 5px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #bbb;
+            font-size: 14px;
+        }
+
+        /* Telebirr Specific */
+        .telebirr-logo {
+            color: #00a859;
+        }
+
+        /* CBE Specific */
+        .cbe-logo {
+            color: #0055a5;
+        }
+
+        /* Dashen Specific */
+        .dashen-logo {
+            color: #0f5ca8;
+        }
+
+        /* Card Specific */
+        .card-logo {
+            color: #ff6d00;
+        }
+
+        /* Security Badge */
+        .security-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            color: var(--gray);
+        }
+
+        .security-badge i {
+            color: var(--success);
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateX(100%); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0); 
+            }
+        }
+        
+        /* Form validation styles */
+        .form-control.error {
+            border-color: var(--danger) !important;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+        }
+        
+        .form-control.success {
+            border-color: var(--success) !important;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+        }
+        
+        /* Prevent text overflow */
+        * {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        /* Ensure proper mobile viewport */
+        html {
+            overflow-x: hidden;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1>Swift<span>Bus</span></h1>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <h1 style="text-align: center; color: var(--primary); margin-bottom: 40px;">Complete Your Payment</h1>
+            
+            <div class="payment-container">
+                <!-- Payment Method -->
+                <div class="payment-method-section">
+                    <div id="paymentMethodContent">
+                        <!-- Content will be loaded by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Booking Summary -->
+                <div class="booking-summary">
+                    <h2><i class="fas fa-receipt"></i> Booking Summary</h2>
+                    
+                    <div id="bookingSummaryContent">
+                        <!-- Content will be loaded by JavaScript -->
+                    </div>
+
+                    <div class="security-badge">
+                        <i class="fas fa-lock"></i>
+                        <span>Your payment is secured with SSL encryption</span>
+                    </div>
+
+                    <button class="btn btn-primary" id="confirmPaymentBtn" style="margin-top: 20px;">
+                        <i class="fas fa-lock"></i>
+                        Confirm Payment
+                    </button>
+
+                    <button class="btn btn-secondary" id="backToBookingBtn" style="margin-top: 15px; display: block; width: 100%;">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Booking
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Payment Success Overlay -->
+    <div class="payment-success-overlay" id="paymentSuccessOverlay">
+        <div class="payment-success-content">
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <h2>Payment Successful!</h2>
+            <p>Your payment has been processed successfully and your booking is confirmed.</p>
+            
+            <div class="booking-details" id="successBookingDetails">
+                <!-- Will be populated by JavaScript with full booking details -->
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+                <a href="my-tickets.html" class="btn btn-success">
+                    <i class="fas fa-ticket-alt"></i>
+                    View My Tickets
+                </a>
+                <a href="index.html" class="btn btn-secondary">
+                    <i class="fas fa-home"></i>
+                    Back to Home
+                </a>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>SwiftBus</h3>
+                    <p>Your trusted partner for bus travel across Ethiopia. We connect you to your destination safely and comfortably.</p>
+                    <div class="social-links">
+                        <a href="https://facebook.com" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://twitter.com" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="https://instagram.com" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.linkedin.com/" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="routes.html">Routes</a></li>
+                        <li><a href="book-ticket.html">Book Ticket</a></li>
+                        <li><a href="my-tickets.html">My Tickets</a></li>
+                        <li><a href="user-dashboard.html">User Dashboard</a></li>
+                        <li><a href="search.html">Search Buses</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Support</h3>
+                    <ul class="footer-links">
+                        <li><a href="contact-us.html">Contact Us</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                        <li><a href="terms-conditions.html">Terms & Conditions</a></li>
+                        <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Contact Info</h3>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt"></i> Kombolcha, Ethiopia</li>
+                        <li><i class="fas fa-phone"></i> +251 945710924</li>
+                        <li><i class="fas fa-envelope"></i> info@swiftbus.et</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 SwiftBus. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Get payment method from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentMethod = urlParams.get('method') || 'telebirr';
+        const bookingId = urlParams.get('booking_id');
+        
+        // Get booking data from localStorage - use the correct key from book-ticket page
+        const paymentData = JSON.parse(localStorage.getItem('swiftbus_payment_data')) || {};
+        console.log('💳 Payment page loaded with data:', paymentData);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPaymentMethod(paymentMethod);
+            loadBookingSummary();
+            setupEventListeners();
+            formatCardInputs();
+            setupBackToBookingButton();
+        });
+        
+        function setupBackToBookingButton() {
+            const backToBookingBtn = document.getElementById('backToBookingBtn');
+            
+            if (backToBookingBtn) {
+                backToBookingBtn.addEventListener('click', function() {
+                    console.log('🔙 Back to booking clicked - preserving payment data');
+                    
+                    // **ENHANCED: Store complete state for seamless return**
+                    if (paymentData && Object.keys(paymentData).length > 0) {
+                        // Store payment data with additional state information
+                        const enhancedPaymentData = {
+                            ...paymentData,
+                            // Add state flags to maintain consistency
+                            returning_from_payment: true,
+                            payment_method_selected: paymentMethod,
+                            payment_step_completed: true,
+                            timestamp: Date.now()
+                        };
+                        
+                        localStorage.setItem('swiftbus_payment_data', JSON.stringify(enhancedPaymentData));
+                        localStorage.setItem('swiftbus_return_step', '4'); // Ensure we return to step 4
+                        
+                        console.log('💾 Enhanced payment data stored:', enhancedPaymentData);
+                    }
+                    
+                    // **FIXED: Go back to book-ticket page step 4 with proper state**
+                    const bookTicketUrl = 'book-ticket.html?step=4&return=payment';
+                    console.log('🔄 Redirecting to:', bookTicketUrl);
+                    window.location.href = bookTicketUrl;
+                });
+            }
+        }
+
+        function loadPaymentMethod(method) {
+            const paymentMethodContent = document.getElementById('paymentMethodContent');
+            const methodNames = {
+                'telebirr': 'Telebirr',
+                'cbe': 'CBE',
+                'dashen': 'Dashen Bank',
+                'card': 'Credit/Debit Card'
+            };
+            
+            // Store method name for success display
+            localStorage.setItem('payment_method', methodNames[method]);
+            
+            switch(method) {
+                case 'telebirr':
+                    paymentMethodContent.innerHTML = `
+                        <div class="payment-method-logo">
+                            <i class="fas fa-mobile-alt telebirr-logo"></i>
+                        </div>
+                        <h2><i class="fas fa-mobile-alt"></i> Telebirr Payment</h2>
+                        <p style="margin-bottom: 20px; color: var(--gray);">Complete payment using Telebirr mobile money</p>
+                        
+                        <div class="payment-form">
+                            <div class="form-group">
+                                <label class="form-label">Telephone Number *</label>
+                                <input type="tel" class="form-control" id="telebirrPhone" placeholder="+251 9XX XXX XXX" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">PIN *</label>
+                                <input type="password" class="form-control" id="telebirrPin" placeholder="Enter your Telebirr PIN" maxlength="4" required>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'cbe':
+                    paymentMethodContent.innerHTML = `
+                        <div class="payment-method-logo">
+                            <i class="fas fa-university cbe-logo"></i>
+                        </div>
+                        <h2><i class="fas fa-university"></i> CBE Payment</h2>
+                        <p style="margin-bottom: 20px; color: var(--gray);">Pay with Commercial Bank of Ethiopia</p>
+                        
+                        <div class="payment-form">
+                            <div class="form-group">
+                                <label class="form-label">Account Number *</label>
+                                <input type="text" class="form-control" id="cbeAccount" placeholder="Enter your CBE account number" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Password *</label>
+                                <input type="password" class="form-control" id="cbePassword" placeholder="Enter your CBE password" required>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'dashen':
+                    paymentMethodContent.innerHTML = `
+                        <div class="payment-method-logo">
+                            <i class="fas fa-credit-card dashen-logo"></i>
+                        </div>
+                        <h2><i class="fas fa-credit-card"></i> Dashen Bank Payment</h2>
+                        <p style="margin-bottom: 20px; color: var(--gray);">Pay with Dashen Bank</p>
+                        
+                        <div class="payment-form">
+                            <div class="form-group">
+                                <label class="form-label">Card Number *</label>
+                                <input type="text" class="form-control" id="dashenCard" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                            </div>
+                            <div class="form-group">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                    <div>
+                                        <label class="form-label">Expiry Date *</label>
+                                        <input type="text" class="form-control" id="dashenExpiry" placeholder="MM/YY" required>
+                                    </div>
+                                    <div>
+                                        <label class="form-label">CVV *</label>
+                                        <input type="password" class="form-control" id="dashenCvv" placeholder="123" maxlength="3" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'card':
+                    paymentMethodContent.innerHTML = `
+                        <div class="payment-method-logo">
+                            <i class="fas fa-credit-card card-logo"></i>
+                        </div>
+                        <h2><i class="fas fa-credit-card"></i> Credit/Debit Card</h2>
+                        <p style="margin-bottom: 20px; color: var(--gray);">Pay with Visa, MasterCard, or American Express</p>
+                        
+                        <div class="payment-form">
+                            <div class="form-group">
+                                <label class="form-label">Card Number *</label>
+                                <input type="text" class="form-control" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Card Holder Name *</label>
+                                <input type="text" class="form-control" id="cardHolder" placeholder="Full Name as on card" required>
+                            </div>
+                            <div class="form-group">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                    <div>
+                                        <label class="form-label">Expiry Date *</label>
+                                        <input type="text" class="form-control" id="expiryDate" placeholder="MM/YY" required>
+                                    </div>
+                                    <div>
+                                        <label class="form-label">CVV *</label>
+                                        <input type="password" class="form-control" id="cvv" placeholder="123" maxlength="3" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+            }
+        }
+
+        function loadBookingSummary() {
+            const summaryContent = document.getElementById('bookingSummaryContent');
+            
+            if (!paymentData || Object.keys(paymentData).length === 0) {
+                summaryContent.innerHTML = `
+                    <p style="color: var(--danger); text-align: center;">No booking data found. Please go back and complete your booking.</p>
+                `;
+                return;
+            }
+            
+            console.log('💳 Loading booking summary with data:', paymentData);
+            
+            // Use the total amount from payment data
+            const total = paymentData.total_amount || 520;
+            
+            // Calculate fare breakdown (without tax)
+            const baseFare = Math.round(total * 0.95); // Approximate base fare (95% of total)
+            const serviceFee = total - baseFare; // Remaining amount as service fee
+            
+            summaryContent.innerHTML = `
+                <div class="summary-item">
+                    <span>Booking ID:</span>
+                    <span>${paymentData.booking_id || 'Generating...'}</span>
+                </div>
+                <div class="summary-item">
+                    <span>Bus Company:</span>
+                    <span>${getCompanyDisplayName(paymentData.bus_company)}</span>
+                </div>
+                <div class="summary-item">
+                    <span>Bus Type:</span>
+                    <span>${getBusTypeDisplayName(paymentData.bus_type)}</span>
+                </div>
+                <div class="summary-item">
+                    <span>Route:</span>
+                    <span>${getCityDisplayName(paymentData.from_city)} → ${getCityDisplayName(paymentData.to_city)}</span>
+                </div>
+                <div class="summary-item">
+                    <span>Date & Time:</span>
+                    <span>${formatDate(paymentData.departure_date)}, ${getTimeDisplayName(paymentData.departure_time)}</span>
+                </div>
+                <div class="summary-item">
+                    <span>Passengers:</span>
+                    <span>${paymentData.passenger_count || 1} Passenger(s)</span>
+                </div>
+                <div class="summary-item">
+                    <span>Seats:</span>
+                    <span>${paymentData.selected_seats && paymentData.selected_seats.length > 0 ? paymentData.selected_seats.join(', ') : 'Not selected'}</span>
+                </div>
+                <div class="summary-item">
+                    <span>Passenger Name:</span>
+                    <span>${paymentData.passenger_details?.fullName || 'N/A'}</span>
+                </div>
+                <div class="summary-item">
+                    <span>Contact:</span>
+                    <span>${paymentData.passenger_details?.phone || 'N/A'}</span>
+                </div>
+                <div class="summary-item">
+                    <span>Base Fare:</span>
+                    <span>ETB ${baseFare}</span>
+                </div>
+                <div class="summary-item">
+                    <span>Service Fee:</span>
+                    <span>ETB ${serviceFee}</span>
+                </div>
+                <div class="summary-item">
+                    <span>Payment Method:</span>
+                    <span>${getPaymentMethodName(paymentMethod)}</span>
+                </div>
+                <div class="summary-item total">
+                    <span>Total Amount:</span>
+                    <span>ETB ${total}</span>
+                </div>
+            `;
+            
+            // Store total for success display
+            localStorage.setItem('payment_total', total);
+        }
+        
+        function getPaymentMethodName(method) {
+            const methodNames = {
+                'telebirr': 'Telebirr',
+                'cbe': 'Commercial Bank of Ethiopia',
+                'dashen': 'Dashen Bank',
+                'card': 'Credit/Debit Card'
+            };
+            return methodNames[method] || method || 'Unknown Payment Method';
+        }
+        
+        function getCompanyDisplayName(companyCode) {
+            const companies = {
+                'selam-bus': 'Selam Bus',
+                'abay-bus': 'Abay Bus',
+                'ethio-bus': 'Ethio Bus',
+                'habesha-bus': 'Habesha Bus'
+            };
+            return companies[companyCode] || companyCode;
+        }
+        
+        function getBusTypeDisplayName(typeCode) {
+            const types = {
+                'premium-ac': 'Premium AC Bus',
+                'standard-ac': 'Standard AC Bus',
+                'luxury': 'Luxury Bus',
+                'standard': 'Standard Bus',
+                'economy': 'Economy Bus'
+            };
+            return types[typeCode] || typeCode;
+        }
+        
+        function getCityDisplayName(cityCode) {
+            if (!cityCode) return 'Unknown City';
+            
+            const cities = {
+                'addis-ababa': 'Addis Ababa',
+                'kombolcha': 'Kombolcha',
+                'bahirdar': 'Bahirdar',
+                'dessie': 'Dessie',
+                'adama': 'Adama',
+                'hawasa': 'Hawasa',
+                'arbaminch': 'Arbaminch',
+                'gonder': 'Gonder',
+                'mekele': 'Mekele',
+                'jimma': 'Jimma'
+            };
+            return cities[cityCode] || cityCode.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+        
+        function getTimeDisplayName(timeCode) {
+            if (!timeCode) return 'Unknown Time';
+            
+            const times = {
+                '06:00': '06:00 AM',
+                '08:00': '08:00 AM',
+                '10:00': '10:00 AM',
+                '14:00': '02:00 PM',
+                '18:00': '06:00 PM',
+                '20:00': '08:00 PM',
+                '22:00': '10:00 PM'
+            };
+            return times[timeCode] || timeCode;
+        }
+        
+        function formatDate(dateString) {
+            if (!dateString) return 'Unknown Date';
+            
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) {
+                    return dateString; // Return original if invalid date
+                }
+                return date.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric',
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+            } catch (error) {
+                console.error('Error formatting date:', error);
+                return dateString || 'Unknown Date';
+            }
+        }
+
+        function formatCardInputs() {
+            // Format card number input
+            document.addEventListener('input', function(e) {
+                if (e.target.id.includes('Card') || e.target.id === 'cardNumber') {
+                    formatCardNumber(e.target);
+                }
+                if (e.target.id.includes('Expiry') || e.target.id === 'expiryDate') {
+                    formatExpiryDate(e.target);
+                }
+                if (e.target.id === 'telebirrPhone') {
+                    formatPhoneNumber(e.target);
+                }
+            });
+        }
+
+        function formatCardNumber(input) {
+            let value = input.value.replace(/\D/g, '');
+            let formattedValue = '';
+            
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 4 === 0) {
+                    formattedValue += ' ';
+                }
+                formattedValue += value[i];
+            }
+            
+            input.value = formattedValue.substring(0, 19);
+        }
+
+        function formatExpiryDate(input) {
+            let value = input.value.replace(/\D/g, '');
+            
+            if (value.length >= 2) {
+                input.value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            } else {
+                input.value = value;
+            }
+        }
+
+        function formatPhoneNumber(input) {
+            let value = input.value.replace(/\D/g, '');
+            
+            if (value.startsWith('251')) {
+                value = value.substring(3);
+            }
+            
+            if (value.length > 0) {
+                let formattedValue = '+251 ';
+                if (value.length > 0) {
+                    formattedValue += value.substring(0, Math.min(3, value.length));
+                }
+                if (value.length > 3) {
+                    formattedValue += ' ' + value.substring(3, Math.min(6, value.length));
+                }
+                if (value.length > 6) {
+                    formattedValue += ' ' + value.substring(6, Math.min(9, value.length));
+                }
+                input.value = formattedValue;
+            }
+        }
+
+        // FIXED: Enhanced setupEventListeners with better error handling
+        function setupEventListeners() {
+            const confirmBtn = document.getElementById('confirmPaymentBtn');
+            
+            if (!confirmBtn) {
+                console.error('❌ Confirm payment button not found!');
+                return;
+            }
+            
+            console.log('✅ Setting up payment event listeners');
+            
+            confirmBtn.addEventListener('click', function(event) {
+                event.preventDefault();
+                console.log('💳 Payment confirmation clicked');
+                
+                // Validate payment form
+                if (!validatePaymentForm()) {
+                    console.log('❌ Payment form validation failed');
+                    return;
+                }
+                
+                console.log('✅ Payment form validation passed');
+                
+                // Show processing state
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing Payment...';
+                this.disabled = true;
+                
+                // **UPDATED: Generate proper booking ID and create booking in database**
+                const bookingId = 'SWB-' + new Date().getFullYear() + '-' + 
+                    Math.random().toString(36).substr(2, 9).toUpperCase();
+                
+                console.log('🎫 Generated final booking ID:', bookingId);
+                
+                // Update payment data with final booking ID
+                const updatedPaymentData = {
+                    ...paymentData,
+                    booking_id: bookingId
+                };
+                
+                // Save booking confirmation
+                const confirmationData = {
+                    ...updatedPaymentData,
+                    paymentMethod: paymentMethod,
+                    paymentStatus: 'completed',
+                    bookingDate: new Date().toISOString(),
+                    total: paymentData.total_amount
+                };
+                
+                localStorage.setItem('swiftbus_confirmation', JSON.stringify(confirmationData));
+                console.log('💾 Saved confirmation data to localStorage');
+                
+                // Show success overlay after processing (simulate payment processing)
+                setTimeout(() => {
+                    console.log('🎉 Showing payment success');
+                    try {
+                        showPaymentSuccess(bookingId);
+                        
+                        // Reset button state (in case user goes back)
+                        this.innerHTML = originalText;
+                        this.disabled = false;
+                    } catch (error) {
+                        console.error('❌ Error showing payment success:', error);
+                        
+                        // Reset button and show error
+                        this.innerHTML = originalText;
+                        this.disabled = false;
+                        
+                        showNotification('Payment processed but there was an error displaying the result. Please check My Tickets.', 'warning');
+                        
+                        // Redirect to my-tickets as fallback
+                        setTimeout(() => {
+                            window.location.href = 'my-tickets.html';
+                        }, 2000);
+                    }
+                }, 2000);
+            });
+            
+            // Handle browser back button - reset processing state
+            window.addEventListener('pageshow', function(event) {
+                if (event.persisted) {
+                    // Page was loaded from cache (back button)
+                    const confirmBtn = document.getElementById('confirmPaymentBtn');
+                    if (confirmBtn) {
+                        confirmBtn.innerHTML = '<i class="fas fa-lock"></i> Confirm Payment';
+                        confirmBtn.disabled = false;
+                    }
+                }
+            });
+            
+            console.log('✅ Payment event listeners setup complete');
+        }
+        
+        // FIXED: Enhanced validatePaymentForm with better validation and feedback
+        function validatePaymentForm() {
+            console.log('🔍 Validating payment form for method:', paymentMethod);
+            
+            let isValid = true;
+            const requiredFields = [];
+            
+            // Get required fields based on payment method
+            switch(paymentMethod) {
+                case 'telebirr':
+                    requiredFields.push('telebirrPhone', 'telebirrPin');
+                    break;
+                case 'cbe':
+                    requiredFields.push('cbeAccount', 'cbePassword');
+                    break;
+                case 'dashen':
+                    requiredFields.push('dashenCard', 'dashenExpiry', 'dashenCvv');
+                    break;
+                case 'card':
+                    requiredFields.push('cardNumber', 'cardHolder', 'expiryDate', 'cvv');
+                    break;
+                default:
+                    console.warn('⚠️ Unknown payment method:', paymentMethod);
+                    // For unknown methods, assume no validation needed (cash, etc.)
+                    return true;
+            }
+            
+            console.log('📋 Required fields for', paymentMethod, ':', requiredFields);
+            
+            // Validate required fields
+            const missingFields = [];
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    if (!field.value.trim()) {
+                        field.style.borderColor = 'var(--danger)';
+                        isValid = false;
+                        missingFields.push(fieldId);
+                        console.log('❌ Missing field:', fieldId);
+                    } else {
+                        field.style.borderColor = '#ddd';
+                        console.log('✅ Field valid:', fieldId);
+                    }
+                } else {
+                    console.warn('⚠️ Field not found:', fieldId);
+                }
+            });
+            
+            if (!isValid) {
+                const message = `Please fill in all required fields: ${missingFields.join(', ')}`;
+                showNotification(message, 'error');
+                console.log('❌ Validation failed:', message);
+            } else {
+                console.log('✅ Payment form validation passed');
+            }
+            
+            return isValid;
+        }
+        
+        function showNotification(message, type = 'info') {
+            // Simple notification system
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'error' ? 'var(--danger)' : 'var(--primary)'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                z-index: 10000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        function formatCardInputs() {
+            // Format card number input
+            document.addEventListener('input', function(e) {
+                if (e.target.id.includes('Card') || e.target.id === 'cardNumber') {
+                    formatCardNumber(e.target);
+                }
+                if (e.target.id.includes('Expiry') || e.target.id === 'expiryDate') {
+                    formatExpiryDate(e.target);
+                }
+                if (e.target.id === 'telebirrPhone') {
+                    formatPhoneNumber(e.target);
+                }
+            });
+        }
+
+        function formatCardNumber(input) {
+            let value = input.value.replace(/\D/g, '');
+            let formattedValue = '';
+            
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 4 === 0) {
+                    formattedValue += ' ';
+                }
+                formattedValue += value[i];
+            }
+            
+            input.value = formattedValue.substring(0, 19);
+        }
+
+        function formatExpiryDate(input) {
+            let value = input.value.replace(/\D/g, '');
+            
+            if (value.length >= 2) {
+                input.value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            } else {
+                input.value = value;
+            }
+        }
+
+        function formatPhoneNumber(input) {
+            let value = input.value.replace(/\D/g, '');
+            
+            if (value.startsWith('251')) {
+                value = value.substring(3);
+            }
+            
+            if (value.length > 0) {
+                let formattedValue = '+251 ';
+                if (value.length > 0) {
+                    formattedValue += value.substring(0, Math.min(3, value.length));
+                }
+                if (value.length > 3) {
+                    formattedValue += ' ' + value.substring(3, Math.min(6, value.length));
+                }
+                if (value.length > 6) {
+                    formattedValue += ' ' + value.substring(6, Math.min(9, value.length));
+                }
+                input.value = formattedValue;
+            }
+        }
+
+        // **UPDATED: Enhanced showPaymentSuccess with database-first approach (no localStorage dependency)**
+        function showPaymentSuccess(bookingId) {
+            console.log('🎉 showPaymentSuccess called with booking ID:', bookingId);
+            
+            try {
+                const overlay = document.getElementById('paymentSuccessOverlay');
+                if (!overlay) {
+                    console.error('❌ Payment success overlay not found!');
+                    throw new Error('Payment success overlay not found');
+                }
+                
+                const paymentMethodName = getPaymentMethodName(paymentMethod) || 'Unknown';
+                const totalAmount = localStorage.getItem('payment_total') || paymentData.total_amount || '0';
+                
+                console.log('💳 Payment success data:', {
+                    bookingId,
+                    paymentMethodName,
+                    totalAmount,
+                    paymentData
+                });
+                
+                // **UPDATED: Create booking in database (database-first approach)**
+                updateBookingAfterPayment(bookingId, paymentMethodName, totalAmount)
+                    .then((finalBookingId) => {
+                        console.log('✅ Booking successfully created in database:', finalBookingId);
+                        
+                        // Update booking ID if it changed
+                        if (finalBookingId && finalBookingId !== bookingId) {
+                            bookingId = finalBookingId;
+                        }
+                        
+                        // Populate success modal with booking details
+                        populateSuccessModal(bookingId, paymentMethodName, totalAmount);
+                        
+                        // Show success overlay
+                        overlay.classList.add('active');
+                        console.log('✅ Payment success overlay displayed');
+                        
+                        // Clear payment data after successful payment
+                        localStorage.removeItem('swiftbus_payment_data');
+                        localStorage.removeItem('payment_total');
+                        localStorage.removeItem('payment_method');
+                        
+                        console.log('🧹 Cleared payment data from localStorage');
+                        
+                    })
+                    .catch((error) => {
+                        console.error('❌ Error creating booking in database:', error);
+                        
+                        // Still show success modal but with warning
+                        populateSuccessModal(bookingId, paymentMethodName, totalAmount, true);
+                        overlay.classList.add('active');
+                        
+                        // Show warning notification
+                        showNotification('Payment successful! Your booking is being processed. Please check My Tickets in a few minutes.', 'warning');
+                    });
+                
+            } catch (error) {
+                console.error('❌ Error in showPaymentSuccess:', error);
+                console.error('❌ Error stack:', error.stack);
+                console.error('❌ Payment data at error:', paymentData);
+                
+                // Show fallback success message
+                showNotification('Payment successful! Redirecting to My Tickets...', 'success');
+                
+                // Redirect to my-tickets as fallback
+                setTimeout(() => {
+                    window.location.href = 'my-tickets.html?from=payment&booking_id=' + bookingId;
+                }, 2000);
+                
+                throw error; // Re-throw to be caught by the calling function
+            }
+        }
+        
+        // **NEW: Helper function to populate success modal**
+        function populateSuccessModal(bookingId, paymentMethodName, totalAmount, hasWarning = false) {
+            const successDetailsContainer = document.getElementById('successBookingDetails');
+            if (!successDetailsContainer) {
+                console.error('❌ Success booking details container not found!');
+                return;
+            }
+            
+            // FIXED: Safely handle potentially undefined data
+            const fromCity = paymentData.from_city ? getCityDisplayName(paymentData.from_city) : 'Unknown';
+            const toCity = paymentData.to_city ? getCityDisplayName(paymentData.to_city) : 'Unknown';
+            const departureDate = paymentData.departure_date ? formatDate(paymentData.departure_date) : 'Unknown';
+            const departureTime = paymentData.departure_time ? getTimeDisplayName(paymentData.departure_time) : 'Unknown';
+            const seats = (paymentData.selected_seats && paymentData.selected_seats.length > 0) 
+                ? paymentData.selected_seats.join(', ') 
+                : 'Not selected';
+            const passengerName = (paymentData.passenger_details && paymentData.passenger_details.fullName) 
+                ? paymentData.passenger_details.fullName 
+                : 'N/A';
+            
+            successDetailsContainer.innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr; gap: 5px; text-align: left;">
+                    <p><strong>Booking ID:</strong> <span style="color: var(--primary); font-weight: bold;">${bookingId}</span></p>
+                    <p><strong>Status:</strong> <span style="color: var(--success); font-weight: bold;">Confirmed</span></p>
+                    <p><strong>Route:</strong> ${fromCity} → ${toCity}</p>
+                    <p><strong>Date:</strong> ${departureDate}</p>
+                    <p><strong>Time:</strong> ${departureTime}</p>
+                    <p><strong>Seats:</strong> ${seats}</p>
+                    <p><strong>Passenger:</strong> ${passengerName}</p>
+                    <p><strong>Amount:</strong> <span style="color: var(--primary); font-weight: bold;">ETB ${totalAmount}</span></p>
+                </div>
+                
+                <div style="background: ${hasWarning ? '#fff3cd' : '#e8f5e9'}; padding: 12px; border-radius: 6px; margin-top: 15px; border-left: 3px solid ${hasWarning ? '#ffc107' : 'var(--success)'};">
+                    <p style="color: ${hasWarning ? '#856404' : 'var(--success)'}; margin: 0; font-size: 13px; text-align: center;">
+                        <i class="fas fa-${hasWarning ? 'exclamation-triangle' : 'info-circle'}"></i> 
+                        ${hasWarning ? 'Booking is being processed. Check My Tickets for updates.' : 'Confirmation email sent. Arrive 30 minutes early.'}
+                    </p>
+                </div>
+            `;
+        }
+        
+        // **UPDATED: Create booking in database after successful payment (database-first approach)**
+        async function updateBookingAfterPayment(bookingId, paymentMethod, totalAmount) {
+            try {
+                console.log('💳 Creating booking in database after payment:', bookingId);
+                
+                // Create the booking in the database with all details using the API
+                const response = await swiftBusAPI.createBooking({
+                    from_city: paymentData.from_city,
+                    to_city: paymentData.to_city,
+                    departure_date: paymentData.departure_date,
+                    departure_time: paymentData.departure_time,
+                    bus_company: paymentData.bus_company,
+                    bus_type: paymentData.bus_type,
+                    passenger_count: paymentData.passenger_count || 1,
+                    selected_seats: paymentData.selected_seats || [],
+                    passenger_details: paymentData.passenger_details,
+                    total_amount: totalAmount,
+                    payment_method: paymentMethod,
+                    special_requirements: paymentData.special_requirements || ''
+                });
+                
+                if (response && response.success) {
+                    console.log('✅ Booking created successfully in database:', response.data.booking_id);
+                    
+                    // Update the booking ID if it was generated by the API
+                    if (response.data.booking_id) {
+                        bookingId = response.data.booking_id;
+                    }
+                    
+                    // Update payment status to 'paid' using the API
+                    const updateResponse = await swiftBusAPI.request('booking_clean.php?action=update_booking', {
+                        method: 'PUT',
+                        body: JSON.stringify({
+                            booking_id: bookingId,
+                            payment_status: 'paid',
+                            payment_method: paymentMethod
+                        })
+                    });
+                    
+                    if (updateResponse && updateResponse.success) {
+                        console.log('✅ Payment status updated successfully');
+                        
+                        // Mark seats as permanently occupied if seats were selected
+                        if (paymentData.selected_seats && paymentData.selected_seats.length > 0) {
+                            await updateSeatsAfterPayment(bookingId, paymentData);
+                        }
+                        
+                        return bookingId; // Return the final booking ID
+                    } else {
+                        console.error('❌ Failed to update payment status:', updateResponse?.message);
+                        throw new Error('Failed to update payment status: ' + (updateResponse?.message || 'Unknown error'));
+                    }
+                } else {
+                    console.error('❌ Failed to create booking:', response?.message);
+                    throw new Error('Failed to create booking: ' + (response?.message || 'Unknown error'));
+                }
+                
+            } catch (error) {
+                console.error('❌ Error creating booking after payment:', error);
+                // Show user-friendly error message
+                showNotification('Payment was successful, but there was an issue saving your booking. Please contact support with booking ID: ' + bookingId, 'error');
+                throw error;
+            }
+        }
+        
+        // **UPDATED: Update seat occupancy using API**
+        async function updateSeatsAfterPayment(bookingId, bookingData) {
+            try {
+                console.log('🪑 Updating seat occupancy for booking:', bookingId);
+                
+                const route = `${bookingData.from_city}-${bookingData.to_city}`;
+                
+                // Mark seats as occupied in database using the API
+                const response = await swiftBusAPI.reserveSeats({
+                    booking_id: bookingId,
+                    bus_company: bookingData.bus_company,
+                    bus_type: bookingData.bus_type,
+                    route: route,
+                    departure_date: bookingData.departure_date,
+                    departure_time: bookingData.departure_time,
+                    seats: bookingData.selected_seats,
+                    permanent: true // Mark as permanently occupied, not temporary reservation
+                });
+                
+                if (response && response.success) {
+                    console.log('✅ Seats marked as occupied in database');
+                } else {
+                    console.error('❌ Failed to update seat occupancy:', response?.message);
+                }
+                
+            } catch (error) {
+                console.error('❌ Error updating seat occupancy:', error);
+            }
+        }
+    </script>
+
+    <script src="js/api.js"></script>
+    <script>
+        // API Integration for this page
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Require user authentication
+            const user = await authManager.requireAuth();
+            if (!user) return;
+
+        });
+
+        // Helper functions for this page
+        function updateUIForUser(user) {
+            if (user) {
+                // Update UI for logged-in user
+                const userElements = document.querySelectorAll('.user-name');
+                userElements.forEach(el => el.textContent = user.name);
+                
+                const loginBtns = document.querySelectorAll('.login-btn');
+                loginBtns.forEach(btn => btn.style.display = 'none');
+                
+                const userMenus = document.querySelectorAll('.user-menu');
+                userMenus.forEach(menu => menu.style.display = 'block');
+            }
+        }
+
+        // Placeholder functions - implement as needed
+        function displayPopularRoutes(routes) {
+            console.log('Popular routes:', routes);
+            // Implement route display logic
+        }
+
+        function populateCityDropdowns(cities) {
+            console.log('Cities:', cities);
+            // Implement city dropdown population
+        }
+
+        function displayUserBookings(bookings) {
+            console.log('User bookings:', bookings);
+            // Implement booking display logic
+        }
+
+        function displayBookingStats(stats) {
+            console.log('Booking stats:', stats);
+            // Implement stats display logic
+        }
+
+        function displayAdminStats(stats) {
+            console.log('Admin stats:', stats);
+            // Implement admin stats display logic
+        }
+
+        function displayAllBookings(bookings) {
+            console.log('All bookings:', bookings);
+            // Implement all bookings display logic
+        }
+
+        function displayBuses(buses) {
+            console.log('Buses:', buses);
+            // Implement buses display logic
+        }
+
+        function displaySchedules(schedules) {
+            console.log('Schedules:', schedules);
+            // Implement schedules display logic
+        }
+        
+        // **REMOVED: localStorage ticket saving - now using database-only approach**
+        // All ticket data is now saved directly to the database via API calls
+        // The my-tickets.html page loads tickets directly from the database
+    </script>
+</body>
+</html>

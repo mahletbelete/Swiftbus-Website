@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug API Response</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .result {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+            border-left: 4px solid #1a73e8;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .warning {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+        pre {
+            background: #f1f3f4;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        button {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background: #0d47a1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debug API Response</h1>
+    <p>This will show exactly what the API is returning (HTML error vs JSON).</p>
+    
+    <button onclick="testAPIResponse()">Test API Response</button>
+    <button onclick="testBookingCreation()">Test Booking Creation</button>
+    <button onclick="checkAuthentication()">Check Authentication</button>
+    
+    <div id="results"></div>
+
+    <script>
+        function addResult(title, message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = `<strong>${title}:</strong><br>${message}`;
+            results.appendChild(div);
+        }
+        
+        async function testAPIResponse() {
+            document.getElementById('results').innerHTML = '';
+            
+            addResult('Testing API Response', 'Making raw API call to see exact response...', 'info');
+            
+            try {
+                const response = await fetch('api/booking_clean.php?action=get_booking_stats', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                addResult('Response Status', `
+                    Status: ${response.status} ${response.statusText}<br>
+                    Content-Type: ${response.headers.get('content-type')}<br>
+                    URL: ${response.url}
+                `, response.ok ? 'success' : 'error');
+                
+                // Get raw response text
+                const rawText = await response.text();
+                
+                addResult('Raw Response', `
+                    Length: ${rawText.length} characters<br>
+                    First 500 characters:<br>
+                    <pre>${rawText.substring(0, 500)}</pre>
+                `, 'info');
+                
+                // Try to parse as JSON
+                try {
+                    const jsonData = JSON.parse(rawText);
+                    addResult('JSON Parse Success', `
+                        <pre>${JSON.stringify(jsonData, null, 2)}</pre>
+                    `, 'success');
+                } catch (jsonError) {
+                    addResult('JSON Parse Failed', `
+                        Error: ${jsonError.message}<br>
+                        This means the API is returning HTML (probably a PHP error) instead of JSON.<br>
+                        <strong>Full Response:</strong><br>
+                        <pre>${rawText}</pre>
+                    `, 'error');
+                }
+                
+            } catch (error) {
+                addResult('Network Error', `
+                    Error: ${error.message}<br>
+                    This means the API file is not accessible.
+                `, 'error');
+            }
+        }
+        
+        async function testBookingCreation() {
+            addResult('Testing Booking Creation', 'Testing the exact API call that fails...', 'info');
+            
+            const testData = {
+                from_city: 'addis-ababa',
+                to_city: 'bahirdar',
+                departure_date: '2025-01-15',
+                departure_time: '08:00',
+                bus_company: 'selam-bus',
+                bus_type: 'premium-ac',
+                passenger_count: 1,
+                selected_seats: [1],
+                passenger_details: {
+                    fullName: 'Test User',
+                    email: 'test@example.com',
+                    phone: '+251911234567',
+                    nationality: 'ethiopian',
+                    idNumber: 'ID123456',
+                    ageGroup: 'adult'
+                },
+                total_amount: 520.00,
+                payment_method: 'telebirr'
+            };
+            
+            try {
+                const response = await fetch('api/booking_clean.php?action=create_booking', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                addResult('Booking API Status', `
+                    Status: ${response.status} ${response.statusText}<br>
+                    Content-Type: ${response.headers.get('content-type')}<br>
+                `, response.ok ? 'success' : 'error');
+                
+                const rawText = await response.text();
+                
+                addResult('Booking API Raw Response', `
+                    Length: ${rawText.length} characters<br>
+                    <pre>${rawText}</pre>
+                `, 'info');
+                
+                try {
+                    const jsonData = JSON.parse(rawText);
+                    addResult('Booking API JSON', `
+                        <pre>${JSON.stringify(jsonData, null, 2)}</pre>
+                    `, jsonData.success ? 'success' : 'error');
+                } catch (jsonError) {
+                    addResult('Booking API JSON Parse Error', `
+                        This is the exact error you're seeing!<br>
+                        Error: ${jsonError.message}<br>
+                        The API is returning HTML instead of JSON, which means there's a PHP error.
+                    `, 'error');
+                }
+                
+            } catch (error) {
+                addResult('Booking API Network Error', error.message, 'error');
+            }
+        }
+        
+        async function checkAuthentication() {
+            addResult('Checking Authentication', 'Testing if user is logged in...', 'info');
+            
+            try {
+                const response = await fetch('api/auth.php?action=check_session', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const rawText = await response.text();
+                
+                addResult('Auth API Raw Response', `
+                    Status: ${response.status}<br>
+                    <pre>${rawText}</pre>
+                `, 'info');
+                
+                try {
+                    const authData = JSON.parse(rawText);
+                    if (authData.success) {
+                        addResult('✅ Authentication Success', `
+                            User: ${authData.data.full_name}<br>
+                            Email: ${authData.data.email}<br>
+                            Role: ${authData.data.role}
+                        `, 'success');
+                    } else {
+                        addResult('❌ Not Authenticated', `
+                            Error: ${authData.message}<br>
+                            <a href="login.html">Please login first</a>
+                        `, 'warning');
+                    }
+                } catch (jsonError) {
+                    addResult('Auth API JSON Error', `
+                        Error: ${jsonError.message}<br>
+                        Auth API is also returning HTML instead of JSON.
+                    `, 'error');
+                }
+                
+            } catch (error) {
+                addResult('Auth API Error', error.message, 'error');
+            }
+        }
+        
+        // Auto-run API response test
+        document.addEventListener('DOMContentLoaded', function() {
+            testAPIResponse();
+        });
+    </script>
+</body>
+</html>

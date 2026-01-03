@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Profile - SwiftBus</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .test-card { background: white; margin: 20px 0; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .success { border-left: 5px solid #28a745; background: #d4edda; }
+        .error { border-left: 5px solid #dc3545; background: #f8d7da; }
+        .info { border-left: 5px solid #17a2b8; background: #d1ecf1; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 12px; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; border: none; border-radius: 5px; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        input { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Admin Profile API Test</h1>
+        
+        <div class="test-card info">
+            <h3>Test Instructions</h3>
+            <p>This page tests the admin profile functionality. Make sure you're logged in as an admin first.</p>
+            <button class="btn-primary" onclick="window.open('admin-profile.html', '_blank')">Open Admin Profile</button>
+        </div>
+        
+        <div class="test-card">
+            <h3>🔐 Authentication Test</h3>
+            <button class="btn-primary" onclick="testAuth()">Test Authentication</button>
+            <div id="authResult"></div>
+        </div>
+        
+        <div class="test-card">
+            <h3>👤 Get Profile Test</h3>
+            <button class="btn-primary" onclick="testGetProfile()">Get Profile Data</button>
+            <div id="profileResult"></div>
+        </div>
+        
+        <div class="test-card">
+            <h3>✏️ Update Profile Test</h3>
+            <div>
+                <input type="text" id="testName" placeholder="Full Name" value="Test Admin User">
+                <input type="email" id="testEmail" placeholder="Email" value="admin@swiftbus.com">
+                <input type="tel" id="testPhone" placeholder="Phone" value="+251 912 345 678">
+                <br>
+                <button class="btn-success" onclick="testUpdateProfile()">Update Profile</button>
+            </div>
+            <div id="updateResult"></div>
+        </div>
+        
+        <div class="test-card">
+            <h3>📋 Activity Log Test</h3>
+            <button class="btn-primary" onclick="testActivityLog()">Get Activity Log</button>
+            <div id="activityResult"></div>
+        </div>
+        
+        <div class="test-card">
+            <h3>🔑 Password Change Test</h3>
+            <div>
+                <input type="password" id="currentPass" placeholder="Current Password">
+                <input type="password" id="newPass" placeholder="New Password">
+                <br>
+                <button class="btn-success" onclick="testChangePassword()">Change Password</button>
+                <p><small>⚠️ Be careful with this test - it will actually change your password!</small></p>
+            </div>
+            <div id="passwordResult"></div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let swiftBusAPI;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof SwiftBusAPI !== 'undefined') {
+                swiftBusAPI = new SwiftBusAPI();
+                console.log('✅ SwiftBusAPI initialized for testing');
+            } else {
+                alert('❌ SwiftBusAPI not available');
+            }
+        });
+        
+        async function testAuth() {
+            const resultDiv = document.getElementById('authResult');
+            resultDiv.innerHTML = '<p>Testing authentication...</p>';
+            
+            try {
+                const response = await swiftBusAPI.checkSession();
+                
+                let resultClass = response.success ? 'success' : 'error';
+                let statusIcon = response.success ? '✅' : '❌';
+                
+                resultDiv.innerHTML = `
+                    <div class="${resultClass}">
+                        <h4>${statusIcon} Authentication Result</h4>
+                        <p><strong>Success:</strong> ${response.success}</p>
+                        <p><strong>Role:</strong> ${response.data?.role || 'N/A'}</p>
+                        <p><strong>Name:</strong> ${response.data?.name || response.data?.full_name || 'N/A'}</p>
+                        <details>
+                            <summary>Full Response</summary>
+                            <pre>${JSON.stringify(response, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><strong>Error:</strong> ${error.message}</div>`;
+            }
+        }
+        
+        async function testGetProfile() {
+            const resultDiv = document.getElementById('profileResult');
+            resultDiv.innerHTML = '<p>Getting profile data...</p>';
+            
+            try {
+                const response = await swiftBusAPI.request('admin_profile.php?action=get_profile');
+                
+                let resultClass = response.success ? 'success' : 'error';
+                let statusIcon = response.success ? '✅' : '❌';
+                
+                resultDiv.innerHTML = `
+                    <div class="${resultClass}">
+                        <h4>${statusIcon} Profile Data Result</h4>
+                        <p><strong>Success:</strong> ${response.success}</p>
+                        ${response.data ? `
+                            <p><strong>Name:</strong> ${response.data.name || response.data.full_name}</p>
+                            <p><strong>Email:</strong> ${response.data.email}</p>
+                            <p><strong>Phone:</strong> ${response.data.phone || 'Not provided'}</p>
+                            <p><strong>Last Login:</strong> ${response.data.last_login || 'Never'}</p>
+                        ` : ''}
+                        <details>
+                            <summary>Full Response</summary>
+                            <pre>${JSON.stringify(response, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><strong>Error:</strong> ${error.message}</div>`;
+            }
+        }
+        
+        async function testUpdateProfile() {
+            const resultDiv = document.getElementById('updateResult');
+            resultDiv.innerHTML = '<p>Updating profile...</p>';
+            
+            try {
+                const updateData = {
+                    full_name: document.getElementById('testName').value,
+                    email: document.getElementById('testEmail').value,
+                    phone: document.getElementById('testPhone').value
+                };
+                
+                const response = await swiftBusAPI.request('admin_profile.php?action=update_profile', {
+                    method: 'POST',
+                    body: JSON.stringify(updateData)
+                });
+                
+                let resultClass = response.success ? 'success' : 'error';
+                let statusIcon = response.success ? '✅' : '❌';
+                
+                resultDiv.innerHTML = `
+                    <div class="${resultClass}">
+                        <h4>${statusIcon} Update Profile Result</h4>
+                        <p><strong>Success:</strong> ${response.success}</p>
+                        <p><strong>Message:</strong> ${response.message}</p>
+                        <details>
+                            <summary>Full Response</summary>
+                            <pre>${JSON.stringify(response, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><strong>Error:</strong> ${error.message}</div>`;
+            }
+        }
+        
+        async function testActivityLog() {
+            const resultDiv = document.getElementById('activityResult');
+            resultDiv.innerHTML = '<p>Getting activity log...</p>';
+            
+            try {
+                const response = await swiftBusAPI.request('admin_profile.php?action=get_activity_log');
+                
+                let resultClass = response.success ? 'success' : 'error';
+                let statusIcon = response.success ? '✅' : '❌';
+                
+                resultDiv.innerHTML = `
+                    <div class="${resultClass}">
+                        <h4>${statusIcon} Activity Log Result</h4>
+                        <p><strong>Success:</strong> ${response.success}</p>
+                        <p><strong>Activities:</strong> ${response.data ? response.data.length : 0}</p>
+                        ${response.data && response.data.length > 0 ? `
+                            <h5>Recent Activities:</h5>
+                            <ul>
+                                ${response.data.slice(0, 3).map(activity => 
+                                    `<li><strong>${activity.action}:</strong> ${activity.description} (${activity.timestamp})</li>`
+                                ).join('')}
+                            </ul>
+                        ` : ''}
+                        <details>
+                            <summary>Full Response</summary>
+                            <pre>${JSON.stringify(response, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><strong>Error:</strong> ${error.message}</div>`;
+            }
+        }
+        
+        async function testChangePassword() {
+            const resultDiv = document.getElementById('passwordResult');
+            
+            const currentPassword = document.getElementById('currentPass').value;
+            const newPassword = document.getElementById('newPass').value;
+            
+            if (!currentPassword || !newPassword) {
+                resultDiv.innerHTML = '<div class="error">Please enter both current and new passwords</div>';
+                return;
+            }
+            
+            if (!confirm('Are you sure you want to change your password? This will actually change it!')) {
+                return;
+            }
+            
+            resultDiv.innerHTML = '<p>Changing password...</p>';
+            
+            try {
+                const response = await swiftBusAPI.request('admin_profile.php?action=change_password', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        current_password: currentPassword,
+                        new_password: newPassword
+                    })
+                });
+                
+                let resultClass = response.success ? 'success' : 'error';
+                let statusIcon = response.success ? '✅' : '❌';
+                
+                resultDiv.innerHTML = `
+                    <div class="${resultClass}">
+                        <h4>${statusIcon} Change Password Result</h4>
+                        <p><strong>Success:</strong> ${response.success}</p>
+                        <p><strong>Message:</strong> ${response.message}</p>
+                        ${response.success ? '<p><strong>⚠️ Password has been changed!</strong></p>' : ''}
+                    </div>
+                `;
+                
+                // Clear password fields
+                document.getElementById('currentPass').value = '';
+                document.getElementById('newPass').value = '';
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><strong>Error:</strong> ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

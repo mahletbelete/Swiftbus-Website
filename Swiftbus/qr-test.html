@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Test - SwiftBus</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 2px solid #1a73e8;
+            border-radius: 10px;
+        }
+        .qr-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        canvas {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 10px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0d47a1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SwiftBus QR Code Test</h1>
+        <p>This page tests QR code generation functionality.</p>
+        
+        <div class="test-section">
+            <h2>Library Status</h2>
+            <div id="libraryStatus" class="status info">Checking QR Code library...</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Simple QR Code Test</h2>
+            <button onclick="generateSimpleQR()">Generate Simple QR</button>
+            <div class="qr-container">
+                <canvas id="simpleQR" width="150" height="150"></canvas>
+            </div>
+            <div id="simpleStatus" class="status info">Click button to generate QR code</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Booking QR Code Test</h2>
+            <button onclick="generateBookingQR()">Generate Booking QR</button>
+            <div class="qr-container">
+                <canvas id="bookingQR" width="150" height="150"></canvas>
+            </div>
+            <div id="bookingStatus" class="status info">Click button to generate booking QR code</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Print Test</h2>
+            <button onclick="testPrintTicket()">Test Print Ticket</button>
+            <div id="printStatus" class="status info">Click button to test print functionality</div>
+        </div>
+    </div>
+
+    <script>
+        // Check library status on load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkLibraryStatus();
+        });
+
+        function checkLibraryStatus() {
+            const statusDiv = document.getElementById('libraryStatus');
+            
+            if (typeof QRCode !== 'undefined') {
+                statusDiv.textContent = '✅ QR Code library loaded successfully';
+                statusDiv.className = 'status success';
+            } else {
+                statusDiv.textContent = '❌ QR Code library failed to load';
+                statusDiv.className = 'status error';
+            }
+        }
+
+        function generateSimpleQR() {
+            const canvas = document.getElementById('simpleQR');
+            const statusDiv = document.getElementById('simpleStatus');
+            const data = 'SwiftBus-Test-' + new Date().getTime();
+            
+            statusDiv.textContent = 'Generating QR code...';
+            statusDiv.className = 'status info';
+            
+            if (typeof QRCode !== 'undefined') {
+                QRCode.toCanvas(canvas, data, {
+                    width: 150,
+                    height: 150,
+                    margin: 2,
+                    color: {
+                        dark: '#1a73e8',
+                        light: '#ffffff'
+                    }
+                }, function(error) {
+                    if (error) {
+                        statusDiv.textContent = '❌ Error: ' + error.message;
+                        statusDiv.className = 'status error';
+                    } else {
+                        statusDiv.textContent = '✅ Simple QR code generated successfully';
+                        statusDiv.className = 'status success';
+                    }
+                });
+            } else {
+                statusDiv.textContent = '❌ QR Code library not available';
+                statusDiv.className = 'status error';
+            }
+        }
+
+        function generateBookingQR() {
+            const canvas = document.getElementById('bookingQR');
+            const statusDiv = document.getElementById('bookingStatus');
+            
+            // Sample booking data
+            const bookingData = 'SwiftBus-BK12345-John Doe-Addis Ababa-Bahirdar-2025-01-15';
+            
+            statusDiv.textContent = 'Generating booking QR code...';
+            statusDiv.className = 'status info';
+            
+            if (typeof QRCode !== 'undefined') {
+                QRCode.toCanvas(canvas, bookingData, {
+                    width: 150,
+                    height: 150,
+                    margin: 2,
+                    color: {
+                        dark: '#1a73e8',
+                        light: '#ffffff'
+                    },
+                    errorCorrectionLevel: 'M'
+                }, function(error) {
+                    if (error) {
+                        statusDiv.textContent = '❌ Error: ' + error.message;
+                        statusDiv.className = 'status error';
+                    } else {
+                        statusDiv.textContent = '✅ Booking QR code generated successfully';
+                        statusDiv.className = 'status success';
+                    }
+                });
+            } else {
+                statusDiv.textContent = '❌ QR Code library not available';
+                statusDiv.className = 'status error';
+            }
+        }
+
+        function testPrintTicket() {
+            const statusDiv = document.getElementById('printStatus');
+            
+            statusDiv.textContent = 'Opening print test window...';
+            statusDiv.className = 'status info';
+            
+            // Sample booking data
+            const booking = {
+                id: 'BK12345',
+                passenger: { name: 'John Doe', phone: '+251 911 234 567', email: 'john@example.com' },
+                route: { from: 'Addis Ababa', to: 'Bahirdar' },
+                travelDate: '2025-01-15',
+                bus: { company: 'Selam Bus', number: '3-4567' },
+                seats: 'A3, A4',
+                amount: 520,
+                paymentStatus: 'paid',
+                bookingDate: '2025-01-10'
+            };
+            
+            const qrData = `SwiftBus-${booking.id}`;
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Test Ticket ${booking.id}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        .ticket { border: 2px solid #1a73e8; padding: 30px; max-width: 600px; margin: 0 auto; }
+                        .qr-section { text-align: center; margin: 20px 0; padding: 20px; background: #f8f9fa; }
+                        .qr-container { display: flex; justify-content: center; align-items: center; min-height: 160px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="ticket">
+                        <h1>SwiftBus Test Ticket</h1>
+                        <p><strong>Booking ID:</strong> ${booking.id}</p>
+                        <p><strong>Passenger:</strong> ${booking.passenger.name}</p>
+                        <p><strong>Route:</strong> ${booking.route.from} → ${booking.route.to}</p>
+                        
+                        <div class="qr-section">
+                            <h3>QR Code Test</h3>
+                            <div class="qr-container">
+                                <img id="qrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrData)}&color=1a73e8&bgcolor=ffffff" 
+                                     style="width: 150px; height: 150px; border: 1px solid #ddd; border-radius: 8px;"
+                                     alt="QR Code for ${booking.id}"
+                                     onload="document.getElementById('qrStatus').textContent='QR code loaded successfully!'; document.getElementById('qrStatus').style.color='green';"
+                                     onerror="document.getElementById('qrStatus').textContent='QR code failed to load'; document.getElementById('qrStatus').style.color='red';">
+                            </div>
+                            <p id="qrStatus">Loading QR code...</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            
+            statusDiv.textContent = '✅ Print test window opened with QR API';
+            statusDiv.className = 'status success';
+        }
+    </script>
+</body>
+</html>

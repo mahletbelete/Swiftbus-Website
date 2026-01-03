@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Tickets API</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; white-space: pre-wrap; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .small-text { font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <h1>Debug Tickets API</h1>
+    
+    <div class="debug-section info">
+        <h3>Instructions</h3>
+        <ol>
+            <li>Make sure you're logged in</li>
+            <li>Make sure you have created at least one booking</li>
+            <li>Click "Test Get User Bookings" to see what the API returns</li>
+            <li>Check the console for detailed logs</li>
+        </ol>
+    </div>
+
+    <div class="debug-section">
+        <h3>API Tests</h3>
+        <button onclick="testGetUserBookings()">Test Get User Bookings</button>
+        <button onclick="testDirectAPI()">Test Direct API Call</button>
+        <button onclick="testAuth()">Test Authentication</button>
+        <button onclick="clearResults()">Clear Results</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script src="js/api.js"></script>
+    <script>
+        function addResult(title, content, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `debug-section ${type}`;
+            
+            let contentStr;
+            if (typeof content === 'object') {
+                contentStr = JSON.stringify(content, null, 2);
+            } else {
+                contentStr = content;
+            }
+            
+            div.innerHTML = `
+                <h3>${title}</h3>
+                <pre>${contentStr}</pre>
+                <div class="small-text">Check browser console for more details</div>
+            `;
+            results.appendChild(div);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function testAuth() {
+            console.log('=== Testing Authentication ===');
+            
+            try {
+                const response = await swiftBusAPI.checkSession();
+                console.log('Auth response:', response);
+                
+                if (response.success && response.data) {
+                    addResult('✅ Authentication Success', {
+                        user: response.data,
+                        message: 'User is authenticated'
+                    }, 'success');
+                } else {
+                    addResult('❌ Authentication Failed', response, 'error');
+                }
+            } catch (error) {
+                addResult('💥 Authentication Error', {
+                    error: error.message,
+                    stack: error.stack
+                }, 'error');
+            }
+        }
+
+        async function testGetUserBookings() {
+            console.log('=== Testing Get User Bookings ===');
+            
+            try {
+                addResult('Test Started', 'Calling swiftBusAPI.getUserBookings()...', 'info');
+                
+                const response = await swiftBusAPI.getUserBookings();
+                console.log('getUserBookings response:', response);
+                
+                if (response.success) {
+                    const bookingsCount = response.data?.bookings?.length || 0;
+                    
+                    addResult('✅ API Call Success', {
+                        success: response.success,
+                        message: response.message,
+                        bookingsFound: bookingsCount,
+                        fullResponse: response
+                    }, 'success');
+                    
+                    if (bookingsCount > 0) {
+                        addResult('📋 Sample Booking Data', {
+                            firstBooking: response.data.bookings[0],
+                            totalBookings: bookingsCount
+                        }, 'info');
+                    } else {
+                        addResult('📭 No Bookings Found', {
+                            message: 'No bookings returned from API',
+                            possibleReasons: [
+                                'User has not created any bookings yet',
+                                'Bookings exist but API query is not finding them',
+                                'Database connection issue'
+                            ]
+                        }, 'error');
+                    }
+                } else {
+                    addResult('❌ API Call Failed', response, 'error');
+                }
+            } catch (error) {
+                addResult('💥 API Error', {
+                    error: error.message,
+                    stack: error.stack
+                }, 'error');
+                console.error('getUserBookings error:', error);
+            }
+        }
+
+        async function testDirectAPI() {
+            console.log('=== Testing Direct API Call ===');
+            
+            try {
+                addResult('Direct API Test Started', 'Making direct fetch to booking_clean.php...', 'info');
+                
+                const response = await fetch('api/booking_clean.php?action=get_user_bookings');
+                const data = await response.json();
+                
+                console.log('Direct API response:', data);
+                
+                if (data.success) {
+                    addResult('✅ Direct API Success', data, 'success');
+                } else {
+                    addResult('❌ Direct API Failed', data, 'error');
+                }
+            } catch (error) {
+                addResult('💥 Direct API Error', {
+                    error: error.message,
+                    stack: error.stack
+                }, 'error');
+                console.error('Direct API error:', error);
+            }
+        }
+
+        // Auto-run auth test on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Debug page loaded');
+            addResult('Page Loaded', 'Debug page ready. Make sure you are logged in and have created bookings.', 'info');
+        });
+    </script>
+</body>
+</html>

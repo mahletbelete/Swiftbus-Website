@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Dashboard API</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+        .info { background: #d1ecf1; border-color: #bee5eb; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Admin Dashboard API Test</h1>
+    
+    <div class="test-section info">
+        <h3>Test Status</h3>
+        <div id="testStatus">Ready to test...</div>
+    </div>
+    
+    <div class="test-section">
+        <h3>API Configuration</h3>
+        <div id="apiConfig"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Authentication Test</h3>
+        <button onclick="testAuth()">Test Authentication</button>
+        <div id="authResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Dashboard Stats Test</h3>
+        <button onclick="testDashboardStats()">Test Dashboard Stats</button>
+        <div id="statsResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Direct API Test</h3>
+        <button onclick="testDirectAPI()">Test Direct API Call</button>
+        <div id="directResult"></div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let swiftBusAPI;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize API
+            if (typeof SwiftBusAPI !== 'undefined') {
+                swiftBusAPI = new SwiftBusAPI();
+                document.getElementById('testStatus').innerHTML = '<span style="color: green;">✅ SwiftBusAPI loaded successfully</span>';
+                
+                // Show API configuration
+                document.getElementById('apiConfig').innerHTML = `
+                    <pre>Base URL: ${swiftBusAPI.baseURL}
+API URL: ${swiftBusAPI.apiURL}
+Current Location: ${window.location.href}</pre>
+                `;
+            } else {
+                document.getElementById('testStatus').innerHTML = '<span style="color: red;">❌ SwiftBusAPI failed to load</span>';
+            }
+        });
+        
+        async function testAuth() {
+            const resultDiv = document.getElementById('authResult');
+            resultDiv.innerHTML = '<p>Testing authentication...</p>';
+            
+            try {
+                const response = await swiftBusAPI.checkSession();
+                resultDiv.innerHTML = `
+                    <div class="${response.success ? 'success' : 'error'}">
+                        <h4>Authentication Result:</h4>
+                        <pre>${JSON.stringify(response, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>Authentication Error:</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+        
+        async function testDashboardStats() {
+            const resultDiv = document.getElementById('statsResult');
+            resultDiv.innerHTML = '<p>Testing dashboard stats...</p>';
+            
+            try {
+                const response = await swiftBusAPI.request('admin_dashboard_fixed.php?action=get_admin_stats');
+                resultDiv.innerHTML = `
+                    <div class="${response.success ? 'success' : 'error'}">
+                        <h4>Dashboard Stats Result:</h4>
+                        <pre>${JSON.stringify(response, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>Dashboard Stats Error:</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+        
+        async function testDirectAPI() {
+            const resultDiv = document.getElementById('directResult');
+            resultDiv.innerHTML = '<p>Testing direct API call...</p>';
+            
+            try {
+                const url = `${swiftBusAPI.apiURL}/admin_dashboard_fixed.php?action=get_admin_stats`;
+                console.log('Direct API URL:', url);
+                
+                const response = await fetch(url, {
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="${data.success ? 'success' : 'error'}">
+                        <h4>Direct API Result:</h4>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <p><strong>URL:</strong> ${url}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>Direct API Error:</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

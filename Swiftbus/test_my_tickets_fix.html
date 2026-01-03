@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test My-Tickets Fix</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .warning { background: #fff3cd; border-color: #ffeaa7; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px; }
+        .ticket-item { background: #f8f9fa; padding: 10px; margin: 5px 0; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>Test My-Tickets Fix</h1>
+    
+    <div class="test-section">
+        <h2>1. Clear All Test Data</h2>
+        <button onclick="clearAllData()">Clear All Data</button>
+        <div id="clearResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Create Multiple Test Tickets</h2>
+        <button onclick="createMultipleTickets()">Create 5 Test Tickets</button>
+        <div id="createResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Test Ticket Loading</h2>
+        <button onclick="testTicketLoading()">Test Loading Logic</button>
+        <div id="loadingResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Test My-Tickets Page</h2>
+        <a href="my-tickets.html" target="_blank" style="display: inline-block; padding: 10px 15px; background: #007bff; color: white; text-decoration: none; border-radius: 4px;">Open My-Tickets Page</a>
+        <p>Open the my-tickets page to see if all tickets display correctly and cancel buttons work.</p>
+    </div>
+
+    <script>
+        // Clear all data
+        function clearAllData() {
+            const keys = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('swiftbus_')) {
+                    keys.push(key);
+                }
+            }
+            
+            keys.forEach(key => localStorage.removeItem(key));
+            
+            document.getElementById('clearResult').innerHTML = `
+                <div class="success">
+                    <h4>✅ All Data Cleared</h4>
+                    <p>Removed ${keys.length} localStorage items</p>
+                </div>
+            `;
+        }
+        
+        // Create multiple test tickets
+        function createMultipleTickets() {
+            const tickets = [];
+            const cities = ['Addis Ababa', 'Bahirdar', 'Dessie', 'Gonder', 'Mekele'];
+            const companies = ['Selam Bus', 'Abay Bus', 'Ethio Bus', 'Habesha Bus'];
+            
+            for (let i = 1; i <= 5; i++) {
+                const bookingId = `SWB-2025-TEST00${i}`;
+                const fromCity = cities[i - 1];
+                const toCity = cities[(i % cities.length)];
+                const company = companies[(i - 1) % companies.length];
+                
+                const ticketData = {
+                    bookingId: bookingId,
+                    booking_id: bookingId,
+                    id: bookingId,
+                    fromCity: fromCity,
+                    toCity: toCity,
+                    from_city: fromCity.toLowerCase().replace(' ', '-'),
+                    to_city: toCity.toLowerCase().replace(' ', '-'),
+                    departureDate: '2025-01-25',
+                    departure_date: '2025-01-25',
+                    departureTime: `0${6 + i}:00`,
+                    departure_time: `0${6 + i}:00`,
+                    busCompany: company,
+                    bus_company: company.toLowerCase().replace(' ', '-'),
+                    busType: 'Premium AC Bus',
+                    bus_type: 'premium-ac',
+                    passengerCount: 1,
+                    passenger_count: 1,
+                    seats: [10 + i],
+                    selected_seats: [10 + i],
+                    totalAmount: 500 + (i * 50),
+                    total_amount: 500 + (i * 50),
+                    paymentMethod: 'Telebirr',
+                    payment_method: 'telebirr',
+                    bookingDate: new Date().toISOString(),
+                    booking_date: new Date().toISOString(),
+                    status: 'confirmed',
+                    booking_status: 'confirmed',
+                    paymentStatus: 'paid',
+                    payment_status: 'paid',
+                    passengerName: `Test Passenger ${i}`,
+                    passengerEmail: `test${i}@example.com`,
+                    passengerPhone: `+25191123456${i}`,
+                    passengerIdNumber: `ID12345678${i}`,
+                    passenger_details: {
+                        fullName: `Test Passenger ${i}`,
+                        email: `test${i}@example.com`,
+                        phone: `+25191123456${i}`,
+                        idNumber: `ID12345678${i}`
+                    },
+                    qrCode: `SwiftBus-${bookingId}`,
+                    specialRequirements: 'None',
+                    special_requirements: 'None'
+                };
+                
+                tickets.push(ticketData);
+                
+                // Save to localStorage in multiple formats (as the app does)
+                localStorage.setItem(`swiftbus_booking_${bookingId}`, JSON.stringify(ticketData));
+            }
+            
+            // Also save as tickets array
+            localStorage.setItem('swiftbus_tickets', JSON.stringify(tickets));
+            
+            // Set the latest as confirmation
+            localStorage.setItem('swiftbus_confirmation', JSON.stringify(tickets[tickets.length - 1]));
+            
+            document.getElementById('createResult').innerHTML = `
+                <div class="success">
+                    <h4>✅ Created ${tickets.length} Test Tickets</h4>
+                    <ul>
+                        ${tickets.map(t => `<li><strong>${t.bookingId}:</strong> ${t.fromCity} → ${t.toCity} (${t.busCompany})</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+        
+        // Test ticket loading logic (simulate the my-tickets.html logic)
+        function testTicketLoading() {
+            const result = document.getElementById('loadingResult');
+            
+            try {
+                const tickets = [];
+                const processedBookingIds = new Set();
+                
+                // Check for confirmation data
+                const confirmationData = localStorage.getItem('swiftbus_confirmation');
+                if (confirmationData) {
+                    const confirmation = JSON.parse(confirmationData);
+                    if (confirmation.bookingId && !processedBookingIds.has(confirmation.bookingId)) {
+                        tickets.push(confirmation);
+                        processedBookingIds.add(confirmation.bookingId);
+                    }
+                }
+                
+                // Check for stored tickets array
+                const storedTickets = localStorage.getItem('swiftbus_tickets');
+                if (storedTickets) {
+                    const parsedTickets = JSON.parse(storedTickets);
+                    if (Array.isArray(parsedTickets)) {
+                        parsedTickets.forEach(ticketData => {
+                            if (ticketData.bookingId && !processedBookingIds.has(ticketData.bookingId)) {
+                                tickets.push(ticketData);
+                                processedBookingIds.add(ticketData.bookingId);
+                            }
+                        });
+                    }
+                }
+                
+                // Check for individual booking confirmations
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('swiftbus_booking_')) {
+                        try {
+                            const bookingData = JSON.parse(localStorage.getItem(key));
+                            if (bookingData.bookingId && !processedBookingIds.has(bookingData.bookingId)) {
+                                tickets.push(bookingData);
+                                processedBookingIds.add(bookingData.bookingId);
+                            }
+                        } catch (e) {
+                            console.warn('Failed to parse booking data:', key);
+                        }
+                    }
+                }
+                
+                result.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Ticket Loading Test Results</h4>
+                        <p><strong>Total Tickets Found:</strong> ${tickets.length}</p>
+                        <p><strong>Unique Booking IDs:</strong> ${processedBookingIds.size}</p>
+                        <h5>Ticket Details:</h5>
+                        ${tickets.map((ticket, index) => `
+                            <div class="ticket-item">
+                                <strong>Ticket ${index + 1}:</strong><br>
+                                <strong>Booking ID:</strong> ${ticket.bookingId}<br>
+                                <strong>Route:</strong> ${ticket.fromCity} → ${ticket.toCity}<br>
+                                <strong>Company:</strong> ${ticket.busCompany}<br>
+                                <strong>Amount:</strong> ETB ${ticket.totalAmount}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Error Testing Ticket Loading</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

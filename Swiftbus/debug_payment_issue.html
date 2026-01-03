@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Payment Issue - SwiftBus</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1a73e8;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-section h3 {
+            color: #333;
+            margin-top: 0;
+        }
+        button {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0d47a1;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            background: #f8f9fa;
+            border-left: 4px solid #1a73e8;
+        }
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+            color: #856404;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Payment Issue Debug Tool</h1>
+        <p>This tool helps debug the payment processing issue where the button gets stuck on "Processing Payment..."</p>
+
+        <!-- Test 1: Check Payment Data -->
+        <div class="test-section">
+            <h3>Test 1: Check Payment Data</h3>
+            <p>Check if payment data exists in localStorage and is properly formatted.</p>
+            <button onclick="checkPaymentData()">Check Payment Data</button>
+            <div id="paymentDataResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Test 2: Simulate Payment Setup -->
+        <div class="test-section">
+            <h3>Test 2: Create Test Payment Data</h3>
+            <p>Create sample payment data to test the payment flow.</p>
+            <button onclick="createTestPaymentData()">Create Test Payment Data</button>
+            <div id="testDataResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Test 3: Test Payment Processing -->
+        <div class="test-section">
+            <h3>Test 3: Test Payment Processing Logic</h3>
+            <p>Test the payment processing logic without the UI.</p>
+            <button onclick="testPaymentProcessing()">Test Payment Processing</button>
+            <div id="processingResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Test 4: Check DOM Elements -->
+        <div class="test-section">
+            <h3>Test 4: Check DOM Elements</h3>
+            <p>Check if all required DOM elements exist on the payment page.</p>
+            <button onclick="checkDOMElements()">Check DOM Elements</button>
+            <div id="domResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Navigation -->
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="payment.html" style="display: inline-block; background: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 5px;">
+                Go to Payment Page
+            </a>
+            <a href="book-ticket.html" style="display: inline-block; background: #17a2b8; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 5px;">
+                Go to Book Ticket
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function checkPaymentData() {
+            const resultDiv = document.getElementById('paymentDataResult');
+            let html = '<h4>Payment Data Check:</h4>';
+            
+            try {
+                // Check payment data
+                const paymentData = localStorage.getItem('swiftbus_payment_data');
+                if (paymentData) {
+                    const parsed = JSON.parse(paymentData);
+                    html += '<div class="success">✅ Payment data found</div>';
+                    html += '<pre>' + JSON.stringify(parsed, null, 2) + '</pre>';
+                } else {
+                    html += '<div class="error">❌ No payment data found in localStorage</div>';
+                }
+                
+                // Check other payment-related data
+                const paymentTotal = localStorage.getItem('payment_total');
+                const paymentMethod = localStorage.getItem('payment_method');
+                
+                html += '<h5>Other Payment Data:</h5>';
+                html += `<p><strong>payment_total:</strong> ${paymentTotal || 'Not found'}</p>`;
+                html += `<p><strong>payment_method:</strong> ${paymentMethod || 'Not found'}</p>`;
+                
+                // Check URL parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                html += '<h5>URL Parameters:</h5>';
+                html += `<p><strong>method:</strong> ${urlParams.get('method') || 'Not found'}</p>`;
+                html += `<p><strong>booking_id:</strong> ${urlParams.get('booking_id') || 'Not found'}</p>`;
+                
+            } catch (error) {
+                html += `<div class="error">❌ Error checking payment data: ${error.message}</div>`;
+            }
+            
+            resultDiv.innerHTML = html;
+            resultDiv.style.display = 'block';
+        }
+
+        function createTestPaymentData() {
+            const resultDiv = document.getElementById('testDataResult');
+            
+            try {
+                const testPaymentData = {
+                    from_city: 'addis-ababa',
+                    to_city: 'bahirdar',
+                    departure_date: '2025-01-15',
+                    departure_time: '08:00',
+                    bus_company: 'selam-bus',
+                    bus_type: 'premium-ac',
+                    passenger_count: 1,
+                    selected_seats: [12],
+                    passenger_details: {
+                        fullName: 'Test User',
+                        email: 'test@example.com',
+                        phone: '+251911234567',
+                        idNumber: 'TEST123'
+                    },
+                    total_amount: 850.00,
+                    special_requirements: 'None'
+                };
+                
+                // Save test data
+                localStorage.setItem('swiftbus_payment_data', JSON.stringify(testPaymentData));
+                localStorage.setItem('payment_total', '850.00');
+                localStorage.setItem('payment_method', 'telebirr');
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        ✅ Test payment data created successfully!
+                        <p>You can now go to the payment page and test the payment flow.</p>
+                        <pre>${JSON.stringify(testPaymentData, null, 2)}</pre>
+                    </div>
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error creating test data: ${error.message}</div>`;
+            }
+            
+            resultDiv.style.display = 'block';
+        }
+
+        function testPaymentProcessing() {
+            const resultDiv = document.getElementById('processingResult');
+            let html = '<h4>Payment Processing Test:</h4>';
+            
+            try {
+                // Get payment data
+                const paymentData = JSON.parse(localStorage.getItem('swiftbus_payment_data') || '{}');
+                const paymentMethod = localStorage.getItem('payment_method') || 'telebirr';
+                
+                if (Object.keys(paymentData).length === 0) {
+                    html += '<div class="error">❌ No payment data found. Create test data first.</div>';
+                    resultDiv.innerHTML = html;
+                    resultDiv.style.display = 'block';
+                    return;
+                }
+                
+                // Simulate payment processing
+                html += '<div class="success">✅ Payment data found</div>';
+                
+                // Generate booking ID
+                const bookingId = 'SWB-' + new Date().getFullYear() + '-' + 
+                    Math.random().toString(36).substr(2, 9).toUpperCase();
+                
+                html += `<p><strong>Generated Booking ID:</strong> ${bookingId}</p>`;
+                
+                // Test helper functions with the actual data
+                html += '<h5>Testing Helper Functions:</h5>';
+                
+                try {
+                    const paymentMethodName = getPaymentMethodName ? getPaymentMethodName(paymentMethod) : 'Function not found';
+                    html += `<p>✅ <strong>Payment Method:</strong> ${paymentMethodName}</p>`;
+                } catch (e) {
+                    html += `<p>❌ <strong>Payment Method Error:</strong> ${e.message}</p>`;
+                }
+                
+                try {
+                    const fromCity = getCityDisplayName ? getCityDisplayName(paymentData.from_city) : 'Function not found';
+                    html += `<p>✅ <strong>From City:</strong> ${fromCity}</p>`;
+                } catch (e) {
+                    html += `<p>❌ <strong>From City Error:</strong> ${e.message}</p>`;
+                }
+                
+                try {
+                    const toCity = getCityDisplayName ? getCityDisplayName(paymentData.to_city) : 'Function not found';
+                    html += `<p>✅ <strong>To City:</strong> ${toCity}</p>`;
+                } catch (e) {
+                    html += `<p>❌ <strong>To City Error:</strong> ${e.message}</p>`;
+                }
+                
+                try {
+                    const formattedDate = formatDate ? formatDate(paymentData.departure_date) : 'Function not found';
+                    html += `<p>✅ <strong>Formatted Date:</strong> ${formattedDate}</p>`;
+                } catch (e) {
+                    html += `<p>❌ <strong>Date Format Error:</strong> ${e.message}</p>`;
+                }
+                
+                try {
+                    const timeDisplay = getTimeDisplayName ? getTimeDisplayName(paymentData.departure_time) : 'Function not found';
+                    html += `<p>✅ <strong>Time Display:</strong> ${timeDisplay}</p>`;
+                } catch (e) {
+                    html += `<p>❌ <strong>Time Display Error:</strong> ${e.message}</p>`;
+                }
+                
+                // Create confirmation data
+                const confirmationData = {
+                    ...paymentData,
+                    bookingId: bookingId,
+                    paymentMethod: paymentMethod,
+                    paymentStatus: 'completed',
+                    bookingDate: new Date().toISOString(),
+                    total: paymentData.total_amount
+                };
+                
+                // Save confirmation
+                localStorage.setItem('swiftbus_confirmation', JSON.stringify(confirmationData));
+                
+                html += '<div class="success">✅ Confirmation data saved</div>';
+                
+                // Test the success overlay HTML generation
+                html += '<h5>Testing Success Overlay HTML:</h5>';
+                try {
+                    const fromCity = paymentData.from_city ? (getCityDisplayName ? getCityDisplayName(paymentData.from_city) : paymentData.from_city) : 'Unknown';
+                    const toCity = paymentData.to_city ? (getCityDisplayName ? getCityDisplayName(paymentData.to_city) : paymentData.to_city) : 'Unknown';
+                    const departureDate = paymentData.departure_date ? (formatDate ? formatDate(paymentData.departure_date) : paymentData.departure_date) : 'Unknown';
+                    const departureTime = paymentData.departure_time ? (getTimeDisplayName ? getTimeDisplayName(paymentData.departure_time) : paymentData.departure_time) : 'Unknown';
+                    const seats = (paymentData.selected_seats && paymentData.selected_seats.length > 0) 
+                        ? paymentData.selected_seats.join(', ') 
+                        : 'Not selected';
+                    const passengerName = (paymentData.passenger_details && paymentData.passenger_details.fullName) 
+                        ? paymentData.passenger_details.fullName 
+                        : 'N/A';
+                    const totalAmount = paymentData.total_amount || '0';
+                    
+                    const testHTML = `
+                        <div style="display: grid; grid-template-columns: 1fr; gap: 5px; text-align: left;">
+                            <p><strong>Booking ID:</strong> <span style="color: var(--primary); font-weight: bold;">${bookingId}</span></p>
+                            <p><strong>Status:</strong> <span style="color: var(--success); font-weight: bold;">Confirmed</span></p>
+                            <p><strong>Route:</strong> ${fromCity} → ${toCity}</p>
+                            <p><strong>Date:</strong> ${departureDate}</p>
+                            <p><strong>Time:</strong> ${departureTime}</p>
+                            <p><strong>Seats:</strong> ${seats}</p>
+                            <p><strong>Passenger:</strong> ${passengerName}</p>
+                            <p><strong>Amount:</strong> <span style="color: var(--primary); font-weight: bold;">ETB ${totalAmount}</span></p>
+                        </div>
+                    `;
+                    
+                    html += '<div class="success">✅ Success overlay HTML generated successfully</div>';
+                    html += '<div style="background: #f0f0f0; padding: 10px; border-radius: 5px; margin: 10px 0;"><strong>Generated HTML:</strong><br>' + testHTML.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
+                    
+                } catch (htmlError) {
+                    html += `<div class="error">❌ Error generating success HTML: ${htmlError.message}</div>`;
+                }
+                
+                // Test ticket saving
+                try {
+                    const ticketData = {
+                        bookingId: bookingId,
+                        booking_id: bookingId,
+                        fromCity: paymentData.from_city ? (getCityDisplayName ? getCityDisplayName(paymentData.from_city) : paymentData.from_city) : 'Unknown',
+                        toCity: paymentData.to_city ? (getCityDisplayName ? getCityDisplayName(paymentData.to_city) : paymentData.to_city) : 'Unknown',
+                        from_city: paymentData.from_city,
+                        to_city: paymentData.to_city,
+                        departureDate: paymentData.departure_date,
+                        departure_date: paymentData.departure_date,
+                        departureTime: paymentData.departure_time,
+                        departure_time: paymentData.departure_time,
+                        busCompany: 'Selam Bus',
+                        bus_company: paymentData.bus_company,
+                        busType: 'Premium AC Bus',
+                        bus_type: paymentData.bus_type,
+                        passengerCount: paymentData.passenger_count || 1,
+                        passenger_count: paymentData.passenger_count || 1,
+                        seats: paymentData.selected_seats || [],
+                        selected_seats: paymentData.selected_seats || [],
+                        totalAmount: parseFloat(paymentData.total_amount) || 0,
+                        total_amount: parseFloat(paymentData.total_amount) || 0,
+                        paymentMethod: paymentMethod,
+                        payment_method: paymentMethod,
+                        bookingDate: new Date().toISOString(),
+                        booking_date: new Date().toISOString(),
+                        status: 'confirmed',
+                        booking_status: 'confirmed',
+                        paymentStatus: 'paid',
+                        payment_status: 'paid',
+                        passengerName: paymentData.passenger_details?.fullName || 'Test User',
+                        passengerEmail: paymentData.passenger_details?.email || 'test@example.com',
+                        passengerPhone: paymentData.passenger_details?.phone || '+251911234567',
+                        passenger_details: paymentData.passenger_details,
+                        qrCode: `SwiftBus-${bookingId}`,
+                        specialRequirements: paymentData.special_requirements || 'None'
+                    };
+                    
+                    // Save ticket to localStorage
+                    localStorage.setItem(`swiftbus_booking_${bookingId}`, JSON.stringify(ticketData));
+                    
+                    // Update tickets array
+                    let tickets = [];
+                    const existingTickets = localStorage.getItem('swiftbus_tickets');
+                    if (existingTickets) {
+                        tickets = JSON.parse(existingTickets);
+                    }
+                    tickets.unshift(ticketData);
+                    localStorage.setItem('swiftbus_tickets', JSON.stringify(tickets));
+                    
+                    html += '<div class="success">✅ Ticket data saved successfully</div>';
+                    
+                } catch (ticketError) {
+                    html += `<div class="error">❌ Error saving ticket: ${ticketError.message}</div>`;
+                }
+                
+                html += '<div class="success">🎉 Payment processing simulation completed successfully!</div>';
+                html += '<p><strong>Next Step:</strong> Go to payment page and test with real form.</p>';
+                
+            } catch (error) {
+                html += `<div class="error">❌ Error in payment processing: ${error.message}</div>`;
+                html += `<div class="error">❌ Error stack: ${error.stack}</div>`;
+            }
+            
+            resultDiv.innerHTML = html;
+            resultDiv.style.display = 'block';
+        }
+
+        function checkDOMElements() {
+            const resultDiv = document.getElementById('domResult');
+            let html = '<h4>DOM Elements Check:</h4>';
+            
+            // List of elements that should exist on payment page
+            const requiredElements = [
+                'confirmPaymentBtn',
+                'paymentSuccessOverlay',
+                'successBookingDetails',
+                'telebirrPhone',
+                'telebirrPin'
+            ];
+            
+            requiredElements.forEach(elementId => {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    html += `<p>✅ <strong>${elementId}:</strong> Found</p>`;
+                } else {
+                    html += `<p>❌ <strong>${elementId}:</strong> Not found</p>`;
+                }
+            });
+            
+            // Check if we're on the payment page
+            if (window.location.pathname.includes('payment.html')) {
+                html += '<div class="success">✅ Currently on payment page</div>';
+            } else {
+                html += '<div class="warning">⚠️ Not on payment page - some elements may not exist</div>';
+            }
+            
+            resultDiv.innerHTML = html;
+            resultDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

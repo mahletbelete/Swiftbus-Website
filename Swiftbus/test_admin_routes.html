@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Routes - SwiftBus</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-title {
+            color: #1a73e8;
+            border-bottom: 2px solid #1a73e8;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .test-result {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .btn {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover { background: #0d47a1; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border: 1px solid #e9ecef;
+        }
+        .route-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .route-header {
+            font-weight: bold;
+            color: #1a73e8;
+            margin-bottom: 10px;
+        }
+        .route-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .detail-item {
+            background: white;
+            padding: 8px;
+            border-radius: 3px;
+            border-left: 3px solid #1a73e8;
+        }
+        .detail-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+        }
+        .detail-value {
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>🛣️ Admin Routes API Test</h1>
+    
+    <div class="test-container">
+        <h2 class="test-title">Authentication Test</h2>
+        <button class="btn" onclick="testAuthentication()">Test Authentication</button>
+        <div id="authResult"></div>
+    </div>
+
+    <div class="test-container">
+        <h2 class="test-title">Routes API Tests</h2>
+        <button class="btn" onclick="testGetRoutes()">Get All Routes</button>
+        <button class="btn" onclick="testGetRoutesWithFilters()">Get Routes with Filters</button>
+        <button class="btn" onclick="testCreateRoute()">Create Sample Route</button>
+        <button class="btn" onclick="testUpdateRoute()">Update Route</button>
+        <button class="btn btn-danger" onclick="testDeleteRoute()">Delete Route</button>
+        <div id="routesResult"></div>
+    </div>
+
+    <div class="test-container">
+        <h2 class="test-title">Routes Display</h2>
+        <div id="routesDisplay"></div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let swiftBusAPI;
+        let testRouteId = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof SwiftBusAPI !== 'undefined') {
+                swiftBusAPI = new SwiftBusAPI();
+                console.log('✅ SwiftBusAPI initialized for testing');
+                showResult('authResult', 'API initialized successfully', 'info');
+            } else {
+                showResult('authResult', 'SwiftBusAPI not available', 'error');
+            }
+        });
+
+        async function testAuthentication() {
+            try {
+                showResult('authResult', 'Testing authentication...', 'info');
+                
+                const response = await swiftBusAPI.checkSession();
+                console.log('Auth response:', response);
+                
+                if (response.success && response.data) {
+                    const userData = response.data;
+                    if (userData.role === 'admin') {
+                        showResult('authResult', 
+                            `✅ Admin authenticated successfully!<br>
+                            Name: ${userData.name || userData.full_name}<br>
+                            Role: ${userData.role}<br>
+                            Email: ${userData.email}`, 'success');
+                    } else {
+                        showResult('authResult', 
+                            `❌ Admin access required. Current role: ${userData.role}`, 'error');
+                    }
+                } else {
+                    showResult('authResult', '❌ Authentication failed: ' + (response.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Auth test error:', error);
+                showResult('authResult', '❌ Authentication test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testGetRoutes() {
+            try {
+                showResult('routesResult', 'Loading all routes...', 'info');
+                
+                const response = await swiftBusAPI.request('admin_routes.php?action=get_routes');
+                console.log('Get routes response:', response);
+                
+                if (response.success && response.data) {
+                    const routes = response.data;
+                    showResult('routesResult', 
+                        `✅ Successfully loaded ${routes.length} routes`, 'success');
+                    
+                    displayRoutes(routes);
+                } else {
+                    showResult('routesResult', '❌ Failed to load routes: ' + (response.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Get routes test error:', error);
+                showResult('routesResult', '❌ Get routes test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testGetRoutesWithFilters() {
+            try {
+                showResult('routesResult', 'Loading routes with filters...', 'info');
+                
+                const response = await swiftBusAPI.request('admin_routes.php?action=get_routes&status=active&search=Addis');
+                console.log('Get filtered routes response:', response);
+                
+                if (response.success && response.data) {
+                    const routes = response.data;
+                    showResult('routesResult', 
+                        `✅ Successfully loaded ${routes.length} filtered routes (active status, search: "Addis")`, 'success');
+                    
+                    displayRoutes(routes);
+                } else {
+                    showResult('routesResult', '❌ Failed to load filtered routes: ' + (response.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Get filtered routes test error:', error);
+                showResult('routesResult', '❌ Get filtered routes test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testCreateRoute() {
+            try {
+                showResult('routesResult', 'Creating test route...', 'info');
+                
+                const routeData = {
+                    name: 'Test Route → Destination',
+                    origin_city: 'Test Origin',
+                    destination_city: 'Test Destination',
+                    distance: 250,
+                    estimated_duration: '4h 30m',
+                    status: 'active',
+                    description: 'Test route created by API test',
+                    fare_base: 200
+                };
+                
+                const response = await swiftBusAPI.request('admin_routes.php', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'create_route',
+                        ...routeData
+                    })
+                });
+                
+                console.log('Create route response:', response);
+                
+                if (response.success && response.data) {
+                    testRouteId = response.data.id;
+                    showResult('routesResult', 
+                        `✅ Successfully created route: ${response.data.id}<br>
+                        Name: ${response.data.name}<br>
+                        Distance: ${response.data.distance} km<br>
+                        Duration: ${response.data.estimated_duration}`, 'success');
+                } else {
+                    showResult('routesResult', '❌ Failed to create route: ' + (response.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Create route test error:', error);
+                showResult('routesResult', '❌ Create route test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testUpdateRoute() {
+            if (!testRouteId) {
+                showResult('routesResult', '❌ No test route available. Create a route first.', 'error');
+                return;
+            }
+            
+            try {
+                showResult('routesResult', 'Updating test route...', 'info');
+                
+                const updateData = {
+                    action: 'update_route',
+                    id: testRouteId,
+                    description: 'Updated test route description',
+                    fare_base: 250,
+                    status: 'active'
+                };
+                
+                const response = await swiftBusAPI.request('admin_routes.php', {
+                    method: 'POST',
+                    body: JSON.stringify(updateData)
+                });
+                
+                console.log('Update route response:', response);
+                
+                if (response.success && response.data) {
+                    showResult('routesResult', 
+                        `✅ Successfully updated route: ${response.data.id}<br>
+                        Description: ${response.data.description}<br>
+                        Fare Base: ${response.data.fare_base} ETB`, 'success');
+                } else {
+                    showResult('routesResult', '❌ Failed to update route: ' + (response.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Update route test error:', error);
+                showResult('routesResult', '❌ Update route test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testDeleteRoute() {
+            if (!testRouteId) {
+                showResult('routesResult', '❌ No test route available. Create a route first.', 'error');
+                return;
+            }
+            
+            if (!confirm(`Are you sure you want to delete test route ${testRouteId}?`)) {
+                return;
+            }
+            
+            try {
+                showResult('routesResult', 'Deleting test route...', 'info');
+                
+                const response = await swiftBusAPI.request('admin_routes.php', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'delete_route',
+                        id: testRouteId
+                    })
+                });
+                
+                console.log('Delete route response:', response);
+                
+                if (response.success) {
+                    showResult('routesResult', 
+                        `✅ Successfully deleted route: ${testRouteId}`, 'success');
+                    testRouteId = null;
+                } else {
+                    showResult('routesResult', '❌ Failed to delete route: ' + (response.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Delete route test error:', error);
+                showResult('routesResult', '❌ Delete route test failed: ' + error.message, 'error');
+            }
+        }
+
+        function displayRoutes(routes) {
+            const container = document.getElementById('routesDisplay');
+            
+            if (!routes || routes.length === 0) {
+                container.innerHTML = '<div class="info">No routes to display</div>';
+                return;
+            }
+            
+            let html = `<h3>📊 Routes Data (${routes.length} routes)</h3>`;
+            
+            routes.forEach(route => {
+                html += `
+                    <div class="route-item">
+                        <div class="route-header">
+                            ${route.id} - ${route.name}
+                            <span style="float: right; background: ${route.status === 'active' ? '#28a745' : '#dc3545'}; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px;">
+                                ${route.status.toUpperCase()}
+                            </span>
+                        </div>
+                        <div class="route-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Origin</div>
+                                <div class="detail-value">${route.origin_city}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Destination</div>
+                                <div class="detail-value">${route.destination_city}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Distance</div>
+                                <div class="detail-value">${route.distance} km</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Duration</div>
+                                <div class="detail-value">${route.estimated_duration}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Assigned Buses</div>
+                                <div class="detail-value">${route.assigned_buses || 0}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Schedules</div>
+                                <div class="detail-value">${route.assigned_schedules || 0}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Fare Base</div>
+                                <div class="detail-value">${route.fare_base || 0} ETB</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Created</div>
+                                <div class="detail-value">${new Date(route.created_at).toLocaleDateString()}</div>
+                            </div>
+                        </div>
+                        ${route.description ? `<div style="margin-top: 10px; font-style: italic; color: #666;">${route.description}</div>` : ''}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function showResult(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `<div class="test-result ${type}">${message}</div>`;
+        }
+    </script>
+</body>
+</html>

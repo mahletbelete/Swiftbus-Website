@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Auth System Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .step { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .result { margin-top: 10px; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Final Authentication System Test</h1>
+    <p>This test will verify that the redirect loop issue is fixed.</p>
+    
+    <div class="step">
+        <h3>Step 1: Clear All Data & Login</h3>
+        <button onclick="testCompleteAuthFlow()">Test Complete Auth Flow</button>
+        <div id="authFlowResult"></div>
+    </div>
+    
+    <div class="step">
+        <h3>Step 2: Test Admin Page Access</h3>
+        <button onclick="testAdminPageAccess()">Test Admin Page Access</button>
+        <div id="adminAccessResult"></div>
+    </div>
+    
+    <div class="step">
+        <h3>Step 3: Test Real Navigation</h3>
+        <p>If the tests above pass, these links should work without redirect loops:</p>
+        <a href="admin-dashboard.html" target="_blank" style="margin: 5px; padding: 10px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;">Admin Dashboard</a>
+        <a href="admin-profile.html" target="_blank" style="margin: 5px; padding: 10px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;">Admin Profile</a>
+        <a href="admin-buses-list.html" target="_blank" style="margin: 5px; padding: 10px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;">Admin Buses</a>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        async function testCompleteAuthFlow() {
+            const container = document.getElementById('authFlowResult');
+            container.innerHTML = '<div class="warning">🔄 Testing complete authentication flow...</div>';
+            
+            try {
+                // Step 1: Clear everything
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                // Step 2: Login
+                const loginResponse = await swiftBusAPI.login({
+                    email: 'mubarekali974@gmail.com',
+                    password: 'Admin@123'
+                });
+                
+                if (!loginResponse.success) {
+                    container.innerHTML = `<div class="result error">❌ Login Failed: ${loginResponse.message}</div>`;
+                    return;
+                }
+                
+                // Step 3: Immediate session check
+                const sessionResponse = await swiftBusAPI.checkSession();
+                
+                if (!sessionResponse.success || sessionResponse.data.role !== 'admin') {
+                    container.innerHTML = `
+                        <div class="result error">
+                            ❌ Session Check Failed<br>
+                            Login: ✅ ${loginResponse.message}<br>
+                            Session: ❌ ${sessionResponse.message}<br>
+                            <strong>This would cause redirect loops!</strong>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Step 4: Test authManager
+                const adminUser = await authManager.checkAuth();
+                
+                if (!adminUser || adminUser.role !== 'admin') {
+                    container.innerHTML = `
+                        <div class="result error">
+                            ❌ AuthManager Check Failed<br>
+                            Login: ✅<br>
+                            Session: ✅<br>
+                            AuthManager: ❌ ${adminUser ? adminUser.role : 'null'}<br>
+                            <strong>This would cause redirect loops!</strong>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = `
+                    <div class="result success">
+                        ✅ Complete Auth Flow: SUCCESS<br>
+                        User: ${adminUser.name}<br>
+                        Role: ${adminUser.role}<br>
+                        <strong>No redirect loops should occur!</strong>
+                    </div>
+                `;
+                
+            } catch (error) {
+                container.innerHTML = `<div class="result error">❌ Auth Flow Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function testAdminPageAccess() {
+            const container = document.getElementById('adminAccessResult');
+            container.innerHTML = '<div class="warning">🔄 Testing admin page access simulation...</div>';
+            
+            try {
+                // This simulates what happens when an admin page loads
+                const user = await authManager.requireAdmin();
+                
+                if (user && user.role === 'admin') {
+                    container.innerHTML = `
+                        <div class="result success">
+                            ✅ Admin Page Access: SUCCESS<br>
+                            User: ${user.name}<br>
+                            Role: ${user.role}<br>
+                            <strong>Admin pages should load without redirect!</strong>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div class="result error">
+                            ❌ Admin Page Access: FAILED<br>
+                            authManager.requireAdmin() returned: ${user ? user.role : 'null'}<br>
+                            <strong>This would cause redirect to login!</strong>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                container.innerHTML = `<div class="result error">❌ Admin Access Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Auto-start the test
+        setTimeout(() => {
+            testCompleteAuthFlow();
+        }, 1000);
+    </script>
+</body>
+</html>

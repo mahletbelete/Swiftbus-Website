@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Complete Booking Flow - SwiftBus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border-color: #bee5eb; }
+        .warning { background: #fff3cd; color: #856404; border-color: #ffeaa7; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; font-size: 12px; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .step { margin: 10px 0; padding: 10px; background: #f8f9fa; border-left: 4px solid #007bff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Test Complete Booking Flow</h1>
+        <p>This tests the complete booking flow: book-ticket.html → payment.html → my-tickets.html</p>
+
+        <!-- Step 1: Authentication -->
+        <div class="section">
+            <h3>🔐 Step 1: Authentication Check</h3>
+            <button onclick="testAuth()">Check Authentication</button>
+            <div id="authResult"></div>
+        </div>
+
+        <!-- Step 2: Simulate Book Ticket -->
+        <div class="section">
+            <h3>📝 Step 2: Simulate Book Ticket Process</h3>
+            <p>This simulates what book-ticket.html does (store data in localStorage)</p>
+            <button onclick="simulateBookTicket()">Simulate Book Ticket</button>
+            <div id="bookResult"></div>
+        </div>
+
+        <!-- Step 3: Simulate Payment -->
+        <div class="section">
+            <h3>💳 Step 3: Simulate Payment Process</h3>
+            <p>This simulates what payment.html does (create booking in database)</p>
+            <button onclick="simulatePayment()">Simulate Payment</button>
+            <div id="paymentResult"></div>
+        </div>
+
+        <!-- Step 4: Test My Tickets -->
+        <div class="section">
+            <h3>🎫 Step 4: Test My Tickets Loading</h3>
+            <p>This tests if my-tickets.html can load the created booking</p>
+            <button onclick="testMyTickets()">Test My Tickets</button>
+            <div id="ticketsResult"></div>
+        </div>
+
+        <!-- Step 5: Check Database -->
+        <div class="section">
+            <h3>🗄️ Step 5: Check Database</h3>
+            <p>Direct database check to see if booking was created</p>
+            <button onclick="checkDatabase()">Check Database</button>
+            <div id="dbResult"></div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let testBookingId = null;
+
+        // Step 1: Test Authentication
+        async function testAuth() {
+            const resultDiv = document.getElementById('authResult');
+            resultDiv.innerHTML = '<div class="info">Checking authentication...</div>';
+            
+            try {
+                const response = await swiftBusAPI.checkSession();
+                
+                if (response && response.success && response.data) {
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Authentication successful!
+User: ${response.data.name || response.data.full_name}
+Email: ${response.data.email}
+User ID: ${response.data.user_id}</div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">❌ Authentication failed!
+Please <a href="login.html">login</a> first.</div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">❌ Authentication error: ${error.message}</div>
+                `;
+            }
+        }
+
+        // Step 2: Simulate Book Ticket
+        function simulateBookTicket() {
+            const resultDiv = document.getElementById('bookResult');
+            resultDiv.innerHTML = '<div class="info">Simulating book ticket process...</div>';
+            
+            try {
+                // Generate temporary booking ID (same as book-ticket.html)
+                const tempBookingId = 'TEMP-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+                testBookingId = tempBookingId;
+                
+                // Create payment data (same structure as book-ticket.html)
+                const paymentData = {
+                    booking_id: tempBookingId,
+                    total_amount: 520,
+                    payment_method: 'telebirr',
+                    from_city: 'addis-ababa',
+                    to_city: 'kombolcha',
+                    departure_date: '2025-01-15',
+                    departure_time: '08:00',
+                    bus_company: 'selam-bus',
+                    bus_type: 'premium-ac',
+                    passenger_count: 1,
+                    selected_seats: ['A1'],
+                    passenger_details: {
+                        fullName: 'Test User',
+                        email: 'test@example.com',
+                        phone: '+251911234567',
+                        idNumber: 'TEST123456'
+                    },
+                    special_requirements: 'Test booking for flow verification'
+                };
+                
+                // Store in localStorage (same as book-ticket.html)
+                localStorage.setItem('swiftbus_payment_data', JSON.stringify(paymentData));
+                
+                resultDiv.innerHTML = `
+                    <div class="success">✅ Book ticket simulation successful!
+Temporary Booking ID: ${tempBookingId}
+Data stored in localStorage: swiftbus_payment_data
+
+Payment Data:
+${JSON.stringify(paymentData, null, 2)}</div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">❌ Book ticket simulation error: ${error.message}</div>
+                `;
+            }
+        }
+
+        // Step 3: Simulate Payment
+        async function simulatePayment() {
+            const resultDiv = document.getElementById('paymentResult');
+            resultDiv.innerHTML = '<div class="info">Simulating payment process...</div>';
+            
+            try {
+                // Get payment data from localStorage (same as payment.html)
+                const paymentData = JSON.parse(localStorage.getItem('swiftbus_payment_data') || '{}');
+                
+                if (!paymentData || Object.keys(paymentData).length === 0) {
+                    throw new Error('No payment data found. Run book ticket simulation first.');
+                }
+                
+                // Generate final booking ID (same as payment.html)
+                const finalBookingId = 'SWB-' + new Date().getFullYear() + '-' + 
+                    Math.random().toString(36).substr(2, 9).toUpperCase();
+                
+                testBookingId = finalBookingId;
+                
+                // Create booking in database (same as payment.html)
+                const response = await swiftBusAPI.createBooking({
+                    from_city: paymentData.from_city,
+                    to_city: paymentData.to_city,
+                    departure_date: paymentData.departure_date,
+                    departure_time: paymentData.departure_time,
+                    bus_company: paymentData.bus_company,
+                    bus_type: paymentData.bus_type,
+                    passenger_count: paymentData.passenger_count,
+                    selected_seats: paymentData.selected_seats,
+                    passenger_details: paymentData.passenger_details,
+                    total_amount: paymentData.total_amount,
+                    payment_method: paymentData.payment_method,
+                    special_requirements: paymentData.special_requirements || ''
+                });
+                
+                if (response && response.success) {
+                    const actualBookingId = response.data.booking_id;
+                    testBookingId = actualBookingId;
+                    
+                    // Update payment status (same as payment.html)
+                    const updateResponse = await swiftBusAPI.request('booking_clean.php?action=update_booking', {
+                        method: 'PUT',
+                        body: JSON.stringify({
+                            booking_id: actualBookingId,
+                            payment_status: 'paid',
+                            payment_method: paymentData.payment_method
+                        })
+                    });
+                    
+                    // Clear payment data (same as payment.html)
+                    localStorage.removeItem('swiftbus_payment_data');
+                    
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Payment simulation successful!
+Final Booking ID: ${actualBookingId}
+Database booking created: ${response.success}
+Payment status updated: ${updateResponse?.success}
+
+Booking Response:
+${JSON.stringify(response.data, null, 2)}</div>
+                    `;
+                } else {
+                    throw new Error('Failed to create booking: ' + (response?.message || 'Unknown error'));
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">❌ Payment simulation error: ${error.message}
+Stack: ${error.stack}</div>
+                `;
+            }
+        }
+
+        // Step 4: Test My Tickets
+        async function testMyTickets() {
+            const resultDiv = document.getElementById('ticketsResult');
+            resultDiv.innerHTML = '<div class="info">Testing my tickets loading...</div>';
+            
+            try {
+                // Load tickets (same as my-tickets.html)
+                const response = await swiftBusAPI.getUserBookings();
+                
+                if (response && response.success && response.data && response.data.bookings) {
+                    const bookings = response.data.bookings;
+                    
+                    // Find our test booking
+                    const testBooking = bookings.find(b => b.booking_id === testBookingId);
+                    
+                    let html = `<div class="success">✅ My tickets loading successful!
+Found ${bookings.length} total bookings</div>`;
+                    
+                    if (testBooking) {
+                        html += `
+                            <div class="success">✅ Test booking found in results!
+Booking ID: ${testBooking.booking_id}
+Status: ${testBooking.booking_status}
+Payment Status: ${testBooking.payment_status}
+Route: ${testBooking.from_city} → ${testBooking.to_city}
+Amount: ETB ${testBooking.total_amount}</div>
+                        `;
+                    } else {
+                        html += `
+                            <div class="warning">⚠️ Test booking not found in results
+Looking for: ${testBookingId}
+Available bookings: ${bookings.map(b => b.booking_id).join(', ')}</div>
+                        `;
+                    }
+                    
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">❌ My tickets loading failed!
+Response: ${JSON.stringify(response, null, 2)}</div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">❌ My tickets test error: ${error.message}</div>
+                `;
+            }
+        }
+
+        // Step 5: Check Database
+        async function checkDatabase() {
+            const resultDiv = document.getElementById('dbResult');
+            resultDiv.innerHTML = '<div class="info">Checking database...</div>';
+            
+            try {
+                const response = await fetch('check_database_tickets.php');
+                const html = await response.text();
+                
+                // Create iframe to show the database check results
+                const iframe = document.createElement('iframe');
+                iframe.style.width = '100%';
+                iframe.style.height = '400px';
+                iframe.style.border = '1px solid #ddd';
+                iframe.style.borderRadius = '5px';
+                iframe.srcdoc = html;
+                
+                resultDiv.innerHTML = '<div class="info">Database check results:</div>';
+                resultDiv.appendChild(iframe);
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">❌ Database check error: ${error.message}</div>
+                `;
+            }
+        }
+
+        // Auto-run authentication test
+        document.addEventListener('DOMContentLoaded', function() {
+            testAuth();
+        });
+    </script>
+</body>
+</html>

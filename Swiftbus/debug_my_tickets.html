@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug My Tickets</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .result {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #007cba;
+            background: #f0f8ff;
+        }
+        .success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .warning {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debug My Tickets</h1>
+    <p>This will test the getUserBookings API and show why tickets aren't appearing.</p>
+    
+    <button onclick="checkAuth()">Check Authentication</button>
+    <button onclick="testGetUserBookings()">Test Get User Bookings</button>
+    <button onclick="checkDatabase()">Check Database Directly</button>
+    
+    <div id="results"></div>
+
+    <script src="js/api.js"></script>
+    <script>
+        function addResult(title, message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = `<strong>${title}:</strong><br>${message}`;
+            results.appendChild(div);
+        }
+        
+        async function checkAuth() {
+            document.getElementById('results').innerHTML = '';
+            
+            addResult('Checking Authentication', 'Testing if user is logged in...', 'info');
+            
+            try {
+                const response = await swiftBusAPI.checkSession();
+                
+                if (response.success) {
+                    addResult('✅ Authentication Success', `
+                        User: ${response.data.full_name}<br>
+                        Email: ${response.data.email}<br>
+                        Role: ${response.data.role}<br>
+                        User ID: ${response.data.user_id}
+                    `, 'success');
+                    
+                    // Store user info for later use
+                    window.currentUser = response.data;
+                } else {
+                    addResult('❌ Authentication Failed', `
+                        Error: ${response.message}<br>
+                        <strong>You need to login first!</strong><br>
+                        <a href="login.html">Go to Login Page</a>
+                    `, 'error');
+                }
+            } catch (error) {
+                addResult('❌ Authentication Error', `
+                    Network Error: ${error.message}
+                `, 'error');
+            }
+        }
+        
+        async function testGetUserBookings() {
+            addResult('Testing getUserBookings API', 'Calling the exact same API as my-tickets.html...', 'info');
+            
+            try {
+                const response = await swiftBusAPI.getUserBookings();
+                
+                addResult('Raw API Response', `
+                    <pre>${JSON.stringify(response, null, 2)}</pre>
+                `, 'info');
+                
+                if (response.success) {
+                    if (response.data && response.data.bookings && response.data.bookings.length > 0) {
+                        addResult('✅ Bookings Found', `
+                            Found ${response.data.bookings.length} booking(s)<br>
+                            Total in database: ${response.data.total}
+                        `, 'success');
+                        
+                        // Process each booking like my-tickets.html does
+                        response.data.bookings.forEach((booking, index) => {
+                            addResult(`Booking ${index + 1}`, `
+                                <strong>Booking ID:</strong> ${booking.booking_id}<br>
+                                <strong>Route:</strong> ${booking.from_city_display || booking.from_city} → ${booking.to_city_display || booking.to_city}<br>
+                                <strong>Date:</strong> ${booking.departure_date || booking.travel_date}<br>
+                                <strong>Time:</strong> ${booking.departure_time}<br>
+                                <strong>Company:</strong> ${booking.company_name || booking.bus_company_display || booking.bus_company}<br>
+                                <strong>Status:</strong> ${booking.booking_status}<br>
+                                <strong>Payment:</strong> ${booking.payment_status}<br>
+                                <strong>Amount:</strong> ${booking.total_amount}<br>
+                                <br>
+                                <strong>Raw Data:</strong><br>
+                                <pre>${JSON.stringify(booking, null, 2)}</pre>
+                            `, 'success');
+                        });
+                        
+                    } else {
+                        addResult('⚠️ No Bookings Found', `
+                            API returned success but no bookings found.<br>
+                            Response structure: <pre>${JSON.stringify(response.data, null, 2)}</pre>
+                        `, 'warning');
+                    }
+                } else {
+                    addResult('❌ API Error', `
+                        Error: ${response.message}<br>
+                        Full response: <pre>${JSON.stringify(response, null, 2)}</pre>
+                    `, 'error');
+                }
+            } catch (error) {
+                addResult('❌ Network Error', `
+                    Error: ${error.message}
+                `, 'error');
+            }
+        }
+        
+        async function checkDatabase() {
+            addResult('Checking Database Directly', 'Testing direct database query...', 'info');
+            
+            try {
+                // Test direct API call to see raw database data
+                const response = await fetch('api/booking_clean.php?action=get_user_bookings');
+                const data = await response.json();
+                
+                addResult('Direct Database Query', `
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `, data.success ? 'success' : 'error');
+                
+                if (data.success && data.data && data.data.bookings) {
+                    addResult('Database Analysis', `
+                        <strong>Total bookings:</strong> ${data.data.bookings.length}<br>
+                        <strong>User filter applied:</strong> Yes (only shows current user's bookings)<br>
+                        <strong>Data structure:</strong> Simplified (from booking_clean.php)
+                    `, 'info');
+                } else {
+                    addResult('Database Issue', `
+                        No bookings returned from database.<br>
+                        Possible causes:<br>
+                        1. No bookings exist for current user<br>
+                        2. User ID mismatch<br>
+                        3. Database connection issue<br>
+                        4. API endpoint issue
+                    `, 'warning');
+                }
+                
+            } catch (error) {
+                addResult('❌ Database Query Error', `
+                    Error: ${error.message}
+                `, 'error');
+            }
+        }
+        
+        // Auto-run authentication check
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+        });
+    </script>
+</body>
+</html>

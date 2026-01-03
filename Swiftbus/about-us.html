@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - SwiftBus | Premium Ethiopian Bus Travel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --secondary: #ff6d00;
+            --dark: #222;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --chat-user: #e3f2fd;
+            --chat-bot: #f5f5f5;
+            --accent: #00c6ff;
+            --ethiopia-green: #078930;
+            --ethiopia-yellow: #fcdd09;
+            --ethiopia-red: #da121a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Back Button */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateX(-5px);
+            box-shadow: 0 6px 20px rgba(26, 115, 232, 0.3);
+        }
+
+        /* Page Hero */
+        .page-hero {
+            background: linear-gradient(135deg, 
+                rgba(26, 115, 232, 0.85) 0%, 
+                rgba(7, 137, 48, 0.8) 50%, 
+                rgba(255, 109, 0, 0.85) 100%);
+            color: white;
+            padding: 120px 0 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 1s ease;
+        }
+
+        .page-hero p {
+            font-size: 1.3rem;
+            max-width: 700px;
+            margin: 0 auto 40px;
+            opacity: 0.9;
+            animation: fadeInUp 1s ease 0.2s forwards;
+            opacity: 0;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* About Content */
+        .about-content {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-title h2 {
+            font-size: 36px;
+            color: var(--dark);
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--secondary);
+            border-radius: 2px;
+        }
+
+        .section-title p {
+            color: var(--gray);
+            max-width: 600px;
+            margin: 0 auto;
+            font-size: 18px;
+        }
+
+        .story-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+            margin-bottom: 60px;
+        }
+
+        .story-image {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .story-image img {
+            width: 100%;
+            height: auto;
+            transition: transform 0.5s ease;
+        }
+
+        .story-image:hover img {
+            transform: scale(1.05);
+        }
+
+        .story-text h3 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .story-text p {
+            color: var(--gray);
+            margin-bottom: 20px;
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        /* Mission & Vision */
+        .mission-vision {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 80px 0;
+        }
+
+        .mv-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 50px;
+        }
+
+        .mv-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: transform 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mv-card:hover {
+            transform: translateY(-15px);
+        }
+
+        .mv-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--secondary);
+        }
+
+        .mv-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            font-size: 32px;
+        }
+
+        .mv-card h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        /* Values Section */
+        .values-section {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .value-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s ease;
+            border: 2px solid transparent;
+        }
+
+        .value-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .value-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 24px;
+        }
+
+        .value-card h4 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        /* Team Section */
+        .team-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #0d2b4e 0%, #1a365d 50%, #2d3748 100%);
+            color: white;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .team-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .team-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .team-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .team-info {
+            padding: 25px;
+        }
+
+        .team-info h4 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .team-info p {
+            color: #bbb;
+            margin-bottom: 15px;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 30px;
+            background: var(--light);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-10px);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: block;
+            margin-bottom: 10px;
+            transition: color 0.3s ease;
+        }
+
+        .stat-card:hover .stat-number {
+            color: white;
+        }
+
+        /* Navigation Footer */
+        .nav-footer {
+            background: var(--dark);
+            color: white;
+            padding: 40px 0 20px;
+            margin-top: 60px;
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+
+        .nav-column h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .nav-column h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--secondary);
+            border-radius: 2px;
+        }
+
+        .nav-links {
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-bottom: 12px;
+        }
+
+        .nav-links a {
+            color: #bbb;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: block;
+            padding: 5px 0;
+        }
+
+        .nav-links a:hover {
+            color: white;
+            padding-left: 5px;
+        }
+
+        .nav-links a.active {
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #bbb;
+            font-size: 14px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .story-section {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .page-hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .page-hero p {
+                font-size: 1.1rem;
+            }
+            
+            .section-title h2 {
+                font-size: 28px;
+            }
+            
+            .mv-card, .value-card, .team-card, .stat-card {
+                padding: 25px;
+            }
+            
+            .nav-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 30px;
+            }
+            
+            .back-btn {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-hero h1 {
+                font-size: 2rem;
+            }
+            
+            .page-hero {
+                padding: 100px 0 40px;
+            }
+            
+            .story-section {
+                gap: 20px;
+            }
+            
+            .story-text h3 {
+                font-size: 24px;
+            }
+            
+            .nav-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Back Button -->
+    <div class="back-button">
+        <a href="index.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Back to Home
+        </a>
+    </div>
+
+    <!-- Page Hero -->
+    <section class="page-hero">
+        <div class="container">
+            <h1>About SwiftBus</h1>
+            <p>Transforming bus travel across Ethiopia with innovation, comfort, and reliability</p>
+        </div>
+    </section>
+
+    <!-- Our Story -->
+    <section class="about-content">
+        <div class="container">
+            <div class="story-section">
+                <div class="story-image">
+                    <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="SwiftBus Story">
+                </div>
+                <div class="story-text">
+                    <h3>Our Journey</h3>
+                    <p>Founded in 2020, SwiftBus emerged from a simple idea: to make bus travel across Ethiopia more accessible, reliable, and comfortable. Our founders, experienced travelers and tech enthusiasts, recognized the challenges faced by millions of Ethiopians who rely on bus transportation.</p>
+                    <p>What started as a small startup in Addis Ababa has now grown into Ethiopia's leading bus booking platform, connecting over 50 destinations across the country. We've partnered with 15+ trusted bus companies to bring you the best travel experience.</p>
+                    <p>Today, SwiftBus is more than just a booking platform – we're a travel community committed to enhancing your journey every step of the way.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mission & Vision -->
+    <section class="mission-vision">
+        <div class="container">
+            <div class="section-title">
+                <h2>Our Mission & Vision</h2>
+                <p>Driving Ethiopia forward through innovative transportation solutions</p>
+            </div>
+            <div class="mv-grid">
+                <div class="mv-card">
+                    <div class="mv-icon">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <h3>Our Mission</h3>
+                    <p>To revolutionize bus travel in Ethiopia by providing a seamless, safe, and affordable booking experience that connects communities and empowers travelers.</p>
+                </div>
+                <div class="mv-card">
+                    <div class="mv-icon">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <h3>Our Vision</h3>
+                    <p>To become the most trusted and innovative transportation platform in East Africa, making long-distance travel convenient for everyone.</p>
+                </div>
+                <div class="mv-card">
+                    <div class="mv-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3>Our Promise</h3>
+                    <p>To deliver exceptional service, maintain transparency in pricing, and ensure customer satisfaction at every stage of your journey.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Values -->
+    <section class="values-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Our Core Values</h2>
+                <p>The principles that guide everything we do</p>
+            </div>
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h4>Customer First</h4>
+                    <p>Our customers are at the heart of every decision we make. We listen, adapt, and innovate based on your needs.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h4>Safety & Security</h4>
+                    <p>Your safety is our top priority. We partner only with certified operators and maintain strict safety standards.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h4>Innovation</h4>
+                    <p>We constantly evolve our technology to provide you with the best booking experience and travel solutions.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-hand-holding-heart"></i>
+                    </div>
+                    <h4>Integrity</h4>
+                    <p>We believe in transparency, honesty, and ethical practices in all our business dealings.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="team-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Meet Our Leadership</h2>
+                <p>The passionate team behind SwiftBus</p>
+            </div>
+            <div class="team-grid">
+                <div class="team-card">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="CEO" class="team-img">
+                    <div class="team-info">
+                        <h4>Samuel Bekele</h4>
+                        <p>CEO & Founder</p>
+                        <p>10+ years in transportation tech</p>
+                    </div>
+                </div>
+                <div class="team-card">
+                    <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="CTO" class="team-img">
+                    <div class="team-info">
+                        <h4>Meron Tekle</h4>
+                        <p>Chief Technology Officer</p>
+                        <p>Former Google engineer</p>
+                    </div>
+                </div>
+                <div class="team-card">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="COO" class="team-img">
+                    <div class="team-info">
+                        <h4>Kebede Alemu</h4>
+                        <p>Chief Operations Officer</p>
+                        <p>Transportation industry veteran</p>
+                    </div>
+                </div>
+                <div class="team-card">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="CMO" class="team-img">
+                    <div class="team-info">
+                        <h4>Hana Solomon</h4>
+                        <p>Chief Marketing Officer</p>
+                        <p>Digital marketing expert</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>By The Numbers</h2>
+                <p>Our impact across Ethiopia</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-number">50+</span>
+                    <h4>Destinations</h4>
+                    <p>Connected across Ethiopia</p>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">100k+</span>
+                    <h4>Happy Travelers</h4>
+                    <p>Served since 2020</p>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">15+</span>
+                    <h4>Bus Partners</h4>
+                    <p>Trusted companies</p>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">99%</span>
+                    <h4>Satisfaction Rate</h4>
+                    <p>Based on customer reviews</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Navigation Footer -->
+    <footer class="nav-footer">
+        <div class="container">
+            <div class="nav-grid">
+                <div class="nav-column">
+                    <h3>SwiftBus Pages</h3>
+                    <ul class="nav-links">
+                        <li><a href="index.html">Home Page</a></li>
+                        <li><a href="about-us.html" class="active">About Us</a></li>
+                        <li><a href="reviews.html">Customer Reviews</a></li>
+                        <li><a href="faq.html">FAQ & Help</a></li>
+                        <li><a href="contact-us.html">Contact Us</a></li>
+                    </ul>
+                </div>
+                
+                <div class="nav-column">
+                    <h3>Support Pages</h3>
+                    <ul class="nav-links">
+                        
+                        <li><a href="feedback.html">Submit Feedback</a></li>
+                        <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                        <li><a href="terms-conditions.html">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+                
+                <div class="nav-column">
+                    <h3>Main Features</h3>
+                    <ul class="nav-links">
+                        <li><a href="index.html#routes">Bus Routes</a></li>
+                        <li><a href="index.html#companies">Bus Companies</a></li>
+                        <li><a href="index.html#tracking">Live Tracking</a></li>
+                        <li><a href="index.html#promotions">Promotions</a></li>
+                        <li><a href="index.html#chatbot">AI Assistant</a></li>
+                    </ul>
+                </div>
+                
+                <div class="nav-column">
+                    <h3>Account</h3>
+                    <ul class="nav-links">
+                        <li><a href="login.html">Login</a></li>
+                        <li><a href="signup.html">Sign Up</a></li>
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="my-tickets.html">My Tickets</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2023 SwiftBus. All rights reserved. | Your trusted bus travel partner in Ethiopia</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple scroll to top functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add active class to current page link
+            const currentPage = window.location.pathname.split('/').pop();
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                if (link.getAttribute('href') === currentPage) {
+                    link.classList.add('active');
+                }
+            });
+            
+            // Add smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+
+    <script src="js/api.js"></script>
+    <script>
+        // API Integration for this page
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Check user session (optional)
+            const user = await authManager.checkAuth();
+            updateUIForUser(user);
+
+        });
+
+        // Helper functions for this page
+        function updateUIForUser(user) {
+            if (user) {
+                // Update UI for logged-in user
+                const userElements = document.querySelectorAll('.user-name');
+                userElements.forEach(el => el.textContent = user.name);
+                
+                const loginBtns = document.querySelectorAll('.login-btn');
+                loginBtns.forEach(btn => btn.style.display = 'none');
+                
+                const userMenus = document.querySelectorAll('.user-menu');
+                userMenus.forEach(menu => menu.style.display = 'block');
+            }
+        }
+
+        // Placeholder functions - implement as needed
+        function displayPopularRoutes(routes) {
+            console.log('Popular routes:', routes);
+            // Implement route display logic
+        }
+
+        function populateCityDropdowns(cities) {
+            console.log('Cities:', cities);
+            // Implement city dropdown population
+        }
+
+        function displayUserBookings(bookings) {
+            console.log('User bookings:', bookings);
+            // Implement booking display logic
+        }
+
+        function displayBookingStats(stats) {
+            console.log('Booking stats:', stats);
+            // Implement stats display logic
+        }
+
+        function displayAdminStats(stats) {
+            console.log('Admin stats:', stats);
+            // Implement admin stats display logic
+        }
+
+        function displayAllBookings(bookings) {
+            console.log('All bookings:', bookings);
+            // Implement all bookings display logic
+        }
+
+        function displayBuses(buses) {
+            console.log('Buses:', buses);
+            // Implement buses display logic
+        }
+
+        function displaySchedules(schedules) {
+            console.log('Schedules:', schedules);
+            // Implement schedules display logic
+        }
+    </script>
+</body>
+</html>

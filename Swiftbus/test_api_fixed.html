@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API Fixed</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .result {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #007cba;
+            background: #f0f8ff;
+        }
+        .success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test API After Fix</h1>
+    <p>Testing if the duplicate function issue is resolved.</p>
+    
+    <button onclick="testAPI()">Test API</button>
+    <button onclick="testBooking()">Test Booking Creation</button>
+    
+    <div id="results"></div>
+
+    <script src="js/api.js"></script>
+    <script>
+        function addResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = message;
+            results.appendChild(div);
+        }
+        
+        async function testAPI() {
+            document.getElementById('results').innerHTML = '';
+            
+            addResult('<strong>Testing API Test Endpoint...</strong>');
+            
+            try {
+                const response = await fetch('api/booking_clean.php?action=test');
+                const data = await response.json();
+                
+                if (data.success) {
+                    addResult(`✅ API Test Success: ${data.message}<br><pre>${JSON.stringify(data, null, 2)}</pre>`, 'success');
+                } else {
+                    addResult(`❌ API Test Failed: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ API Test Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testBooking() {
+            addResult('<strong>Testing Booking Creation...</strong>');
+            
+            const testData = {
+                from_city: 'addis-ababa',
+                to_city: 'bahirdar',
+                departure_date: '2025-01-15',
+                departure_time: '08:00',
+                bus_company: 'selam-bus',
+                bus_type: 'premium-ac',
+                passenger_count: 1,
+                selected_seats: [1],
+                passenger_details: {
+                    fullName: 'Test User',
+                    email: 'test@example.com',
+                    phone: '+251911234567',
+                    nationality: 'ethiopian',
+                    idNumber: 'ID123456',
+                    ageGroup: 'adult',
+                    specialRequirements: ''
+                },
+                total_amount: 520.00,
+                payment_method: 'telebirr'
+            };
+            
+            try {
+                const response = await swiftBusAPI.createSimpleBooking(testData);
+                
+                if (response.success) {
+                    addResult(`✅ Booking Creation Success!<br>Booking ID: ${response.data.booking_id}<br><pre>${JSON.stringify(response, null, 2)}</pre>`, 'success');
+                } else {
+                    addResult(`❌ Booking Creation Failed: ${response.message}<br><pre>${JSON.stringify(response, null, 2)}</pre>`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Booking Creation Error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Auto-test on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            testAPI();
+        });
+    </script>
+</body>
+</html>

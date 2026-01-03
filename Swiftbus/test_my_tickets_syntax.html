@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test My-Tickets Syntax</title>
+</head>
+<body>
+    <h1>Testing My-Tickets JavaScript Syntax</h1>
+    <div id="result"></div>
+
+    <script>
+        // Test the helper functions that were causing issues
+        function getCityDisplayName(cityCode) {
+            const cities = {
+                'addis-ababa': 'Addis Ababa',
+                'kombolcha': 'Kombolcha',
+                'bahirdar': 'Bahirdar',
+                'dessie': 'Dessie',
+                'adama': 'Adama',
+                'hawasa': 'Hawasa',
+                'arbaminch': 'Arbaminch',
+                'gonder': 'Gonder',
+                'mekele': 'Mekele',
+                'jimma': 'Jimma'
+            };
+            return cities[cityCode] || (cityCode ? cityCode.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : cityCode);
+        }
+        
+        function getBusCompanyDisplayName(companyCode) {
+            const companies = {
+                'selam-bus': 'Selam Bus',
+                'abay-bus': 'Abay Bus',
+                'ethio-bus': 'Ethio Bus',
+                'habesha-bus': 'Habesha Bus'
+            };
+            return companies[companyCode] || (companyCode ? companyCode.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : companyCode);
+        }
+        
+        function getBusTypeDisplayName(typeCode) {
+            const types = {
+                'premium-ac': 'Premium AC Bus',
+                'standard-ac': 'Standard AC Bus',
+                'luxury': 'Luxury Bus',
+                'standard': 'Standard Bus',
+                'economy': 'Economy Bus'
+            };
+            return types[typeCode] || (typeCode ? typeCode.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : typeCode);
+        }
+
+        // Test the functions
+        try {
+            const city = getCityDisplayName('addis-ababa');
+            const company = getBusCompanyDisplayName('selam-bus');
+            const busType = getBusTypeDisplayName('premium-ac');
+            
+            document.getElementById('result').innerHTML = `
+                <div style="background: #d4edda; padding: 15px; border-radius: 8px; color: #155724;">
+                    <h3>✅ JavaScript Syntax Test Passed!</h3>
+                    <p><strong>City:</strong> ${city}</p>
+                    <p><strong>Company:</strong> ${company}</p>
+                    <p><strong>Bus Type:</strong> ${busType}</p>
+                </div>
+            `;
+        } catch (error) {
+            document.getElementById('result').innerHTML = `
+                <div style="background: #f8d7da; padding: 15px; border-radius: 8px; color: #721c24;">
+                    <h3>❌ JavaScript Syntax Error!</h3>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

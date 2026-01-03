@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear Session - SwiftBus</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; text-align: center; background: #f5f5f5; }
+        .container { max-width: 600px; margin: 50px auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .btn { padding: 12px 24px; margin: 10px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-primary { background: #1a73e8; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .result { margin: 20px 0; padding: 15px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 SwiftBus Session Manager</h1>
+        <p>Use this page to clear sessions and fix login issues.</p>
+        
+        <div id="sessionStatus" class="result info">
+            <strong>Checking session status...</strong>
+        </div>
+        
+        <div style="margin: 30px 0;">
+            <button class="btn btn-danger" onclick="clearAllSessions()">Clear All Sessions</button>
+            <button class="btn btn-primary" onclick="checkSessionStatus()">Check Session</button>
+            <button class="btn btn-success" onclick="testLogout()">Test Logout API</button>
+        </div>
+        
+        <div style="margin: 30px 0;">
+            <h3>Quick Navigation</h3>
+            <a href="index.html" class="btn btn-primary">Go to Index</a>
+            <a href="login.html" class="btn btn-primary">Go to Login</a>
+            <a href="signup.html" class="btn btn-primary">Go to Signup</a>
+            <a href="logout.php" class="btn btn-danger">PHP Logout</a>
+        </div>
+        
+        <div id="result"></div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        // Check session status on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkSessionStatus();
+        });
+        
+        async function checkSessionStatus() {
+            const statusDiv = document.getElementById('sessionStatus');
+            const resultDiv = document.getElementById('result');
+            
+            statusDiv.innerHTML = '<strong>Checking session status...</strong>';
+            
+            try {
+                const response = await swiftBusAPI.checkSession();
+                if (response.success) {
+                    statusDiv.innerHTML = `
+                        <div class="error">
+                            <strong>⚠️ Active Session Found!</strong><br>
+                            User: ${response.data.name} (${response.data.email})<br>
+                            Role: ${response.data.role}<br>
+                            <em>This is why login/signup pages redirect to index.html</em>
+                        </div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="success">
+                            <strong>✅ No Active Session</strong><br>
+                            You can now access login/signup pages normally.
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <div class="success">
+                        <strong>✅ No Active Session</strong><br>
+                        Session check failed: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        async function clearAllSessions() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="info">Clearing all sessions...</div>';
+            
+            try {
+                // Method 1: Try API logout
+                try {
+                    await swiftBusAPI.logout();
+                    resultDiv.innerHTML += '<div class="success">✅ API logout successful</div>';
+                } catch (error) {
+                    resultDiv.innerHTML += '<div class="error">❌ API logout failed: ' + error.message + '</div>';
+                }
+                
+                // Method 2: Clear any localStorage (just in case)
+                localStorage.clear();
+                sessionStorage.clear();
+                resultDiv.innerHTML += '<div class="success">✅ Browser storage cleared</div>';
+                
+                // Method 3: Clear cookies
+                document.cookie.split(";").forEach(function(c) { 
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                });
+                resultDiv.innerHTML += '<div class="success">✅ Cookies cleared</div>';
+                
+                // Method 4: Redirect to PHP logout
+                setTimeout(() => {
+                    resultDiv.innerHTML += '<div class="info">🔄 Redirecting to PHP logout...</div>';
+                    window.location.href = 'logout.php';
+                }, 2000);
+                
+            } catch (error) {
+                resultDiv.innerHTML += '<div class="error">❌ Error clearing sessions: ' + error.message + '</div>';
+            }
+        }
+        
+        async function testLogout() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="info">Testing logout API...</div>';
+            
+            try {
+                const response = await swiftBusAPI.logout();
+                if (response.success) {
+                    resultDiv.innerHTML = '<div class="success">✅ Logout API successful!</div>';
+                    setTimeout(checkSessionStatus, 1000);
+                } else {
+                    resultDiv.innerHTML = '<div class="error">❌ Logout API failed: ' + response.message + '</div>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<div class="error">❌ Logout API error: ' + error.message + '</div>';
+            }
+        }
+    </script>
+</body>
+</html>

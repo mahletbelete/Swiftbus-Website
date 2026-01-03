@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug My-Tickets Issues</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .warning { background: #fff3cd; border-color: #ffeaa7; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px; }
+        .ticket-item { background: #f8f9fa; padding: 10px; margin: 5px 0; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>Debug My-Tickets Issues</h1>
+    
+    <div class="debug-section">
+        <h2>1. Check localStorage Contents</h2>
+        <button onclick="checkLocalStorage()">Check localStorage</button>
+        <div id="localStorageResult"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>2. Create Test Tickets</h2>
+        <button onclick="createTestTicket(1)">Create Test Ticket 1</button>
+        <button onclick="createTestTicket(2)">Create Test Ticket 2</button>
+        <button onclick="createTestTicket(3)">Create Test Ticket 3</button>
+        <div id="createTicketResult"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>3. Test Ticket Loading Logic</h2>
+        <button onclick="testTicketLoading()">Test Ticket Loading</button>
+        <div id="ticketLoadingResult"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>4. Test Cancel Button Logic</h2>
+        <button onclick="testCancelLogic()">Test Cancel Logic</button>
+        <div id="cancelLogicResult"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>5. Clear All Test Data</h2>
+        <button onclick="clearAllData()">Clear All Data</button>
+        <div id="clearResult"></div>
+    </div>
+
+    <script>
+        // Check localStorage contents
+        function checkLocalStorage() {
+            const result = document.getElementById('localStorageResult');
+            let html = '<h3>localStorage Contents:</h3>';
+            
+            const swiftBusKeys = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('swiftbus_')) {
+                    swiftBusKeys.push(key);
+                }
+            }
+            
+            if (swiftBusKeys.length === 0) {
+                html += '<p class="warning">No SwiftBus data found in localStorage</p>';
+            } else {
+                html += `<p class="success">Found ${swiftBusKeys.length} SwiftBus keys:</p>`;
+                swiftBusKeys.forEach(key => {
+                    try {
+                        const data = JSON.parse(localStorage.getItem(key));
+                        html += `
+                            <div class="ticket-item">
+                                <strong>${key}:</strong><br>
+                                <strong>Booking ID:</strong> ${data.bookingId || data.booking_id || 'N/A'}<br>
+                                <strong>Route:</strong> ${data.fromCity || data.from_city} → ${data.toCity || data.to_city}<br>
+                                <strong>Status:</strong> ${data.status || data.booking_status || 'N/A'}<br>
+                                <pre>${JSON.stringify(data, null, 2)}</pre>
+                            </div>
+                        `;
+                    } catch (e) {
+                        html += `<p class="error"><strong>${key}:</strong> ${localStorage.getItem(key)}</p>`;
+                    }
+                });
+            }
+            
+            result.innerHTML = html;
+        }
+        
+        // Create test tickets
+        function createTestTicket(ticketNumber) {
+            const bookingId = `SWB-2025-TEST00${ticketNumber}`;
+            const ticketData = {
+                bookingId: bookingId,
+                booking_id: bookingId,
+                id: bookingId,
+                fromCity: ticketNumber === 1 ? 'Addis Ababa' : ticketNumber === 2 ? 'Bahirdar' : 'Dessie',
+                toCity: ticketNumber === 1 ? 'Bahirdar' : ticketNumber === 2 ? 'Gonder' : 'Mekele',
+                from_city: ticketNumber === 1 ? 'addis-ababa' : ticketNumber === 2 ? 'bahirdar' : 'dessie',
+                to_city: ticketNumber === 1 ? 'bahirdar' : ticketNumber === 2 ? 'gonder' : 'mekele',
+                departureDate: '2025-01-20',
+                departure_date: '2025-01-20',
+                departureTime: '08:00',
+                departure_time: '08:00',
+                busCompany: 'Selam Bus',
+                bus_company: 'selam-bus',
+                busType: 'Premium AC Bus',
+                bus_type: 'premium-ac',
+                passengerCount: 1,
+                passenger_count: 1,
+                seats: [10 + ticketNumber],
+                selected_seats: [10 + ticketNumber],
+                totalAmount: 520 + (ticketNumber * 100),
+                total_amount: 520 + (ticketNumber * 100),
+                paymentMethod: 'Telebirr',
+                payment_method: 'telebirr',
+                bookingDate: new Date().toISOString(),
+                booking_date: new Date().toISOString(),
+                status: 'confirmed',
+                booking_status: 'confirmed',
+                paymentStatus: 'paid',
+                payment_status: 'paid',
+                passengerName: `Test Passenger ${ticketNumber}`,
+                passengerEmail: `test${ticketNumber}@example.com`,
+                passengerPhone: `+25191123456${ticketNumber}`,
+                passengerIdNumber: `ID12345678${ticketNumber}`,
+                passenger_details: {
+                    fullName: `Test Passenger ${ticketNumber}`,
+                    email: `test${ticketNumber}@example.com`,
+                    phone: `+25191123456${ticketNumber}`,
+                    idNumber: `ID12345678${ticketNumber}`
+                },
+                qrCode: `SwiftBus-${bookingId}`,
+                specialRequirements: 'None',
+                special_requirements: 'None'
+            };
+            
+            try {
+                // Save to multiple localStorage keys (as the app does)
+                localStorage.setItem(`swiftbus_booking_${bookingId}`, JSON.stringify(ticketData));
+                
+                // Update tickets array
+                let tickets = [];
+                const existingTickets = localStorage.getItem('swiftbus_tickets');
+                if (existingTickets) {
+                    try {
+                        tickets = JSON.parse(existingTickets);
+                        if (!Array.isArray(tickets)) {
+                            tickets = [];
+                        }
+                    } catch (e) {
+                        tickets = [];
+                    }
+                }
+                
+                // Add new ticket if it doesn't exist
+                const existingIndex = tickets.findIndex(t => 
+                    (t.bookingId || t.booking_id) === bookingId
+                );
+                
+                if (existingIndex >= 0) {
+                    tickets[existingIndex] = ticketData;
+                } else {
+                    tickets.push(ticketData);
+                }
+                
+                localStorage.setItem('swiftbus_tickets', JSON.stringify(tickets));
+                
+                // Also set as latest confirmation
+                localStorage.setItem('swiftbus_confirmation', JSON.stringify(ticketData));
+                
+                document.getElementById('createTicketResult').innerHTML = `
+                    <div class="success">
+                        <h4>✅ Test Ticket ${ticketNumber} Created</h4>
+                        <p><strong>Booking ID:</strong> ${bookingId}</p>
+                        <p><strong>Route:</strong> ${ticketData.fromCity} → ${ticketData.toCity}</p>
+                        <p><strong>Amount:</strong> ETB ${ticketData.totalAmount}</p>
+                    </div>
+                `;
+                
+            } catch (error) {
+                document.getElementById('createTicketResult').innerHTML = `
+                    <div class="error">
+                        <h4>❌ Error Creating Test Ticket ${ticketNumber}</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Test ticket loading logic (simulate the my-tickets.html logic)
+        function testTicketLoading() {
+            const result = document.getElementById('ticketLoadingResult');
+            
+            try {
+                const allTickets = [];
+                
+                // Simulate loadTicketsFromLocalStorage function
+                const tickets = [];
+                
+                // Check for confirmation data
+                const confirmationData = localStorage.getItem('swiftbus_confirmation');
+                if (confirmationData) {
+                    const confirmation = JSON.parse(confirmationData);
+                    const ticket = createTicketFromConfirmation(confirmation);
+                    if (ticket) {
+                        tickets.push(ticket);
+                    }
+                }
+                
+                // Check for stored tickets array
+                const storedTickets = localStorage.getItem('swiftbus_tickets');
+                if (storedTickets) {
+                    const parsedTickets = JSON.parse(storedTickets);
+                    if (Array.isArray(parsedTickets)) {
+                        parsedTickets.forEach(ticketData => {
+                            const ticket = createTicketFromLocalStorage(ticketData);
+                            if (ticket) {
+                                tickets.push(ticket);
+                            }
+                        });
+                    }
+                }
+                
+                // Check for individual booking confirmations
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('swiftbus_booking_')) {
+                        try {
+                            const bookingData = JSON.parse(localStorage.getItem(key));
+                            const ticket = createTicketFromLocalStorage(bookingData);
+                            if (ticket && !tickets.some(t => t.bookingId === ticket.bookingId)) {
+                                tickets.push(ticket);
+                            }
+                        } catch (e) {
+                            console.warn('Failed to parse booking data from localStorage:', key);
+                        }
+                    }
+                }
+                
+                result.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Ticket Loading Test Results</h4>
+                        <p><strong>Total Tickets Found:</strong> ${tickets.length}</p>
+                        <h5>Ticket Details:</h5>
+                        ${tickets.map((ticket, index) => `
+                            <div class="ticket-item">
+                                <strong>Ticket ${index + 1}:</strong><br>
+                                <strong>ID:</strong> ${ticket.id}<br>
+                                <strong>Booking ID:</strong> ${ticket.bookingId}<br>
+                                <strong>Route:</strong> ${ticket.fromCity} → ${ticket.toCity}<br>
+                                <strong>Status:</strong> ${ticket.status}<br>
+                                <strong>Amount:</strong> ETB ${ticket.totalAmount}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Error Testing Ticket Loading</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Test cancel logic
+        function testCancelLogic() {
+            const result = document.getElementById('cancelLogicResult');
+            
+            try {
+                // Get all tickets
+                const tickets = [];
+                
+                // Load from localStorage (simplified)
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('swiftbus_booking_')) {
+                        try {
+                            const bookingData = JSON.parse(localStorage.getItem(key));
+                            const ticket = createTicketFromLocalStorage(bookingData);
+                            if (ticket) {
+                                tickets.push(ticket);
+                            }
+                        } catch (e) {
+                            console.warn('Failed to parse booking data:', key);
+                        }
+                    }
+                }
+                
+                result.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Cancel Logic Test Results</h4>
+                        <p><strong>Total Tickets:</strong> ${tickets.length}</p>
+                        <h5>Cancel Button Test:</h5>
+                        ${tickets.map((ticket, index) => {
+                            const canCancel = ticket.status === 'confirmed' && ticket.paymentStatus === 'paid';
+                            return `
+                                <div class="ticket-item">
+                                    <strong>Ticket ${index + 1}:</strong><br>
+                                    <strong>ID:</strong> ${ticket.id}<br>
+                                    <strong>Booking ID:</strong> ${ticket.bookingId}<br>
+                                    <strong>Status:</strong> ${ticket.status}<br>
+                                    <strong>Payment Status:</strong> ${ticket.paymentStatus}<br>
+                                    <strong>Can Cancel:</strong> ${canCancel ? '✅ Yes' : '❌ No'}<br>
+                                    <button onclick="testCancelForTicket('${ticket.id}', '${ticket.bookingId}')" 
+                                            ${!canCancel ? 'disabled' : ''}>
+                                        Test Cancel for ${ticket.bookingId}
+                                    </button>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+                
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Error Testing Cancel Logic</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Test cancel for specific ticket
+        function testCancelForTicket(ticketId, bookingId) {
+            alert(`Cancel test for:\nTicket ID: ${ticketId}\nBooking ID: ${bookingId}\n\nThis would trigger the cancel modal in the actual app.`);
+        }
+        
+        // Clear all data
+        function clearAllData() {
+            const keys = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('swiftbus_')) {
+                    keys.push(key);
+                }
+            }
+            
+            keys.forEach(key => localStorage.removeItem(key));
+            
+            document.getElementById('clearResult').innerHTML = `
+                <div class="success">
+                    <h4>✅ All Data Cleared</h4>
+                    <p>Removed ${keys.length} localStorage items</p>
+                </div>
+            `;
+        }
+        
+        // Helper functions (copied from my-tickets.html)
+        function createTicketFromConfirmation(confirmation) {
+            try {
+                return {
+                    id: confirmation.bookingId || confirmation.booking_id,
+                    bookingId: confirmation.bookingId || confirmation.booking_id,
+                    fromCity: getCityDisplayName(confirmation.from_city) || confirmation.fromCity,
+                    toCity: getCityDisplayName(confirmation.to_city) || confirmation.toCity,
+                    departureDate: confirmation.departure_date || confirmation.departureDate,
+                    departureTime: confirmation.departure_time || confirmation.departureTime,
+                    busCompany: getBusCompanyDisplayName(confirmation.bus_company) || confirmation.busCompany,
+                    busType: getBusTypeDisplayName(confirmation.bus_type) || confirmation.busType || 'Standard Bus',
+                    passengerCount: confirmation.passenger_count || confirmation.passengerCount || 1,
+                    seats: confirmation.selected_seats || confirmation.seats || ['N/A'],
+                    totalAmount: parseFloat(confirmation.total_amount || confirmation.total || confirmation.totalAmount) || 0,
+                    paymentMethod: confirmation.paymentMethod || confirmation.payment_method || 'Unknown',
+                    bookingDate: confirmation.bookingDate || new Date().toISOString(),
+                    status: 'confirmed',
+                    paymentStatus: 'paid',
+                    passengerName: confirmation.passenger_details?.fullName || confirmation.passengerName || 'Passenger',
+                    passengerEmail: confirmation.passenger_details?.email || confirmation.passengerEmail || 'N/A',
+                    passengerPhone: confirmation.passenger_details?.phone || confirmation.passengerPhone || 'N/A',
+                    passengerIdNumber: confirmation.passenger_details?.idNumber || confirmation.passengerIdNumber || 'N/A',
+                    qrCode: `SwiftBus-${confirmation.bookingId || confirmation.booking_id}`,
+                    specialRequirements: confirmation.special_requirements || confirmation.specialRequirements || 'None'
+                };
+            } catch (error) {
+                console.error('Error creating ticket from confirmation:', error);
+                return null;
+            }
+        }
+        
+        function createTicketFromLocalStorage(ticketData) {
+            try {
+                return {
+                    id: ticketData.id || ticketData.bookingId || ticketData.booking_id,
+                    bookingId: ticketData.bookingId || ticketData.booking_id || ticketData.id,
+                    fromCity: ticketData.fromCity || getCityDisplayName(ticketData.from_city),
+                    toCity: ticketData.toCity || getCityDisplayName(ticketData.to_city),
+                    departureDate: ticketData.departureDate || ticketData.departure_date,
+                    departureTime: ticketData.departureTime || ticketData.departure_time,
+                    busCompany: ticketData.busCompany || getBusCompanyDisplayName(ticketData.bus_company),
+                    busType: ticketData.busType || getBusTypeDisplayName(ticketData.bus_type) || 'Standard Bus',
+                    passengerCount: ticketData.passengerCount || ticketData.passenger_count || 1,
+                    seats: ticketData.seats || ticketData.selected_seats || ['N/A'],
+                    totalAmount: parseFloat(ticketData.totalAmount || ticketData.total_amount || ticketData.total) || 0,
+                    paymentMethod: ticketData.paymentMethod || ticketData.payment_method || 'Unknown',
+                    bookingDate: ticketData.bookingDate || ticketData.booking_date || new Date().toISOString(),
+                    status: ticketData.status || 'confirmed',
+                    paymentStatus: ticketData.paymentStatus || ticketData.payment_status || 'paid',
+                    passengerName: ticketData.passengerName || ticketData.passenger_details?.fullName || 'Passenger',
+                    passengerEmail: ticketData.passengerEmail || ticketData.passenger_details?.email || 'N/A',
+                    passengerPhone: ticketData.passengerPhone || ticketData.passenger_details?.phone || 'N/A',
+                    passengerIdNumber: ticketData.passengerIdNumber || ticketData.passenger_details?.idNumber || 'N/A',
+                    qrCode: ticketData.qrCode || `SwiftBus-${ticketData.bookingId || ticketData.booking_id || ticketData.id}`,
+                    specialRequirements: ticketData.specialRequirements || ticketData.special_requirements || 'None'
+                };
+            } catch (error) {
+                console.error('Error creating ticket from localStorage:', error);
+                return null;
+            }
+        }
+        
+        function getCityDisplayName(cityCode) {
+            const cities = {
+                'addis-ababa': 'Addis Ababa',
+                'kombolcha': 'Kombolcha',
+                'bahirdar': 'Bahirdar',
+                'dessie': 'Dessie',
+                'adama': 'Adama',
+                'hawasa': 'Hawasa',
+                'arbaminch': 'Arbaminch',
+                'gonder': 'Gonder',
+                'mekele': 'Mekele',
+                'jimma': 'Jimma'
+            };
+            return cities[cityCode] || (cityCode ? cityCode.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : cityCode);
+        }
+        
+        function getBusCompanyDisplayName(companyCode) {
+            const companies = {
+                'selam-bus': 'Selam Bus',
+                'abay-bus': 'Abay Bus',
+                'ethio-bus': 'Ethio Bus',
+                'habesha-bus': 'Habesha Bus'
+            };
+            return companies[companyCode] || (companyCode ? companyCode.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : companyCode);
+        }
+        
+        function getBusTypeDisplayName(typeCode) {
+            const types = {
+                'premium-ac': 'Premium AC Bus',
+                'standard-ac': 'Standard AC Bus',
+                'luxury': 'Luxury Bus',
+                'standard': 'Standard Bus',
+                'economy': 'Economy Bus'
+            };
+            return types[typeCode] || (typeCode ? typeCode.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : typeCode);
+        }
+    </script>
+</body>
+</html>

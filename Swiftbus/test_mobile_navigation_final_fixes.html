@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Navigation Final Fixes Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --secondary: #ff6d00;
+            --dark: #222;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --accent: #00c6ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .test-container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .test-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+
+        .test-section h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        /* Header simulation */
+        .header-sim {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .logo h1 {
+            color: var(--primary);
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .logo span {
+            color: var(--secondary);
+        }
+
+        /* Index.html style - FIXED (no rotation) */
+        .mobile-menu-btn-index {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 8px 12px;
+            border-radius: 25px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .mobile-menu-btn-index:hover {
+            background: var(--primary);
+            color: white;
+            /* NO ROTATION - FIXED! */
+        }
+
+        .mobile-user-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(26, 115, 232, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        /* Routes.html style - COMPACT navigation */
+        .mobile-nav-routes {
+            position: fixed;
+            top: 70px;
+            right: 10px;
+            width: 280px;
+            max-width: calc(100vw - 20px);
+            height: auto;
+            max-height: calc(100vh - 90px);
+            background: white;
+            overflow-y: auto;
+            z-index: 999;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            transform-origin: top right;
+            animation: slideDown 0.4s ease forwards;
+            display: none;
+        }
+
+        .mobile-nav-routes.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from { transform: scaleY(0); opacity: 0; }
+            to { transform: scaleY(1); opacity: 1; }
+        }
+
+        .mobile-nav-links {
+            padding: 15px;
+            list-style: none;
+        }
+
+        .mobile-nav-links li {
+            margin-bottom: 8px;
+            opacity: 0;
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .mobile-nav-links li:nth-child(1) { animation-delay: 0.1s; }
+        .mobile-nav-links li:nth-child(2) { animation-delay: 0.2s; }
+        .mobile-nav-links li:nth-child(3) { animation-delay: 0.3s; }
+        .mobile-nav-links li:nth-child(4) { animation-delay: 0.4s; }
+        .mobile-nav-links li:nth-child(5) { animation-delay: 0.5s; }
+        .mobile-nav-links li:nth-child(6) { animation-delay: 0.6s; }
+        .mobile-nav-links li:nth-child(7) { animation-delay: 0.7s; }
+        .mobile-nav-links li:nth-child(8) { animation-delay: 0.8s; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .mobile-nav-links a {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--dark);
+            transition: all 0.3s ease;
+        }
+
+        .mobile-nav-links a:hover {
+            color: var(--primary);
+            padding-left: 10px;
+        }
+
+        /* Mobile User Profile - COMPACT */
+        .mobile-user-profile {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            color: white;
+            text-align: center;
+        }
+
+        .mobile-user-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mobile-user-name {
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mobile-user-role {
+            font-size: 12px;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-weight: 500;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .before, .after {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .before {
+            background: #ffebee;
+            border: 2px solid #f44336;
+        }
+
+        .after {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+
+            .mobile-nav-routes {
+                width: 260px;
+                max-width: calc(100vw - 10px);
+                right: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🔧 Mobile Navigation Final Fixes</h1>
+            <p>Testing the fixes for index.html rotation issue and routes.html size optimization</p>
+        </div>
+
+        <div class="test-section">
+            <h3>1. ✅ Index.html - Fixed Rotation Issue</h3>
+            <div class="status success">
+                <strong>FIXED:</strong> Mobile menu button no longer rotates when clicked or hovered
+            </div>
+            
+            <div class="header-sim">
+                <div class="logo"><h1>Swift<span>Bus</span></h1></div>
+                <button class="mobile-menu-btn-index" id="indexTestBtn">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div class="mobile-user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span style="font-size: 14px; font-weight: 500;">John</span>
+                        <i class="fas fa-caret-down" style="font-size: 12px;"></i>
+                    </div>
+                </button>
+            </div>
+            
+            <p><strong>Test:</strong> Hover and click the button above - it should NOT rotate!</p>
+            <div class="status info">
+                <strong>Changes made:</strong><br>
+                • Removed <code>transform: rotate(90deg)</code> from hover state<br>
+                • Removed <code>transform: rotate(90deg)</code> from active state<br>
+                • Now only changes background color on hover
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>2. ✅ Routes.html - Compact Mobile Navigation</h3>
+            <div class="status success">
+                <strong>FIXED:</strong> Mobile navigation is now compact and positioned on the right side
+            </div>
+            
+            <div class="header-sim">
+                <div class="logo"><h1>Swift<span>Bus</span></h1></div>
+                <button class="mobile-menu-btn-index" onclick="toggleRoutesNav()">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div class="mobile-user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span style="font-size: 14px; font-weight: 500;">John</span>
+                        <i class="fas fa-caret-down" style="font-size: 12px;"></i>
+                    </div>
+                </button>
+            </div>
+
+            <button class="btn btn-primary" onclick="toggleRoutesNav()">Toggle Routes Navigation</button>
+            
+            <div class="mobile-nav-routes" id="routesNav">
+                <ul class="mobile-nav-links">
+                    <li>
+                        <div class="mobile-user-profile">
+                            <div class="mobile-user-info">
+                                <div class="mobile-user-name">
+                                    <i class="fas fa-user"></i>
+                                    <span>John Doe</span>
+                                </div>
+                                <div class="mobile-user-role user">
+                                    <i class="fas fa-user"></i>
+                                    User
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li><a href="#"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="#"><i class="fas fa-route"></i> Routes</a></li>
+                    <li><a href="#"><i class="fas fa-city"></i> Cities</a></li>
+                    <li><a href="#"><i class="fas fa-bus"></i> Bus Companies</a></li>
+                    <li><a href="#"><i class="fas fa-user-circle"></i> Profile</a></li>
+                    <li><a href="#"><i class="fas fa-ticket-alt"></i> My Tickets</a></li>
+                    <li><a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                    <li>
+                        <button class="btn btn-danger" style="width: 100%; margin-top: 10px; font-size: 13px; padding: 8px;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="status info" style="margin-top: 20px;">
+                <strong>Improvements made:</strong><br>
+                • Width: 280px (was full width)<br>
+                • Position: Right-aligned (was left-aligned)<br>
+                • Height: Auto with max-height (was full screen)<br>
+                • Compact padding and font sizes<br>
+                • Smooth slide-down animation<br>
+                • Rounded corners and better shadows
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>3. 📱 Mobile Responsiveness</h3>
+            <div class="comparison">
+                <div class="before">
+                    <h4>❌ BEFORE</h4>
+                    <p><strong>Index.html:</strong> Button rotated on click</p>
+                    <p><strong>Routes.html:</strong> Navigation covered full screen</p>
+                </div>
+                <div class="after">
+                    <h4>✅ AFTER</h4>
+                    <p><strong>Index.html:</strong> Smooth color transition only</p>
+                    <p><strong>Routes.html:</strong> Compact 280px width navigation</p>
+                </div>
+            </div>
+            
+            <div class="status success">
+                <strong>Screen Size Adaptations:</strong><br>
+                • Desktop (>768px): Full dropdown functionality<br>
+                • Tablet (≤768px): Compact navigation (280px)<br>
+                • Mobile (≤480px): Even more compact (260px)
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>4. 🎯 Summary of Fixes</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                <div class="status success">
+                    <strong>✅ Index.html Fixed</strong><br>
+                    • No more rotation on hover/click<br>
+                    • Smooth background color transition<br>
+                    • Maintains user name display
+                </div>
+                <div class="status success">
+                    <strong>✅ Routes.html Fixed</strong><br>
+                    • Compact 280px width<br>
+                    • Right-aligned positioning<br>
+                    • Auto-height with scroll<br>
+                    • Better animations
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleRoutesNav() {
+            const nav = document.getElementById('routesNav');
+            nav.classList.toggle('show');
+        }
+
+        // Close navigation when clicking outside
+        document.addEventListener('click', (e) => {
+            const nav = document.getElementById('routesNav');
+            if (!e.target.closest('#routesNav') && !e.target.closest('button')) {
+                nav.classList.remove('show');
+            }
+        });
+
+        // Test index button behavior
+        document.getElementById('indexTestBtn').addEventListener('click', function() {
+            console.log('Index button clicked - no rotation!');
+        });
+
+        // Display current screen size
+        function updateScreenInfo() {
+            const width = window.innerWidth;
+            console.log(`Screen width: ${width}px`);
+        }
+
+        window.addEventListener('resize', updateScreenInfo);
+        updateScreenInfo();
+    </script>
+</body>
+</html>

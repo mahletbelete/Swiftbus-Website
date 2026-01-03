@@ -1,0 +1,2189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftBus - All Routes Across Ethiopia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --secondary: #ff6d00;
+            --dark: #222;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --ethiopia-green: #078930;
+            --ethiopia-yellow: #fcdd09;
+            --ethiopia-red: #da121a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        header.scrolled {
+            background-color: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            padding: 5px 0;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo h1 {
+            color: var(--primary);
+            font-size: 28px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo span {
+            color: var(--secondary);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-left: 25px;
+            position: relative;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 5px 0;
+        }
+
+        .nav-links a.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--secondary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after,
+        .nav-links a.active::after {
+            width: 100%;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 22px;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            border: none;
+            font-size: 14px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+            z-index: -1;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-outline {
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            background: transparent;
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(26, 115, 232, 0.3);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: 2px solid var(--primary);
+        }
+
+        .btn-primary:hover {
+            background: transparent;
+            color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(26, 115, 232, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+            border: 2px solid var(--secondary);
+        }
+
+        .btn-secondary:hover {
+            background: transparent;
+            color: var(--secondary);
+            transform: translateY(-3px);
+        }
+
+        /* Mobile Navigation */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--dark);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            padding: 5px;
+        }
+
+        .mobile-nav {
+            display: none;
+            background: white;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            z-index: 99;
+            transform-origin: top;
+            animation: slideDown 0.4s ease forwards;
+        }
+
+        @keyframes slideDown {
+            from { transform: scaleY(0); opacity: 0; }
+            to { transform: scaleY(1); opacity: 1; }
+        }
+
+        .mobile-nav.active {
+            display: block;
+        }
+
+        .mobile-nav-links {
+            list-style: none;
+            padding: 20px;
+        }
+
+        .mobile-nav-links li {
+            margin-bottom: 15px;
+        }
+
+        .mobile-nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            display: block;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-nav-links a:hover {
+            color: var(--primary);
+            padding-left: 10px;
+        }
+
+        /* Routes Hero Section */
+        .routes-hero {
+            position: relative;
+            height: 320px;
+            background: url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') center/cover no-repeat;
+            margin-top: 70px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .routes-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1;
+        }
+
+        .hero-text {
+            position: relative;
+            z-index: 2;
+            color: white;
+            padding: 60px;
+            max-width: 800px;
+        }
+
+        .hero-text h1 {
+            font-size: 44px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-text p {
+            font-size: 18px;
+            opacity: 0.9;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Filters Section */
+        .filters-section {
+            padding: 50px 0;
+            background: white;
+        }
+
+        .filters-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .filters-container h3 {
+            font-size: 24px;
+            color: var(--dark);
+        }
+
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .filter-btn {
+            padding: 12px 24px;
+            border-radius: 30px;
+            border: 2px solid var(--primary);
+            background: transparent;
+            color: var(--primary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(26, 115, 232, 0.2);
+        }
+
+        /* Routes Grid */
+        .routes-grid-section {
+            padding: 0 0 100px;
+            background: #f8f9fa;
+        }
+
+        .routes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            padding: 30px 0;
+        }
+
+        .route-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .route-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .route-image {
+            position: relative;
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            overflow: hidden;
+        }
+
+        .route-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 100%);
+        }
+
+        .route-cities {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 25px;
+            color: white;
+            z-index: 2;
+        }
+
+        .city-info {
+            text-align: center;
+        }
+
+        .city-label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .city-name {
+            font-size: 20px;
+            font-weight: 700;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        .route-arrow {
+            display: flex;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+            margin: 0 10px;
+        }
+
+        .route-info {
+            padding: 25px;
+        }
+
+        .route-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            text-align: center;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: var(--gray);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .route-price {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary), #1a73e8);
+            border-radius: 15px;
+            color: white;
+            margin-top: 15px;
+        }
+
+        .price-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .price-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .book-route-btn {
+            width: 100%;
+            margin-top: 20px;
+            padding: 14px;
+            background: linear-gradient(45deg, var(--secondary), #ff8c00);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .book-route-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 109, 0, 0.4);
+        }
+
+        /* Region Tags */
+        .region-tag {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            z-index: 2;
+        }
+
+        .region-tag.north {
+            background: var(--primary);
+            color: white;
+        }
+
+        .region-tag.south {
+            background: var(--ethiopia-green);
+            color: white;
+        }
+
+        .region-tag.east {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .region-tag.west {
+            background: var(--ethiopia-yellow);
+            color: var(--dark);
+        }
+
+        .region-tag.central {
+            background: var(--ethiopia-red);
+            color: white;
+        }
+
+        /* Stats Section */
+        .routes-stats {
+            padding: 60px 0;
+            background: white;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px);
+            background: var(--primary);
+            color: white;
+        }
+
+        .stat-card:hover .stat-number,
+        .stat-card:hover .stat-label {
+            color: white;
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 16px;
+            color: var(--gray);
+        }
+
+        /* Floating Chatbot Button */
+        .floating-chatbot-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), #1a73e8);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 998;
+            border: none;
+            text-decoration: none;
+        }
+
+        .floating-chatbot-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 80px 0 20px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-column h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--secondary);
+            border-radius: 2px;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: #bbb;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: white;
+            padding-left: 5px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .social-links a:hover {
+            background: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #bbb;
+            font-size: 14px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .routes-grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+            
+            .hero-text {
+                padding: 40px;
+            }
+            
+            .hero-text h1 {
+                font-size: 36px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links, .auth-buttons {
+                display: none;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .routes-hero {
+                height: 250px;
+            }
+            
+            .hero-text {
+                padding: 30px 20px;
+            }
+            
+            .hero-text h1 {
+                font-size: 32px;
+            }
+            
+            .hero-text p {
+                font-size: 16px;
+            }
+            
+            .filters-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+            
+            .filter-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .route-card {
+                max-width: 400px;
+                margin: 0 auto;
+            }
+            
+            .routes-grid {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+            
+            .floating-chatbot-btn {
+                bottom: 20px;
+                right: 20px;
+                width: 50px;
+                height: 50px;
+            }
+
+            /* Mobile Navigation Improvements */
+            .mobile-nav {
+                position: fixed;
+                top: 70px;
+                right: 10px;
+                width: 280px;
+                max-width: calc(100vw - 20px);
+                height: auto;
+                max-height: calc(100vh - 90px);
+                background: white;
+                overflow-y: auto;
+                z-index: 999;
+                border-radius: 15px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+                transform-origin: top right;
+                animation: slideDown 0.4s ease forwards;
+            }
+
+            @keyframes slideDown {
+                from { transform: scaleY(0); opacity: 0; }
+                to { transform: scaleY(1); opacity: 1; }
+            }
+
+            .mobile-nav-links {
+                padding: 15px;
+            }
+
+            .mobile-nav-links li {
+                margin-bottom: 8px;
+                opacity: 0;
+                animation: fadeInUp 0.5s ease forwards;
+            }
+
+            .mobile-nav-links li:nth-child(1) { animation-delay: 0.1s; }
+            .mobile-nav-links li:nth-child(2) { animation-delay: 0.2s; }
+            .mobile-nav-links li:nth-child(3) { animation-delay: 0.3s; }
+            .mobile-nav-links li:nth-child(4) { animation-delay: 0.4s; }
+            .mobile-nav-links li:nth-child(5) { animation-delay: 0.5s; }
+            .mobile-nav-links li:nth-child(6) { animation-delay: 0.6s; }
+            .mobile-nav-links li:nth-child(7) { animation-delay: 0.7s; }
+            .mobile-nav-links li:nth-child(8) { animation-delay: 0.8s; }
+
+            @keyframes fadeInUp {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            .mobile-nav-links a {
+                padding: 10px 0;
+                border-bottom: 1px solid #eee;
+                font-size: 14px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                text-decoration: none;
+                color: var(--dark);
+                transition: all 0.3s ease;
+            }
+
+            .mobile-nav-links a:hover {
+                color: var(--primary);
+                padding-left: 10px;
+            }
+
+            .mobile-menu-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+            }
+
+            .header-top {
+                padding: 10px 0;
+            }
+
+            .logo h1 {
+                font-size: 24px;
+            }
+
+            /* Mobile User Profile */
+            .mobile-user-profile {
+                background: linear-gradient(135deg, var(--primary), #1a73e8);
+                padding: 15px;
+                border-radius: 10px;
+                margin-bottom: 15px;
+                color: white;
+                text-align: center;
+            }
+
+            .mobile-user-info {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .mobile-user-name {
+                font-size: 16px;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .mobile-user-name i {
+                font-size: 14px;
+            }
+
+            .mobile-user-role {
+                font-size: 12px;
+                background: rgba(255,255,255,0.2);
+                padding: 4px 12px;
+                border-radius: 15px;
+                font-weight: 500;
+            }
+
+            .mobile-user-role.admin {
+                background: rgba(255, 109, 0, 0.3);
+            }
+
+            .mobile-user-role.user {
+                background: rgba(40, 167, 69, 0.3);
+            }
+
+            /* Mobile menu button user display */
+            .mobile-menu-btn {
+                background: transparent;
+                border: 2px solid var(--primary);
+                color: var(--primary);
+                padding: 8px 12px;
+                border-radius: 25px;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                min-width: 120px;
+            }
+
+            .mobile-menu-btn:hover {
+                background: var(--primary);
+                color: white;
+                transform: translateY(-2px);
+            }
+
+            .mobile-user-avatar {
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                background: rgba(26, 115, 232, 0.1);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 12px;
+                flex-shrink: 0;
+            }
+
+            .mobile-user-avatar img {
+                width: 100%;
+                height: 100%;
+                border-radius: 50%;
+                object-fit: cover;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-text h1 {
+                font-size: 28px;
+            }
+            
+            .filter-btn {
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+            
+            .route-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .routes-hero {
+                height: 200px;
+                margin-top: 60px;
+            }
+
+            .hero-text {
+                padding: 20px;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            /* Smaller mobile navigation */
+            .mobile-nav {
+                width: 260px;
+                max-width: calc(100vw - 10px);
+                right: 5px;
+            }
+
+            .mobile-user-profile {
+                padding: 12px;
+                margin-bottom: 12px;
+            }
+
+            .mobile-user-name {
+                font-size: 15px;
+            }
+
+            .mobile-user-role {
+                font-size: 11px;
+                padding: 3px 10px;
+            }
+
+            .mobile-nav-links {
+                padding: 12px;
+            }
+
+            .mobile-nav-links a {
+                font-size: 13px;
+                padding: 8px 0;
+            }
+        }
+
+        /* Animation Classes */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .fade-in.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+   
+    <!-- Header -->
+    <header id="header">
+        <div class="container">
+            <div class="header-top">
+                <div class="logo">
+                    <h1>Swift<span>Bus</span></h1>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="routes.html" class="active">Routes</a></li>
+                    <li><a href="index.html#cities">Cities</a></li>
+                    <li><a href="index.html#companies">Bus Companies</a></li>
+                </ul>
+                <div class="auth-buttons" id="authButtons">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+                <button class="mobile-menu-btn" aria-label="Toggle navigation">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Navigation -->
+        <div class="mobile-nav">
+            <ul class="mobile-nav-links" id="mobileNavLinks">
+                <!-- Will be populated by JavaScript -->
+            </ul>
+        </div>
+    </header>
+
+    <!-- Routes Hero Section -->
+    <section class="routes-hero">
+        <div class="container">
+            <div class="hero-text">
+                <h1>All Routes Across Ethiopia</h1>
+                <p>Explore our extensive network connecting major cities with comfortable and reliable bus services.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filters Section -->
+    <section class="filters-section">
+        <div class="container">
+            <div class="filters-container">
+                <h3>Filter by Region</h3>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-region="all">All Routes</button>
+                    <button class="filter-btn" data-region="north">Northern Region</button>
+                    <button class="filter-btn" data-region="south">Southern Region</button>
+                    <button class="filter-btn" data-region="east">Eastern Region</button>
+                    <button class="filter-btn" data-region="west">Western Region</button>
+                    <button class="filter-btn" data-region="central">Central Region</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Routes Stats -->
+    <section class="routes-stats">
+        <div class="container">
+            <h2>Our Route Network</h2>
+            <p>Connecting Ethiopia through an extensive bus network</p>
+            <div class="stats-grid">
+                <div class="stat-card fade-in">
+                    <div class="stat-number" id="totalRoutes">50+</div>
+                    <div class="stat-label">Total Routes</div>
+                </div>
+                <div class="stat-card fade-in">
+                    <div class="stat-number">10</div>
+                    <div class="stat-label">Major Cities</div>
+                </div>
+                <div class="stat-card fade-in">
+                    <div class="stat-number">4</div>
+                    <div class="stat-label">Bus Companies</div>
+                </div>
+                <div class="stat-card fade-in">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Support</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Routes Grid -->
+    <section class="routes-grid-section">
+        <div class="container">
+            <div class="routes-grid" id="routesGrid">
+                <!-- Routes will be populated by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Floating Chatbot Button -->
+    <button class="floating-chatbot-btn" id="floatingChatbotBtn">
+        <i class="fas fa-robot"></i>
+    </button>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>SwiftBus</h3>
+                    <p>Your trusted partner for bus travel across Ethiopia. We connect you to your destination safely and comfortably.</p>
+                    <div class="social-links">
+                        <a href="https://facebook.com" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://twitter.com" target="_blank" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="https://instagram.com" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="https://linkedin.com" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="routes.html">Routes</a></li>
+                        <li><a href="index.html#cities">Cities</a></li>
+                        <li><a href="index.html#companies">Bus Companies</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Support</h3>
+                    <ul class="footer-links">
+                        <li><a href="contact-us.html">Contact Us</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                        <li><a href="terms-conditions.html">Terms & Conditions</a></li>
+                        <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Contact Info</h3>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt"></i> Kombolcha, Ethiopia</li>
+                        <li><i class="fas fa-phone"></i> +251 945710924</li>
+                        <li><i class="fas fa-envelope"></i> info@swiftbus.et</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 SwiftBus. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Route data matching your 10 cities
+        const routesData = [
+            {
+                id: 1,
+                origin: "Addis Ababa",
+                destination: "Bahirdar",
+                duration: "10-11 hours",
+                distance: "580km",
+                price: 350,
+                dailyTrips: 8,
+                region: "north",
+                image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+                description: "Scenic route through Ethiopian highlands"
+            },
+            {
+                id: 2,
+                origin: "Addis Ababa",
+                destination: "Hawasa",
+                duration: "4-5 hours",
+                distance: "275km",
+                price: 220,
+                dailyTrips: 12,
+                region: "south",
+                image: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+                description: "Quick connection to the lake city"
+            },
+            {
+                id: 3,
+                origin: "Addis Ababa",
+                destination: "Mekele",
+                duration: "12-13 hours",
+                distance: "780km",
+                price: 420,
+                dailyTrips: 6,
+                region: "north",
+                image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+                description: "Historic route to Tigray region"
+            },
+            {
+                id: 4,
+                origin: "Addis Ababa",
+                destination: "Jimma",
+                duration: "6-7 hours",
+                distance: "350km",
+                price: 280,
+                dailyTrips: 10,
+                region: "west",
+                image: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+                description: "Coffee region exploration route"
+            },
+            {
+                id: 5,
+                origin: "Bahirdar",
+                destination: "Gonder",
+                duration: "3-4 hours",
+                distance: "180km",
+                price: 180,
+                dailyTrips: 15,
+                region: "north",
+                image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+                description: "Historic cities connection"
+            },
+            {
+                id: 6,
+                origin: "Adama",
+                destination: "Hawasa",
+                duration: "3-4 hours",
+                distance: "250km",
+                price: 200,
+                dailyTrips: 14,
+                region: "south",
+                image: "https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+                description: "Industrial to resort city"
+            },
+            {
+                id: 7,
+                origin: "Kombolcha",
+                destination: "Addis Ababa",
+                duration: "6-7 hours",
+                distance: "380km",
+                price: 250,
+                dailyTrips: 9,
+                region: "east",
+                image: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+                description: "Industrial hub connection"
+            },
+            {
+                id: 8,
+                origin: "Dessie",
+                destination: "Kombolcha",
+                duration: "1-2 hours",
+                distance: "75km",
+                price: 80,
+                dailyTrips: 20,
+                region: "east",
+                image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+                description: "Short regional connection"
+            },
+            {
+                id: 9,
+                origin: "Arbaminch",
+                destination: "Hawasa",
+                duration: "5-6 hours",
+                distance: "300km",
+                price: 240,
+                dailyTrips: 7,
+                region: "south",
+                image: "https://images.unsplash.com/photo-1470219556762-1771e7f9427d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+                description: "Nature and lakes route"
+            },
+            {
+                id: 10,
+                origin: "Gonder",
+                destination: "Mekele",
+                duration: "8-9 hours",
+                distance: "450km",
+                price: 320,
+                dailyTrips: 5,
+                region: "north",
+                image: "https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+                description: "Northern historical circuit"
+            },
+            {
+                id: 11,
+                origin: "Jimma",
+                destination: "Arbaminch",
+                duration: "8-9 hours",
+                distance: "400km",
+                price: 300,
+                dailyTrips: 4,
+                region: "west",
+                image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+                description: "Western to southern route"
+            },
+            {
+                id: 12,
+                origin: "Addis Ababa",
+                destination: "Adama",
+                duration: "2-3 hours",
+                distance: "100km",
+                price: 120,
+                dailyTrips: 30,
+                region: "central",
+                image: "https://images.unsplash.com/photo-1501854140801-50d01698950b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+                description: "Frequent commuter route"
+            }
+        ];
+
+        // Current user state
+        let currentUser = null;
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+        });
+
+        async function initializePage() {
+            // Check user login state
+            await checkUserLoginState();
+            
+            // Populate routes
+            populateRoutes();
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Initialize animations
+            initializeAnimations();
+        }
+
+        async function checkUserLoginState() {
+            try {
+                // Show loading state if needed
+                console.log('Checking user session...');
+                
+                // Check session with backend API
+                const response = await swiftBusAPI.checkSession();
+                if (response.success && response.data) {
+                    currentUser = response.data;
+                    console.log('User authenticated:', currentUser.name, '(' + currentUser.role + ')');
+                    
+                    // Store user data in localStorage for consistency with other pages
+                    localStorage.setItem('swiftbus_user_loggedin', 'true');
+                    localStorage.setItem('swiftbus_user_data', JSON.stringify(currentUser));
+                    updateHeaderForLoggedInUser();
+                    updateMobileMenuForLoggedInUser();
+                } else {
+                    // Not logged in or session expired
+                    console.log('No active session');
+                    currentUser = null;
+                    localStorage.removeItem('swiftbus_user_loggedin');
+                    localStorage.removeItem('swiftbus_user_data');
+                    updateHeaderForLoggedOutUser();
+                    updateMobileMenuForLoggedOutUser();
+                }
+            } catch (error) {
+                console.error('Session check failed:', error);
+                
+                // Fallback to localStorage check for offline compatibility
+                const userLoggedIn = localStorage.getItem('swiftbus_user_loggedin') === 'true';
+                const userData = JSON.parse(localStorage.getItem('swiftbus_user_data') || 'null');
+                
+                if (userLoggedIn && userData) {
+                    console.log('Using cached user data:', userData.name);
+                    currentUser = userData;
+                    updateHeaderForLoggedInUser();
+                    updateMobileMenuForLoggedInUser();
+                } else {
+                    console.log('No cached user data available');
+                    currentUser = null;
+                    updateHeaderForLoggedOutUser();
+                    updateMobileMenuForLoggedOutUser();
+                }
+            }
+        }
+
+        function updateHeaderForLoggedInUser() {
+            const authButtons = document.getElementById('authButtons');
+            
+            if (authButtons) {
+                authButtons.innerHTML = `
+                    <div style="position: relative;">
+                        <button class="user-profile-btn" id="profileDropdown">
+                            <i class="fas fa-user-circle"></i>
+                            <span>${currentUser.name.split(' ')[0]}</span>
+                            <i class="fas fa-caret-down" style="margin-left: 5px;"></i>
+                        </button>
+                        <div class="dropdown-menu" id="userDropdownMenu">
+                            <div class="user-info-header">
+                                <div class="user-avatar-small" id="routesUserAvatar">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="user-details">
+                                    <div class="user-name">
+                                        <span>${currentUser.name}</span>
+                                    </div>
+                                    <div class="user-role ${currentUser.role}">
+                                        <i class="fas fa-${currentUser.role === 'admin' ? 'crown' : 'user'}"></i>
+                                        ${currentUser.role === 'admin' ? 'Administrator' : 'User'}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dropdown-links">
+                                <a href="#" id="profileLink">
+                                    <i class="fas fa-user-circle"></i>
+                                    <span>Profile</span>
+                                </a>
+                                ${currentUser.role === 'user' ? `
+                                <a href="#" id="ticketsLink">
+                                    <i class="fas fa-ticket-alt"></i>
+                                    <span>My Tickets</span>
+                                </a>
+                                ` : ''}
+                                <a href="#" id="dashboardLink">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <span>Dashboard</span>
+                                </a>
+                                ${currentUser.role === 'admin' ? `
+                                <a href="#" id="settingsLink">
+                                    <i class="fas fa-cog"></i>
+                                    <span>Settings</span>
+                                </a>
+                                ` : ''}
+                                <a href="#" class="logout" id="logoutBtn">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Logout</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Add dropdown functionality
+                const profileDropdown = document.getElementById('profileDropdown');
+                const dropdownMenu = document.getElementById('userDropdownMenu');
+                if (profileDropdown && dropdownMenu) {
+                    profileDropdown.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        dropdownMenu.classList.toggle('show');
+                    });
+                    
+                    // Close dropdown when clicking outside
+                    document.addEventListener('click', (e) => {
+                        if (!e.target.closest('.user-menu')) {
+                            dropdownMenu.classList.remove('show');
+                        }
+                    });
+                }
+                
+                // Update profile image in dropdown
+                updateRoutesProfileImage(currentUser.profileImage);
+                
+                // Add navigation functionality
+                setupNavigationLinks();
+                
+                // Update mobile menu button to show user name
+                updateMobileMenuButton();
+                
+                // Add logout functionality
+                document.getElementById('logoutBtn').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    logoutUser();
+                });
+            }
+        }
+
+        function updateRoutesProfileImage(profileImagePath) {
+            const routesUserAvatar = document.getElementById('routesUserAvatar');
+            if (!routesUserAvatar) return;
+            
+            if (profileImagePath && profileImagePath !== 'Not provided') {
+                // Show uploaded image
+                routesUserAvatar.innerHTML = `<img src="${profileImagePath}" alt="Profile picture" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-user\\'></i>'">`;
+            } else {
+                // Show default icon
+                routesUserAvatar.innerHTML = '<i class="fas fa-user"></i>';
+            }
+        }
+
+        // Update mobile menu button to show user name
+        function updateMobileMenuButton() {
+            const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+            if (mobileMenuBtn && currentUser) {
+                const firstName = currentUser.name.split(' ')[0];
+                mobileMenuBtn.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div class="mobile-user-avatar" id="mobileUserAvatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span style="font-size: 14px; font-weight: 500;">${firstName}</span>
+                        <i class="fas fa-caret-down" style="font-size: 12px;"></i>
+                    </div>
+                `;
+                
+                // Update mobile user avatar
+                updateMobileUserAvatar(currentUser.profileImage);
+            }
+        }
+
+        // Update mobile user avatar
+        function updateMobileUserAvatar(profileImagePath) {
+            const mobileUserAvatar = document.getElementById('mobileUserAvatar');
+            if (!mobileUserAvatar) return;
+            
+            if (profileImagePath && profileImagePath !== 'Not provided') {
+                mobileUserAvatar.innerHTML = `<img src="${profileImagePath}" alt="Profile picture" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-user\\'></i>'">`;
+            } else {
+                mobileUserAvatar.innerHTML = '<i class="fas fa-user"></i>';
+            }
+        }
+
+        // Reset mobile menu button to default
+        function resetMobileMenuButton() {
+            const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+            if (mobileMenuBtn) {
+                mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+                mobileMenuBtn.style.cssText = '';
+            }
+        }
+
+        function setupNavigationLinks() {
+            // Profile link
+            document.getElementById('profileLink').addEventListener('click', function(e) {
+                e.preventDefault();
+                if (currentUser.role === 'admin') {
+                    window.location.href = 'admin-profile.html';
+                } else {
+                    window.location.href = 'user-profile.html';
+                }
+            });
+
+            // Tickets link (only for users)
+            const ticketsLink = document.getElementById('ticketsLink');
+            if (ticketsLink) {
+                ticketsLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (currentUser.role === 'user') {
+                        window.location.href = 'my-tickets.html';
+                    }
+                });
+            }
+
+            // Dashboard link with role-based redirection
+            document.getElementById('dashboardLink').addEventListener('click', function(e) {
+                e.preventDefault();
+                if (currentUser.role === 'admin') {
+                    window.location.href = 'admin-dashboard.html';
+                } else {
+                    window.location.href = 'user-dashboard.html';
+                }
+            });
+
+            // Settings link (only for admins)
+            const settingsLink = document.getElementById('settingsLink');
+            if (settingsLink) {
+                settingsLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (currentUser.role === 'admin') {
+                        window.location.href = 'admin-settings.html';
+                    }
+                });
+            }
+        }
+
+        function updateMobileMenuForLoggedInUser() {
+            const mobileNavLinks = document.getElementById('mobileNavLinks');
+            if (mobileNavLinks) {
+                const userRole = currentUser.role;
+                const profileLink = userRole === 'admin' ? 'admin-profile.html' : 'user-profile.html';
+                const dashboardLink = userRole === 'admin' ? 'admin-dashboard.html' : 'user-dashboard.html';
+                
+                mobileNavLinks.innerHTML = `
+                    <li>
+                        <div class="mobile-user-profile">
+                            <div class="mobile-user-info">
+                                <div class="mobile-user-name">
+                                    <i class="fas fa-user"></i>
+                                    <span>${currentUser.name}</span>
+                                </div>
+                                <div class="mobile-user-role ${currentUser.role}">
+                                    <i class="fas fa-${currentUser.role === 'admin' ? 'crown' : 'user'}"></i>
+                                    ${currentUser.role === 'admin' ? 'Administrator' : 'User'}
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="routes.html" class="active">Routes</a></li>
+                    <li><a href="index.html#cities">Cities</a></li>
+                    <li><a href="index.html#companies">Bus Companies</a></li>
+                    <li><a href="${profileLink}">
+                        <i class="fas fa-user-circle" style="margin-right: 10px;"></i> Profile
+                    </a></li>
+                    ${userRole === 'user' ? `
+                    <li><a href="my-tickets.html">
+                        <i class="fas fa-ticket-alt" style="margin-right: 10px;"></i> My Tickets
+                    </a></li>
+                    ` : ''}
+                    <li><a href="${dashboardLink}">
+                        <i class="fas fa-tachometer-alt" style="margin-right: 10px;"></i> Dashboard
+                    </a></li>
+                    ${userRole === 'admin' ? `
+                    <li><a href="admin-settings.html">
+                        <i class="fas fa-cog" style="margin-right: 10px;"></i> Settings
+                    </a></li>
+                    ` : ''}
+                    <li>
+                        <button class="btn btn-danger" style="width: 100%;" id="mobileLogoutBtn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </li>
+                `;
+                
+                // Mobile logout button
+                setTimeout(() => {
+                    const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+                    if (mobileLogoutBtn) {
+                        mobileLogoutBtn.addEventListener('click', logoutUser);
+                    }
+                }, 100);
+            }
+        }
+
+        function updateHeaderForLoggedOutUser() {
+            const authButtons = document.getElementById('authButtons');
+            
+            if (authButtons) {
+                authButtons.innerHTML = `
+                    <div style="position: relative;">
+                        <button class="user-profile-btn" id="profileDropdown">
+                            <i class="fas fa-user-circle"></i>
+                            <span>Guest</span>
+                            <i class="fas fa-caret-down" style="margin-left: 5px;"></i>
+                        </button>
+                        <div class="dropdown-menu" id="userDropdownMenu">
+                            <div class="user-info-header">
+                                <div class="user-name">
+                                    <i class="fas fa-user"></i>
+                                    <span>Guest User</span>
+                                </div>
+                                <div class="user-role user">
+                                    <i class="fas fa-user"></i>
+                                    Not Logged In
+                                </div>
+                            </div>
+                            <div class="dropdown-links">
+                                <a href="login.html" id="loginLink">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                    <span>Login</span>
+                                </a>
+                                <a href="signup.html" id="signupLink">
+                                    <i class="fas fa-user-plus"></i>
+                                    <span>Sign Up</span>
+                                </a>
+                                <a href="user-profile.html" id="profileLink">
+                                    <i class="fas fa-user-circle"></i>
+                                    <span>Profile</span>
+                                </a>
+                                <a href="my-tickets.html" id="ticketsLink">
+                                    <i class="fas fa-ticket-alt"></i>
+                                    <span>My Tickets</span>
+                                </a>
+                                <a href="user-dashboard.html" id="dashboardLink">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <span>Dashboard</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Add dropdown functionality
+                const profileDropdown = document.getElementById('profileDropdown');
+                const dropdownMenu = document.getElementById('userDropdownMenu');
+                if (profileDropdown && dropdownMenu) {
+                    profileDropdown.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        dropdownMenu.classList.toggle('show');
+                    });
+                    
+                    // Close dropdown when clicking outside
+                    document.addEventListener('click', (e) => {
+                        if (!e.target.closest('.user-menu')) {
+                            dropdownMenu.classList.remove('show');
+                        }
+                    });
+                }
+            }
+            
+            // Reset mobile menu button to default
+            resetMobileMenuButton();
+        }
+
+        function updateMobileMenuForLoggedOutUser() {
+            const mobileNavLinks = document.getElementById('mobileNavLinks');
+            if (mobileNavLinks) {
+                mobileNavLinks.innerHTML = `
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="routes.html" class="active">Routes</a></li>
+                    <li><a href="index.html#cities">Cities</a></li>
+                    <li><a href="index.html#companies">Bus Companies</a></li>
+                    <li><a href="login.html">
+                        <i class="fas fa-sign-in-alt" style="margin-right: 10px;"></i> Login
+                    </a></li>
+                    <li><a href="signup.html">
+                        <i class="fas fa-user-plus" style="margin-right: 10px;"></i> Sign Up
+                    </a></li>
+                    <li><a href="user-profile.html">
+                        <i class="fas fa-user-circle" style="margin-right: 10px;"></i> Profile
+                    </a></li>
+                    <li><a href="my-tickets.html">
+                        <i class="fas fa-ticket-alt" style="margin-right: 10px;"></i> My Tickets
+                    </a></li>
+                    <li><a href="user-dashboard.html">
+                        <i class="fas fa-tachometer-alt" style="margin-right: 10px;"></i> Dashboard
+                    </a></li>
+                `;
+            }
+        }
+
+        function populateRoutes() {
+            const routesGrid = document.getElementById('routesGrid');
+            routesGrid.innerHTML = '';
+            
+            routesData.forEach(route => {
+                const routeCard = document.createElement('div');
+                routeCard.className = 'route-card fade-in';
+                routeCard.setAttribute('data-region', route.region);
+                routeCard.setAttribute('data-route', JSON.stringify(route));
+                
+                routeCard.innerHTML = `
+                    <div class="region-tag ${route.region}">
+                        ${getRegionName(route.region)}
+                    </div>
+                    <div class="route-image" style="background-image: url('${route.image}')">
+                        <div class="route-cities">
+                            <div class="city-info">
+                                <div class="city-label">From</div>
+                                <div class="city-name">${route.origin}</div>
+                            </div>
+                            <div class="route-arrow">
+                                <i class="fas fa-long-arrow-alt-right"></i>
+                            </div>
+                            <div class="city-info">
+                                <div class="city-label">To</div>
+                                <div class="city-name">${route.destination}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="route-info">
+                        <div class="route-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Duration</div>
+                                <div class="detail-value">${route.duration}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Distance</div>
+                                <div class="detail-value">${route.distance}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Daily Trips</div>
+                                <div class="detail-value">${route.dailyTrips}</div>
+                            </div>
+                        </div>
+                        <p style="color: var(--gray); font-size: 14px; margin-bottom: 15px;">${route.description}</p>
+                        <div class="route-price">
+                            <div class="price-label">Starting from</div>
+                            <div class="price-value">ETB ${route.price}</div>
+                        </div>
+                        <button class="book-route-btn" data-route-id="${route.id}">
+                            <i class="fas fa-ticket-alt"></i> Book This Route
+                        </button>
+                    </div>
+                `;
+                
+                routesGrid.appendChild(routeCard);
+            });
+            
+            // Update total routes count
+            document.getElementById('totalRoutes').textContent = routesData.length;
+        }
+
+        function getRegionName(regionCode) {
+            const regions = {
+                'north': 'Northern',
+                'south': 'Southern',
+                'east': 'Eastern',
+                'west': 'Western',
+                'central': 'Central'
+            };
+            return regions[regionCode] || regionCode;
+        }
+
+        function setupEventListeners() {
+            // Mobile navigation
+            const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+            const mobileNav = document.querySelector('.mobile-nav');
+            
+            mobileMenuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                mobileNav.classList.toggle('active');
+                mobileMenuBtn.classList.toggle('active');
+            });
+
+            // Close mobile nav when clicking outside or on a link
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.mobile-nav') && !e.target.closest('.mobile-menu-btn')) {
+                    mobileNav.classList.remove('active');
+                    mobileMenuBtn.classList.remove('active');
+                }
+            });
+            
+            // Close menu when clicking on mobile nav links
+            document.querySelectorAll('.mobile-nav-links a, .mobile-nav-links button').forEach(item => {
+                item.addEventListener('click', () => {
+                    mobileNav.classList.remove('active');
+                    mobileMenuBtn.classList.remove('active');
+                });
+            });
+
+            // Header scroll effect
+            window.addEventListener('scroll', function() {
+                const header = document.getElementById('header');
+                if (window.scrollY > 100) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+
+            // Filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    // Filter routes
+                    const region = this.getAttribute('data-region');
+                    filterRoutes(region);
+                });
+            });
+
+            // Book route buttons
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('book-route-btn') || e.target.closest('.book-route-btn')) {
+                    const routeId = e.target.closest('.book-route-btn').getAttribute('data-route-id');
+                    const route = routesData.find(r => r.id == routeId);
+                    
+                    if (route) {
+                        bookRoute(route);
+                    }
+                }
+            });
+
+            // Floating chatbot button - redirect to main page chatbot
+            document.getElementById('floatingChatbotBtn').addEventListener('click', function() {
+                // Store the current page context for the chatbot
+                sessionStorage.setItem('chatbotContext', 'routes');
+                sessionStorage.setItem('chatbotMessage', 'I was looking at routes and need help');
+                
+                // Redirect to main page with chatbot open
+                window.location.href = 'index.html#chatbot-open';
+            });
+        }
+
+        function filterRoutes(region) {
+            const routeCards = document.querySelectorAll('.route-card');
+            
+            routeCards.forEach(card => {
+                if (region === 'all' || card.getAttribute('data-region') === region) {
+                    card.style.display = 'block';
+                    setTimeout(() => {
+                        card.classList.add('active');
+                    }, 100);
+                } else {
+                    card.classList.remove('active');
+                    setTimeout(() => {
+                        card.style.display = 'none';
+                    }, 300);
+                }
+            });
+        }
+
+        function bookRoute(route) {
+            if (currentUser) {
+                // User is logged in
+                const confirmBooking = confirm(`Book route from ${route.origin} to ${route.destination}?\n\nDuration: ${route.duration}\nPrice: ETB ${route.price}\n\nProceed to booking?`);
+                
+                if (confirmBooking) {
+                    // Save booking data
+                    localStorage.setItem('swiftbus_current_booking', JSON.stringify(route));
+                    // Redirect to booking page
+                    window.location.href = 'book-ticket.html';
+                }
+            } else {
+                // User not logged in
+                const proceed = confirm(`You need to login to book tickets.\n\nRoute: ${route.origin} → ${route.destination}\nPrice: ETB ${route.price}\n\nGo to login page?`);
+                
+                if (proceed) {
+                    // Save route for after login
+                    localStorage.setItem('swiftbus_pending_booking', JSON.stringify(route));
+                    window.location.href = 'login.html?redirect=booking';
+                }
+            }
+        }
+
+        function initializeAnimations() {
+            // Fade in animations on scroll
+            const fadeInOnScroll = function() {
+                const fadeElements = document.querySelectorAll('.fade-in');
+                fadeElements.forEach(element => {
+                    const elementTop = element.getBoundingClientRect().top;
+                    const elementVisible = 150;
+                    
+                    if (elementTop < window.innerHeight - elementVisible) {
+                        element.classList.add('active');
+                    }
+                });
+            };
+            
+            window.addEventListener('scroll', fadeInOnScroll);
+            fadeInOnScroll(); // Initial check
+            
+            // Animate route cards with delay
+            const routeCards = document.querySelectorAll('.route-card');
+            routeCards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+        }
+
+        // Logout function
+        async function logoutUser() {
+            try {
+                // Call backend logout API
+                await swiftBusAPI.logout();
+            } catch (error) {
+                console.error('Backend logout failed:', error);
+            }
+            
+            // Clear localStorage regardless of backend response
+            localStorage.removeItem('swiftbus_user_loggedin');
+            localStorage.removeItem('swiftbus_user_data');
+            currentUser = null;
+            updateHeaderForLoggedOutUser();
+            updateMobileMenuForLoggedOutUser();
+            
+            // Show notification
+            alert('Successfully logged out');
+            
+            // Close mobile menu if open
+            document.querySelector('.mobile-nav').classList.remove('active');
+            // Close dropdown if open
+            const dropdownMenu = document.getElementById('userDropdownMenu');
+            if (dropdownMenu) {
+                dropdownMenu.classList.remove('show');
+            }
+        }
+
+        // Add CSS for dropdown menu
+        const style = document.createElement('style');
+        style.textContent = `
+            .dropdown-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                right: 0;
+                background: white;
+                min-width: 250px;
+                box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+                border-radius: 12px;
+                z-index: 1001;
+                margin-top: 15px;
+                overflow: hidden;
+                border: 1px solid rgba(0,0,0,0.1);
+            }
+
+            .dropdown-menu.show {
+                display: block;
+                animation: fadeIn 0.3s ease;
+            }
+
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(-10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            .user-info-header {
+                padding: 20px;
+                background: linear-gradient(135deg, var(--primary), #1a73e8);
+                color: white;
+                border-bottom: 1px solid rgba(255,255,255,0.2);
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .user-avatar-small {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px;
+                flex-shrink: 0;
+            }
+
+            .user-avatar-small img {
+                width: 100%;
+                height: 100%;
+                border-radius: 50%;
+                object-fit: cover;
+            }
+
+            .user-details {
+                flex: 1;
+            }
+
+            .user-name {
+                font-weight: 600;
+                font-size: 16px;
+                margin-bottom: 5px;
+            }
+
+            .user-role {
+                font-size: 13px;
+                opacity: 0.9;
+                background: rgba(255,255,255,0.2);
+                padding: 4px 10px;
+                border-radius: 20px;
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                font-weight: 500;
+            }
+
+            .user-role.admin {
+                background: rgba(255, 109, 0, 0.2);
+            }
+
+            .user-role.user {
+                background: rgba(40, 167, 69, 0.2);
+            }
+
+            .dropdown-links {
+                padding: 10px 0;
+            }
+
+            .dropdown-links a {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 12px 20px;
+                color: var(--dark);
+                text-decoration: none;
+                transition: all 0.3s ease;
+                border-left: 3px solid transparent;
+            }
+
+            .dropdown-links a:hover {
+                background: var(--light);
+                border-left-color: var(--primary);
+                padding-left: 25px;
+            }
+
+            .dropdown-links a i {
+                width: 20px;
+                text-align: center;
+                color: var(--primary);
+            }
+
+            .dropdown-links a.logout {
+                color: var(--danger);
+                border-top: 1px solid #eee;
+                margin-top: 10px;
+            }
+
+            .dropdown-links a.logout i {
+                color: var(--danger);
+            }
+
+            .user-profile-btn {
+                background: transparent;
+                border: 2px solid var(--primary);
+                color: var(--primary);
+                padding: 8px 16px;
+                border-radius: 30px;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .user-profile-btn:hover {
+                background: var(--primary);
+                color: white;
+                transform: translateY(-2px);
+            }
+
+            @media (max-width: 768px) {
+                .dropdown-menu {
+                    position: fixed;
+                    top: auto;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    width: 100%;
+                    max-width: 100%;
+                    margin: 0;
+                    border-radius: 20px 20px 0 0;
+                    max-height: 70vh;
+                    overflow-y: auto;
+                    z-index: 1002;
+                }
+            }
+
+            @media (min-width: 481px) and (max-width: 768px) {
+                .dropdown-menu {
+                    position: absolute;
+                    top: 100%;
+                    right: 0;
+                    left: auto;
+                    bottom: auto;
+                    width: auto;
+                    min-width: 250px;
+                    max-width: 300px;
+                    margin-top: 10px;
+                    border-radius: 12px;
+                    max-height: none;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+
+    <script src="js/api.js"></script>
+    <script>
+        // API Integration for this page
+        document.addEventListener('DOMContentLoaded', async function() {
+        });
+
+        // Helper functions for this page
+        function updateUIForUser(user) {
+            if (user) {
+                // Update UI for logged-in user
+                const userElements = document.querySelectorAll('.user-name');
+                userElements.forEach(el => el.textContent = user.name);
+                
+                const loginBtns = document.querySelectorAll('.login-btn');
+                loginBtns.forEach(btn => btn.style.display = 'none');
+                
+                const userMenus = document.querySelectorAll('.user-menu');
+                userMenus.forEach(menu => menu.style.display = 'block');
+            }
+        }
+
+        // Placeholder functions - implement as needed
+        function displayPopularRoutes(routes) {
+            console.log('Popular routes:', routes);
+            // Implement route display logic
+        }
+
+        function populateCityDropdowns(cities) {
+            console.log('Cities:', cities);
+            // Implement city dropdown population
+        }
+
+        function displayUserBookings(bookings) {
+            console.log('User bookings:', bookings);
+            // Implement booking display logic
+        }
+
+        function displayBookingStats(stats) {
+            console.log('Booking stats:', stats);
+            // Implement stats display logic
+        }
+
+        function displayAdminStats(stats) {
+            console.log('Admin stats:', stats);
+            // Implement admin stats display logic
+        }
+
+        function displayAllBookings(bookings) {
+            console.log('All bookings:', bookings);
+            // Implement all bookings display logic
+        }
+
+        function displayBuses(buses) {
+            console.log('Buses:', buses);
+            // Implement buses display logic
+        }
+
+        function displaySchedules(schedules) {
+            console.log('Schedules:', schedules);
+            // Implement schedules display logic
+        }
+    </script>
+</body>
+</html>

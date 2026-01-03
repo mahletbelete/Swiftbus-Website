@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms & Conditions - SwiftBus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --secondary: #ff6d00;
+            --dark: #222;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background-color: white;
+            box-shadow: var(--shadow);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo h1 {
+            color: var(--primary);
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .logo span {
+            color: var(--secondary);
+        }
+
+        .back-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            background: #0d47a1;
+            transform: translateY(-2px);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding-top: 100px;
+            padding-bottom: 80px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            color: var(--gray);
+            font-size: 1.1rem;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        .terms-section {
+            margin-bottom: 40px;
+        }
+
+        .terms-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .terms-section h2 {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .terms-section h3 {
+            color: var(--dark);
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            margin-top: 25px;
+        }
+
+        .terms-section p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .terms-section ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .terms-section li {
+            margin-bottom: 8px;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid var(--warning);
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        .contact-info {
+            background: #e8f0fe;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+
+        .contact-info h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 60px 0 20px;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-column h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--secondary);
+            border-radius: 2px;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: #bbb;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: white;
+            padding-left: 5px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #bbb;
+            font-size: 14px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .content-card {
+                padding: 25px;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .terms-section h2 {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-top">
+                <div class="logo">
+                    <h1>Swift<span>Bus</span></h1>
+                </div>
+                <a href="javascript:history.back()" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Back
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1>Terms & Conditions</h1>
+                <p>Please read these terms and conditions carefully before using our services</p>
+            </div>
+
+            <!-- Content -->
+            <div class="content-card">
+                <div class="highlight">
+                    <strong>Last Updated:</strong> December 29, 2025<br>
+                    <strong>Effective Date:</strong> January 1, 2024
+                </div>
+
+                <div class="terms-section">
+                    <h2>1. Acceptance of Terms</h2>
+                    <p>By accessing and using SwiftBus services, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.</p>
+                </div>
+
+                <div class="terms-section">
+                    <h2>2. Service Description</h2>
+                    <p>SwiftBus is an online bus ticket booking platform that connects passengers with bus operators across Ethiopia. We provide:</p>
+                    <ul>
+                        <li>Online bus ticket booking services</li>
+                        <li>Route information and schedules</li>
+                        <li>Payment processing services</li>
+                        <li>Customer support services</li>
+                        <li>Travel-related information</li>
+                    </ul>
+                </div>
+
+                <div class="terms-section">
+                    <h2>3. User Responsibilities</h2>
+                    <h3>3.1 Account Registration</h3>
+                    <p>Users must provide accurate, current, and complete information during registration. You are responsible for maintaining the confidentiality of your account credentials.</p>
+                    
+                    <h3>3.2 Booking Requirements</h3>
+                    <ul>
+                        <li>Provide accurate passenger information</li>
+                        <li>Arrive at departure points on time</li>
+                        <li>Carry valid identification documents</li>
+                        <li>Comply with bus operator policies</li>
+                    </ul>
+                </div>
+
+                <div class="terms-section">
+                    <h2>4. Booking and Payment</h2>
+                    <h3>4.1 Booking Process</h3>
+                    <p>All bookings are subject to availability and confirmation. Ticket prices are displayed in Ethiopian Birr (ETB) and include applicable taxes and service fees.</p>
+                    
+                    <h3>4.2 Payment Methods</h3>
+                    <p>We accept the following payment methods:</p>
+                    <ul>
+                        <li>Telebirr mobile payment</li>
+                        <li>Commercial Bank of Ethiopia (CBE)</li>
+                        <li>Dashen Bank</li>
+                        <li>Credit/Debit cards</li>
+                    </ul>
+                    
+                    <h3>4.3 Payment Security</h3>
+                    <p>All payments are processed through secure, encrypted channels. We do not store your payment information on our servers.</p>
+                </div>
+
+                <div class="terms-section">
+                    <h2>5. Cancellation and Refund Policy</h2>
+                    <h3>5.1 Cancellation by Passenger</h3>
+                    <ul>
+                        <li><strong>24+ hours before departure:</strong> Full refund minus service fee</li>
+                        <li><strong>12-24 hours before departure:</strong> 75% refund</li>
+                        <li><strong>6-12 hours before departure:</strong> 50% refund</li>
+                        <li><strong>Less than 6 hours:</strong> No refund</li>
+                    </ul>
+                    
+                    <h3>5.2 Cancellation by Bus Operator</h3>
+                    <p>In case of cancellation by the bus operator due to technical issues, weather conditions, or other unforeseen circumstances, passengers are entitled to a full refund or free rescheduling.</p>
+                </div>
+
+                <div class="terms-section">
+                    <h2>6. Liability and Disclaimers</h2>
+                    <h3>6.1 Service Availability</h3>
+                    <p>While we strive to maintain continuous service availability, we do not guarantee uninterrupted access to our platform.</p>
+                    
+                    <h3>6.2 Third-Party Services</h3>
+                    <p>SwiftBus acts as an intermediary between passengers and bus operators. We are not responsible for the quality of services provided by third-party bus operators.</p>
+                    
+                    <h3>6.3 Limitation of Liability</h3>
+                    <p>Our liability is limited to the ticket price paid. We are not liable for indirect, incidental, or consequential damages.</p>
+                </div>
+
+                <div class="terms-section">
+                    <h2>7. Privacy and Data Protection</h2>
+                    <p>Your privacy is important to us. Please review our Privacy Policy to understand how we collect, use, and protect your personal information.</p>
+                </div>
+
+                <div class="terms-section">
+                    <h2>8. Prohibited Uses</h2>
+                    <p>You may not use our service for:</p>
+                    <ul>
+                        <li>Illegal or unauthorized purposes</li>
+                        <li>Violating any laws or regulations</li>
+                        <li>Transmitting harmful or malicious content</li>
+                        <li>Interfering with the security of the platform</li>
+                        <li>Making fraudulent bookings</li>
+                    </ul>
+                </div>
+
+                <div class="terms-section">
+                    <h2>9. Modifications to Terms</h2>
+                    <p>We reserve the right to modify these terms at any time. Changes will be effective immediately upon posting on our website. Continued use of our services constitutes acceptance of the modified terms.</p>
+                </div>
+
+                <div class="terms-section">
+                    <h2>10. Governing Law</h2>
+                    <p>These terms are governed by the laws of the Federal Democratic Republic of Ethiopia. Any disputes will be resolved in Ethiopian courts.</p>
+                </div>
+
+                <div class="contact-info">
+                    <h3>Contact Information</h3>
+                    <p>If you have any questions about these Terms & Conditions, please contact us:</p>
+                    <p><strong>Email:</strong> legal@swiftbus.et</p>
+                    <p><strong>Phone:</strong> +251 911 234 567</p>
+                    <p><strong>Address:</strong> Addis Ababa, Ethiopia</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>SwiftBus</h3>
+                    <p>Your trusted partner for bus travel across Ethiopia. We connect you to your destination safely and comfortably.</p>
+                    <div class="social-links">
+                        <a href="https://facebook.com" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://twitter.com" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="https://instagram.com" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.linkedin.com/" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="routes.html">Routes</a></li>
+                        <li><a href="book-ticket.html">Book Ticket</a></li>
+                        <li><a href="my-tickets.html">My Tickets</a></li>
+                        <li><a href="user-dashboard.html">User Dashboard</a></li>
+                        <li><a href="search.html">Search Buses</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Support</h3>
+                    <ul class="footer-links">
+                        <li><a href="contact-us.html">Contact Us</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                        <li><a href="terms-conditions.html">Terms & Conditions</a></li>
+                        <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Contact Info</h3>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt"></i> Kombolcha, Ethiopia</li>
+                        <li><i class="fas fa-phone"></i> +251 945710924</li>
+                        <li><i class="fas fa-envelope"></i> info@swiftbus.et</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 SwiftBus. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Fix Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .step { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Session Fix Test</h1>
+    
+    <div class="step">
+        <h3>Step 1: Test Session Configuration</h3>
+        <button onclick="testSessionConfig()">Test Session Config</button>
+        <div id="sessionConfigResult"></div>
+    </div>
+    
+    <div class="step">
+        <h3>Step 2: Test Login with New CORS Settings</h3>
+        <button onclick="testLoginWithCORS()">Test Login + CORS</button>
+        <div id="corsLoginResult"></div>
+    </div>
+    
+    <div class="step">
+        <h3>Step 3: Test Complete Flow</h3>
+        <button onclick="testCompleteFlow()">Test Complete Flow</button>
+        <div id="completeFlowResult"></div>
+    </div>
+    
+    <div class="step">
+        <h3>Step 4: Simulate Real Admin Page Load</h3>
+        <button onclick="simulateRealAdminLoad()">Simulate Admin Page</button>
+        <div id="realAdminResult"></div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        async function testSessionConfig() {
+            const container = document.getElementById('sessionConfigResult');
+            container.innerHTML = '<div class="warning">🔄 Testing session configuration...</div>';
+            
+            try {
+                const response = await fetch('test_session_cookies.php');
+                const data = await response.json();
+                
+                if (data.success) {
+                    container.innerHTML = `
+                        <div class="success">
+                            ✅ Session Config Test: SUCCESS<br>
+                            Session ID: ${data.data.session_id}<br>
+                            Session Status: ${data.data.session_status}<br>
+                            Cookie Params: ${JSON.stringify(data.data.session_cookie_params)}<br>
+                            <details>
+                                <summary>Full Details</summary>
+                                <pre>${JSON.stringify(data.data, null, 2)}</pre>
+                            </details>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `<div class="error">❌ Session Config Test Failed</div>`;
+                }
+            } catch (error) {
+                container.innerHTML = `<div class="error">❌ Session Config Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function testLoginWithCORS() {
+            const container = document.getElementById('corsLoginResult');
+            container.innerHTML = '<div class="warning">🔄 Testing login with CORS credentials...</div>';
+            
+            try {
+                // Clear everything first
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                // Test login with new CORS settings
+                const loginResponse = await swiftBusAPI.login({
+                    email: 'mubarekali974@gmail.com',
+                    password: 'Admin@123'
+                });
+                
+                if (loginResponse.success) {
+                    // Immediately test session
+                    const sessionResponse = await swiftBusAPI.checkSession();
+                    
+                    if (sessionResponse.success && sessionResponse.data.role === 'admin') {
+                        container.innerHTML = `
+                            <div class="success">
+                                ✅ Login + CORS: SUCCESS<br>
+                                User: ${sessionResponse.data.name}<br>
+                                Role: ${sessionResponse.data.role}<br>
+                                <strong>Session persists with CORS credentials!</strong>
+                            </div>
+                        `;
+                    } else {
+                        container.innerHTML = `
+                            <div class="error">
+                                ❌ Login SUCCESS but Session FAILED<br>
+                                Login: ${loginResponse.message}<br>
+                                Session: ${sessionResponse.message}<br>
+                                <strong>CORS fix didn't work!</strong>
+                            </div>
+                        `;
+                    }
+                } else {
+                    container.innerHTML = `<div class="error">❌ Login Failed: ${loginResponse.message}</div>`;
+                }
+            } catch (error) {
+                container.innerHTML = `<div class="error">❌ CORS Login Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function testCompleteFlow() {
+            const container = document.getElementById('completeFlowResult');
+            container.innerHTML = '<div class="warning">🔄 Testing complete login → admin flow...</div>';
+            
+            try {
+                // Step 1: Clear data
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                // Step 2: Login
+                const loginResponse = await swiftBusAPI.login({
+                    email: 'mubarekali974@gmail.com',
+                    password: 'Admin@123'
+                });
+                
+                if (!loginResponse.success) {
+                    container.innerHTML = `<div class="error">❌ Step 2 Failed: ${loginResponse.message}</div>`;
+                    return;
+                }
+                
+                // Step 3: Wait (simulate redirect delay)
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // Step 4: Check session (like admin page would)
+                const sessionResponse = await swiftBusAPI.checkSession();
+                
+                if (!sessionResponse.success) {
+                    container.innerHTML = `
+                        <div class="error">
+                            ❌ Step 4 Failed: Session lost after delay<br>
+                            This explains the redirect loop!<br>
+                            Session: ${sessionResponse.message}
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Step 5: Test authManager (like admin page would)
+                const adminUser = await authManager.checkAuth();
+                
+                if (!adminUser || adminUser.role !== 'admin') {
+                    container.innerHTML = `
+                        <div class="error">
+                            ❌ Step 5 Failed: authManager check failed<br>
+                            This would cause redirect to login!<br>
+                            User: ${adminUser ? adminUser.role : 'null'}
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = `
+                    <div class="success">
+                        ✅ Complete Flow: SUCCESS<br>
+                        Login → Wait → Session Check → Auth Check<br>
+                        User: ${adminUser.name} (${adminUser.role})<br>
+                        <strong>No redirect loop should occur!</strong>
+                    </div>
+                `;
+                
+            } catch (error) {
+                container.innerHTML = `<div class="error">❌ Complete Flow Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function simulateRealAdminLoad() {
+            const container = document.getElementById('realAdminResult');
+            container.innerHTML = '<div class="warning">🔄 Simulating real admin page load...</div>';
+            
+            try {
+                // This simulates exactly what happens when admin page loads
+                console.log('🎭 Simulating admin page DOMContentLoaded...');
+                
+                // This is the exact code from admin pages
+                const user = await authManager.requireAdmin();
+                
+                if (user) {
+                    container.innerHTML = `
+                        <div class="success">
+                            ✅ Real Admin Simulation: SUCCESS<br>
+                            User: ${user.name}<br>
+                            Role: ${user.role}<br>
+                            <strong>Admin page would load successfully!</strong><br>
+                            <br>
+                            <a href="admin-dashboard.html" target="_blank">Test Real Admin Dashboard</a>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div class="error">
+                            ❌ Real Admin Simulation: FAILED<br>
+                            authManager.requireAdmin() returned null<br>
+                            <strong>This would cause redirect to login!</strong>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                container.innerHTML = `<div class="error">❌ Real Admin Simulation Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Auto-start session config test
+        setTimeout(() => {
+            testSessionConfig();
+        }, 1000);
+    </script>
+</body>
+</html>

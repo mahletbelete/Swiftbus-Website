@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Bookings - SwiftBus</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-title {
+            color: #1a73e8;
+            border-bottom: 2px solid #1a73e8;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .test-result {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .btn {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover { background: #0d47a1; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border: 1px solid #e9ecef;
+        }
+        .booking-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .booking-header {
+            font-weight: bold;
+            color: #1a73e8;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .booking-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .detail-item {
+            background: white;
+            padding: 8px;
+            border-radius: 3px;
+            border-left: 3px solid #1a73e8;
+        }
+        .detail-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+        }
+        .detail-value {
+            font-weight: bold;
+            color: #333;
+        }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .booking-confirmed { background: #28a745; color: white; }
+        .booking-pending { background: #ffc107; color: #212529; }
+        .booking-cancelled { background: #dc3545; color: white; }
+        .payment-paid { background: #28a745; color: white; }
+        .payment-pending { background: #ffc107; color: #212529; }
+        .payment-failed { background: #dc3545; color: white; }
+        .route-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        .route-arrow {
+            color: #1a73e8;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎫 Admin Bookings API Test</h1>
+    
+    <div class="test-container">
+        <h2 class="test-title">Authentication Test</h2>
+        <button class="btn" onclick="testAuthentication()">Test Authentication</button>
+        <div id="authResult"></div>
+    </div>
+
+    <div class="test-container">
+        <h2 class="test-title">Bookings API Tests</h2>
+        <button class="btn" onclick="testGetBookings()">Get All Bookings</button>
+        <button class="btn" onclick="testGetBookingsWithFilters()">Get Bookings with Filters</button>
+        <button class="btn" onclick="testUpdateBooking()">Update Booking</button>
+        <button class="btn" onclick="testUpdatePaymentStatus()">Update Payment Status</button>
+        <button class="btn btn-danger" onclick="testCancelBooking()">Cancel Booking</button>
+        <div id="bookingsResult"></div>
+    </div>
+
+    <div class="test-container">
+        <h2 class="test-title">Bookings Display</h2>
+        <div id="bookingsDisplay"></div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let swiftBusAPI;
+        let testBookingId = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof SwiftBusAPI !== 'undefined') {
+                swiftBusAPI = new SwiftBusAPI();
+                console.log('✅ SwiftBusAPI initialized for testing');
+                showResult('authResult', 'API initialized successfully', 'info');
+            } else {
+                showResult('authResult', 'SwiftBusAPI not available', 'error');
+            }
+        });
+
+        async function testAuthentication() {
+            try {
+                showResult('authResult', 'Testing authentication...', 'info');
+                
+                const response = await swiftBusAPI.checkSession();
+                console.log('Auth response:', response);
+                
+                if (response.success && response.data) {
+                    const userData = response.data;
+                    if (userData.role === 'admin') {
+                        showResult('authResult', 
+                            `✅ Admin authenticated successfully!<br>
+                            Name: ${userData.name || userData.full_name}<br>
+                            Role: ${userData.role}<br>
+                            Email: ${userData.email}`, 'success');
+                    } else {
+                        showResult('authResult', 
+                            `❌ Admin access required. Current role: ${userData.role}`, 'error');
+                    }
+                } else {
+                    showResult('authResult', '❌ Authentication failed: ' + (response.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Auth test error:', error);
+                showResult('authResult', '❌ Authentication test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testGetBookings() {
+            try {
+                showResult('bookingsResult', 'Loading all bookings...', 'info');
+                
+                const response = await swiftBusAPI.request('admin_bookings.php?action=get_bookings');
+                console.log('Get bookings response:', response);
+                
+                if (response.success && response.data) {
+                    const bookings = response.data;
+                    showResult('bookingsResult', 
+                        `✅ Successfully loaded ${bookings.length} bookings`, 'success');
+                    
+                    // Set test booking ID from first booking
+                    if (bookings.length > 0) {
+                        testBookingId = bookings[0].id;
+                    }
+                    
+                    displayBookings(bookings);
+                } else {
+                    showResult('bookingsResult', '❌ Failed to load bookings: ' + (response.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Get bookings test error:', error);
+                showResult('bookingsResult', '❌ Get bookings test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testGetBookingsWithFilters() {
+            try {
+                showResult('bookingsResult', 'Loading bookings with filters...', 'info');
+                
+                const response = await swiftBusAPI.request('admin_bookings.php?action=get_bookings&booking_status=confirmed&search=BK');
+                console.log('Get filtered bookings response:', response);
+                
+                if (response.success && response.data) {
+                    const bookings = response.data;
+                    showResult('bookingsResult', 
+                        `✅ Successfully loaded ${bookings.length} filtered bookings (confirmed status, search: "BK")`, 'success');
+                    
+                    displayBookings(bookings);
+                } else {
+                    showResult('bookingsResult', '❌ Failed to load filtered bookings: ' + (response.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Get filtered bookings test error:', error);
+                showResult('bookingsResult', '❌ Get filtered bookings test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testUpdateBooking() {
+            if (!testBookingId) {
+                showResult('bookingsResult', '❌ No test booking available. Load bookings first.', 'error');
+                return;
+            }
+            
+            try {
+                showResult('bookingsResult', 'Updating test booking...', 'info');
+                
+                const updateData = {
+                    action: 'update_booking',
+                    id: testBookingId,
+                    passenger_name: 'Updated Test User',
+                    passenger_phone: '+251 911223344'
+                };
+                
+                const response = await swiftBusAPI.request('admin_bookings.php', {
+                    method: 'POST',
+                    body: JSON.stringify(updateData)
+                });
+                
+                console.log('Update booking response:', response);
+                
+                if (response.success) {
+                    showResult('bookingsResult', 
+                        `✅ Successfully updated booking: ${testBookingId}<br>
+                        Updated passenger information`, 'success');
+                } else {
+                    showResult('bookingsResult', '❌ Failed to update booking: ' + (response.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Update booking test error:', error);
+                showResult('bookingsResult', '❌ Update booking test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testUpdatePaymentStatus() {
+            if (!testBookingId) {
+                showResult('bookingsResult', '❌ No test booking available. Load bookings first.', 'error');
+                return;
+            }
+            
+            try {
+                showResult('bookingsResult', 'Updating payment status...', 'info');
+                
+                const response = await swiftBusAPI.request('admin_bookings.php', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'update_payment_status',
+                        id: testBookingId,
+                        payment_status: 'paid'
+                    })
+                });
+                
+                console.log('Update payment status response:', response);
+                
+                if (response.success) {
+                    showResult('bookingsResult', 
+                        `✅ Successfully updated payment status for booking: ${testBookingId}`, 'success');
+                } else {
+                    showResult('bookingsResult', '❌ Failed to update payment status: ' + (response.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Update payment status test error:', error);
+                showResult('bookingsResult', '❌ Update payment status test failed: ' + error.message, 'error');
+            }
+        }
+
+        async function testCancelBooking() {
+            if (!testBookingId) {
+                showResult('bookingsResult', '❌ No test booking available. Load bookings first.', 'error');
+                return;
+            }
+            
+            if (!confirm(`Are you sure you want to cancel test booking ${testBookingId}?`)) {
+                return;
+            }
+            
+            try {
+                showResult('bookingsResult', 'Cancelling test booking...', 'info');
+                
+                const response = await swiftBusAPI.request('admin_bookings.php', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'cancel_booking',
+                        id: testBookingId
+                    })
+                });
+                
+                console.log('Cancel booking response:', response);
+                
+                if (response.success) {
+                    showResult('bookingsResult', 
+                        `✅ Successfully cancelled booking: ${testBookingId}`, 'success');
+                } else {
+                    showResult('bookingsResult', '❌ Failed to cancel booking: ' + (response.message || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Cancel booking test error:', error);
+                showResult('bookingsResult', '❌ Cancel booking test failed: ' + error.message, 'error');
+            }
+        }
+
+        function displayBookings(bookings) {
+            const container = document.getElementById('bookingsDisplay');
+            
+            if (!bookings || bookings.length === 0) {
+                container.innerHTML = '<div class="info">No bookings to display</div>';
+                return;
+            }
+            
+            let html = `<h3>🎫 Bookings Data (${bookings.length} bookings)</h3>`;
+            
+            bookings.forEach(booking => {
+                html += `
+                    <div class="booking-item">
+                        <div class="booking-header">
+                            <span>${booking.id} - ${booking.user_name}</span>
+                            <div>
+                                <span class="status-badge booking-${booking.booking_status}">${booking.booking_status}</span>
+                                <span class="status-badge payment-${booking.payment_status}">${booking.payment_status}</span>
+                            </div>
+                        </div>
+                        <div class="booking-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Booking ID</div>
+                                <div class="detail-value">${booking.id}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">User Name & Contact 👤</div>
+                                <div class="detail-value">${booking.user_name}<br><small>${booking.user_phone}</small></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Route 🛣️</div>
+                                <div class="detail-value">
+                                    <div class="route-display">
+                                        <span>${booking.route_origin}</span>
+                                        <span class="route-arrow">→</span>
+                                        <span>${booking.route_destination}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Bus & Seat 💺</div>
+                                <div class="detail-value">${booking.bus_name}<br><small>Seats: ${booking.seat_numbers}</small></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Travel Date & Time ⏰</div>
+                                <div class="detail-value">${new Date(booking.travel_date).toLocaleDateString()}<br><small>${booking.departure_time}</small></div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Total Amount</div>
+                                <div class="detail-value">${booking.total_amount} ETB</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Booking Date</div>
+                                <div class="detail-value">${new Date(booking.booking_date).toLocaleDateString()}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Passengers</div>
+                                <div class="detail-value">${booking.passenger_count || 1}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function showResult(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `<div class="test-result ${type}">${message}</div>`;
+        }
+    </script>
+</body>
+</html>

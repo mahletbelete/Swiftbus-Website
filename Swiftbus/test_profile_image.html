@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Profile Image - SwiftBus</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .avatar-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            font-size: 60px;
+            color: #666;
+        }
+        .avatar-preview img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .btn {
+            background: #1a73e8;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        .btn:hover {
+            background: #0d47a1;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>SwiftBus Profile Image Test</h1>
+    
+    <div class="test-section">
+        <h3>1. Test Profile Image Upload</h3>
+        <p>Select an image file to test the upload functionality:</p>
+        
+        <input type="file" id="imageUpload" accept="image/*">
+        <button class="btn" onclick="testUpload()">Upload Image</button>
+        
+        <div class="avatar-preview" id="avatarPreview">
+            <i>👤</i>
+        </div>
+        
+        <div id="uploadStatus"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>2. Test Profile Update</h3>
+        <p>Test updating profile information:</p>
+        
+        <input type="text" id="firstName" placeholder="First Name" value="John">
+        <input type="text" id="lastName" placeholder="Last Name" value="Doe">
+        <input type="tel" id="phone" placeholder="+251911234567">
+        <button class="btn" onclick="testProfileUpdate()">Update Profile</button>
+        
+        <div id="profileStatus"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>4. Test Profile Image Persistence</h3>
+        <p>Test if profile image persists after page refresh:</p>
+        
+        <button class="btn" onclick="testImagePersistence()">Test Image Persistence</button>
+        <button class="btn" onclick="window.location.reload()">Refresh Page</button>
+        
+        <div id="persistenceStatus"></div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        function showStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        async function testUpload() {
+            const fileInput = document.getElementById('imageUpload');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showStatus('uploadStatus', 'Please select a file first', 'error');
+                return;
+            }
+            
+            // Validate file
+            if (!file.type.startsWith('image/')) {
+                showStatus('uploadStatus', 'Please select a valid image file', 'error');
+                return;
+            }
+            
+            if (file.size > 5 * 1024 * 1024) {
+                showStatus('uploadStatus', 'File size must be less than 5MB', 'error');
+                return;
+            }
+            
+            try {
+                showStatus('uploadStatus', 'Uploading image...', 'info');
+                
+                // Preview image
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('avatarPreview').innerHTML = 
+                        `<img src="${e.target.result}" alt="Preview">`;
+                };
+                reader.readAsDataURL(file);
+                
+                // Upload to server
+                const formData = new FormData();
+                formData.append('avatar', file);
+                
+                const response = await fetch('api/auth.php?action=upload_avatar', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('uploadStatus', 
+                        `✓ Image uploaded successfully! Path: ${result.data.profileImage}`, 
+                        'success');
+                } else {
+                    showStatus('uploadStatus', 
+                        `✗ Upload failed: ${result.message}`, 
+                        'error');
+                }
+                
+            } catch (error) {
+                console.error('Upload error:', error);
+                showStatus('uploadStatus', 
+                    `✗ Network error: ${error.message}`, 
+                    'error');
+            }
+        }
+
+        async function testProfileUpdate() {
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const phone = document.getElementById('phone').value;
+            
+            if (!firstName || !lastName) {
+                showStatus('profileStatus', 'Please enter first and last name', 'error');
+                return;
+            }
+            
+            try {
+                showStatus('profileStatus', 'Updating profile...', 'info');
+                
+                const updateData = {
+                    firstName,
+                    lastName,
+                    phone
+                };
+                
+                const response = await fetch('api/auth.php?action=update_profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('profileStatus', 
+                        `✓ Profile updated successfully! Name: ${result.data.name}`, 
+                        'success');
+                } else {
+                    showStatus('profileStatus', 
+                        `✗ Update failed: ${result.message}`, 
+                        'error');
+                }
+                
+            } catch (error) {
+                console.error('Profile update error:', error);
+                showStatus('profileStatus', 
+                    `✗ Network error: ${error.message}`, 
+                    'error');
+            }
+        }
+
+        async function testSession() {
+            try {
+                showStatus('sessionStatus', 'Checking session...', 'info');
+                
+                const response = await fetch('api/auth.php?action=check_session');
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('sessionStatus', '✓ User is logged in', 'success');
+                    
+                    const userData = result.data;
+                    document.getElementById('userInfo').innerHTML = `
+                        <div class="status info">
+                            <h4>User Information:</h4>
+                            <p><strong>Name:</strong> ${userData.name}</p>
+                            <p><strong>Email:</strong> ${userData.email}</p>
+                            <p><strong>Phone:</strong> ${userData.phone}</p>
+                            <p><strong>Role:</strong> ${userData.role}</p>
+                            <p><strong>Profile Image:</strong> ${userData.profileImage || 'Not set'}</p>
+                            <p><strong>Joined:</strong> ${userData.joinedDate}</p>
+                        </div>
+                    `;
+                } else {
+                    showStatus('sessionStatus', '✗ User not logged in', 'error');
+                    document.getElementById('userInfo').innerHTML = 
+                        '<div class="status error">Please login first to test profile functionality</div>';
+                }
+                
+            } catch (error) {
+                console.error('Session check error:', error);
+                showStatus('sessionStatus', 
+                    `✗ Network error: ${error.message}`, 
+                    'error');
+            }
+        }
+
+        async function testImagePersistence() {
+            try {
+                showStatus('persistenceStatus', 'Testing image persistence...', 'info');
+                
+                const response = await fetch('api/auth.php?action=check_session');
+                const result = await response.json();
+                
+                if (result.success && result.data.profileImage) {
+                    showStatus('persistenceStatus', 
+                        `✓ Profile image found in session: ${result.data.profileImage}`, 
+                        'success');
+                } else if (result.success) {
+                    showStatus('persistenceStatus', 
+                        '⚠ User logged in but no profile image set', 
+                        'warning');
+                } else {
+                    showStatus('persistenceStatus', 
+                        '✗ User not logged in', 
+                        'error');
+                }
+                
+            } catch (error) {
+                console.error('Persistence test error:', error);
+                showStatus('persistenceStatus', 
+                    `✗ Network error: ${error.message}`, 
+                    'error');
+            }
+        }
+
+        // Auto-check session on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            testSession();
+        });
+    </script>
+</body>
+</html>

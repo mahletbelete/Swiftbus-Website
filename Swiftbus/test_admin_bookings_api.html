@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Admin Bookings API</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a2e; color: #fff; }
+        .test-result { background: #16213e; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .success { border-left: 4px solid #4ade80; }
+        .error { border-left: 4px solid #f87171; }
+        pre { background: #0f0f23; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px; }
+        button { background: #6366f1; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #4f46e5; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Admin Bookings API Test</h1>
+    
+    <div>
+        <button onclick="testBookings()">Test Get Bookings</button>
+        <button onclick="testStats()">Test Booking Stats</button>
+        <button onclick="testDebug()">Test Debug Info</button>
+        <button onclick="testAll()">Test All</button>
+    </div>
+    
+    <div id="results"></div>
+    
+    <script src="js/api.js"></script>
+    <script>
+        let api;
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            let attempts = 0;
+            while (typeof SwiftBusAPI === 'undefined' && attempts < 10) {
+                await new Promise(r => setTimeout(r, 100));
+                attempts++;
+            }
+            
+            if (typeof SwiftBusAPI !== 'undefined') {
+                api = new SwiftBusAPI();
+                log('✅ API initialized', 'success');
+                log(`API URL: ${api.apiURL}`, 'success');
+            } else {
+                log('❌ Failed to initialize API', 'error');
+            }
+        });
+        
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            if (typeof message === 'object') {
+                div.innerHTML = `<pre>${JSON.stringify(message, null, 2)}</pre>`;
+            } else {
+                div.innerHTML = message;
+            }
+            results.appendChild(div);
+        }
+        
+        async function testBookings() {
+            log('📊 Testing get_bookings...');
+            try {
+                const response = await api.request('admin_bookings.php?action=get_bookings');
+                log(response, response.success ? 'success' : 'error');
+            } catch (e) {
+                log(`❌ Error: ${e.message}`, 'error');
+            }
+        }
+        
+        async function testStats() {
+            log('📈 Testing get_booking_stats...');
+            try {
+                const response = await api.request('admin_bookings.php?action=get_booking_stats');
+                log(response, response.success ? 'success' : 'error');
+            } catch (e) {
+                log(`❌ Error: ${e.message}`, 'error');
+            }
+        }
+        
+        async function testDebug() {
+            log('🔍 Testing debug endpoint...');
+            try {
+                const response = await api.request('test_admin_bookings_debug.php');
+                log(response, response.success ? 'success' : 'error');
+            } catch (e) {
+                log(`❌ Error: ${e.message}`, 'error');
+            }
+        }
+        
+        async function testAll() {
+            document.getElementById('results').innerHTML = '';
+            await testDebug();
+            await testStats();
+            await testBookings();
+        }
+    </script>
+</body>
+</html>
